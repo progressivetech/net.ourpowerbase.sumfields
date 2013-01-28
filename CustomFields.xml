@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<!-- This xml file defines the custom data to be used with fcf extension -->
+<CustomData>	
+  <CustomGroups>
+    <CustomGroup>
+      <name>Calculated_Fundraising_Fields</name>
+      <title>Calculated Fundraising Fields</title>
+      <extends>Contact</extends>
+      <style>Tab</style>
+      <collapse_display>0</collapse_display>
+      <help_pre></help_pre>
+      <help_post></help_post>
+      <weight>3</weight>
+      <is_active>1</is_active>
+      <table_name>civicrm_value_calculated_fundraising_fields</table_name>
+      <is_multiple>0</is_multiple>
+      <collapse_adv_display>0</collapse_adv_display>
+   </CustomGroup>
+ </CustomGroups>
+ <CustomFields>
+    <CustomField>
+      <label>Total Lifetime Contributions</label>
+      <data_type>Money</data_type>
+      <html_type>Text</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>10</weight>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>32</text_length>
+      <column_name>total_lifetime</column_name>
+      <custom_group_name>Calculated_Fundraising_Fields</custom_group_name>
+    </CustomField>
+    <CustomField>
+      <label>Total Contributions this Year</label>
+      <data_type>Money</data_type>
+      <html_type>Text</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>10</weight>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>32</text_length>
+      <column_name>total_this_year</column_name>
+      <custom_group_name>Calculated_Fundraising_Fields</custom_group_name>
+    </CustomField>
+    <CustomField>
+      <label>Total Contributions last Year</label>
+      <data_type>Money</data_type>
+      <html_type>Text</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>10</weight>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>32</text_length>
+      <column_name>total_last_year</column_name>
+      <custom_group_name>Calculated_Fundraising_Fields</custom_group_name>
+    </CustomField>
+   <CustomField>
+      <label>Amount of last contribution</label>
+      <data_type>Money</data_type>
+      <html_type>Text</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>10</weight>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>32</text_length>
+      <column_name>amount_last</column_name>
+      <custom_group_name>Calculated_Fundraising_Fields</custom_group_name>
+    </CustomField>
+    <CustomField>
+      <label>Date of Last Contribution</label>
+      <data_type>Date</data_type>
+      <html_type>Select Date</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>10</weight>
+      <date_format>M:;:;:;d:;:;:;Y</date_format>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>32</text_length>
+      <column_name>date_last</column_name>
+      <custom_group_name>Calculated_Fundraising_Fields</custom_group_name>
+    </CustomField>
+    <CustomField>
+      <label>Date of First Contributions</label>
+      <data_type>Date</data_type>
+      <html_type>Select Date</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>10</weight>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>32</text_length>
+      <column_name>date_first</column_name>
+      <custom_group_name>Calculated_Fundraising_Fields</custom_group_name>
+    </CustomField>
+    <CustomField>
+      <label>Largest Contribution</label>
+      <data_type>Money</data_type>
+      <html_type>Text</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>10</weight>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>32</text_length>
+      <column_name>largest</column_name>
+      <custom_group_name>Calculated_Fundraising_Fields</custom_group_name>
+    </CustomField>
+    <CustomField>
+      <label>Total Contributions</label>
+      <data_type>Int</data_type>
+      <html_type>Text</html_type>
+      <is_required>0</is_required>
+      <is_searchable>1</is_searchable>
+      <is_search_range>0</is_search_range>
+      <weight>10</weight>
+      <is_active>1</is_active>
+      <is_view>1</is_view>
+      <text_length>32</text_length>
+      <column_name>total_number</column_name>
+      <custom_group_name>Calculated_Fundraising_Fields</custom_group_name>
+    </CustomField>
+  </CustomFields>
+</CustomData> 

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<extension key="net.ourpowerbase.fcf" type="module">
+  <file>fcf</file>
+  <name>Fundraising Calculated Fields</name>
+  <description>Creates custom data fields that extend Contact and contain up-to-date totals such as total lifetime contributions, last contribution amount, etc.</description>
+  <license>GPL version 3</license>
+  <maintainer>
+    <author>Jamie McClelland/Progressive Technology Project</author>
+    <email>jamie@progressivetech.org</email>
+  </maintainer>
+  <releaseDate>2013-01-25</releaseDate>
+  <version>1.0</version>
+  <develStage>alpha</develStage>
+  <compatibility>
+    <ver>4.2</ver>
+  </compatibility>
+  <comments>This is a new, undeveloped module</comments>
+  <civix>
+    <namespace>CRM/Fcf</namespace>
+  </civix>
+</extension>
