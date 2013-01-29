@@ -114,7 +114,7 @@ function fcf_civicrm_triggerInfo(&$info, $tableName) {
     AND contact_id = NEW.contact_id AND contribution_status_id = 1), 
     `$total_last_year_field` = 
     (SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount)) 
-    FROM civicrm_contribution WHERE SUBSTR(receive_date,1,4)=YEAR(curdate() - 1) 
+    FROM civicrm_contribution WHERE SUBSTR(receive_date,1,4)=YEAR(curdate())-1 
     AND contact_id = NEW.contact_id AND contribution_status_id = 1), 
     `$amount_last_field` = 
     (SELECT IF(total_amount IS NULL, 0, total_amount) 
