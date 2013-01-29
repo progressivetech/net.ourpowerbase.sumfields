@@ -30,7 +30,7 @@ function fcf_civicrm_install() {
  * Implementation of hook_civicrm_uninstall
  */
 function fcf_civicrm_uninstall() {
-  _fcf_delete_custom_fields_if_empty();
+  _fcf_delete_custom_fields();
   return _fcf_civix_civicrm_uninstall();
 }
 
@@ -160,37 +160,28 @@ function _fcf_create_custom_fields() {
 }
 
 /**
- * Delete custom fields if there are not 
- * valid records
+ * Delete custom fields. All data should be 
+ * generated data, so no worry about deleting
+ * anything that should be kept
  **/
-function _fcf_delete_custom_fields_if_empty() {
+function _fcf_delete_custom_fields() {
+  $session = CRM_Core_Session::singleton();
   $custom_fields = _fcf_get_custom_field_definitions();
   while(list($table, $fields) = each($custom_fields)) {
     $table_info = _fcf_get_custom_table_info($table);
     list($table_id, $table_name) = $table_info;
-    $base_sql = "SELECT count(c.id) FROM civicrm_contact c JOIN 
-    $table_name cv ON c.id = cv.entity_id WHERE is_deleted = 0";
-
-    $delete_table = TRUE;
     while(list($field, $label) = each($fields)) {
       $field_info = _fcf_get_custom_field_info($field, $table_id);      
       list($column_name, $column_id) = $field_info; 
-      $active_sql = $base_sql . " AND `$column_name` IS NOT NULL AND `$column_name` != ''";
-      $dao = CRM_Core_DAO::executeQuery($active_sql);
-      $dao->fetch();
-      $params = array('version' => 3, 'id' => $column_id);
-      if($dao->_N == 0) {
-        $result = civicrm_api('CustomField', 'delete', $params);
-      } 
-      else {
-        $delete_table = FALSE;
-        $session = CRM_Core_Session::singleton();
-        $session->setStatus("$column_name contains data, not removed.");
-      } 
+      $result = civicrm_api('CustomField', 'delete', $params);
+      if($result['is_error'] == 1) {
+        $session->setStatus("Error deleting $column_name.");
+      }
     }
-    if($delete_table) {
-      $params = array('version' => 3, 'id' => $table_id);
-      civicrm_api('CustomGroup', 'delete', $params);
+    $params = array('version' => 3, 'id' => $table_id);
+    $result = civicrm_api('CustomGroup', 'delete', $params);
+    if($result['is_error'] == 1) {
+      $session->setStatus("Error deleting $table_name.");
     }
   }
 }
