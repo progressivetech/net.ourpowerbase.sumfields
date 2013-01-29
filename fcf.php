@@ -23,6 +23,7 @@ function fcf_civicrm_xmlMenu(&$files) {
  */
 function fcf_civicrm_install() {
   _fcf_create_custom_fields();
+  _fcf_generate_data_based_on_current_contributions();
   return _fcf_civix_civicrm_install();
 }
 
@@ -147,6 +148,52 @@ function fcf_civicrm_triggerInfo(&$info, $tableName) {
     'event' => 'UPDATE',
     'sql' => $sql,
   );
+}
+
+/**
+ * Generate calculated fields for all contacts.
+ * This function is designed to be run once when
+ * the extension is installed. 
+ **/
+function _fcf_generate_data_based_on_current_contributions() {
+  $calc_fr_table_base = 'calculated_fundraising_fields';
+  $calc_fr_table_info = _fcf_get_custom_table_info($calc_fr_table_base);
+  list($id, $table_name) = $calc_fr_table_info; 
+
+  $sql = "TRUNCATE TABLE `$table_name`";
+  $dao = CRM_Core_DAO::executeQuery($sql);
+
+  // NOTE: MySQL ignores the AS spec - the rows are assigned based on order, not 
+  // based on column name. I'm keeping the AS statements for reference so we know
+  // which calcs are for which fields - however keep in mind, the column names may
+  // not properly match the actual column names (which will have IDs appended to them).
+  $sql = "INSERT INTO `$table_name` 
+    SELECT
+      NULL,
+      contact_id AS entity_id,
+      SUM(total_amount) AS total_lifetime,
+      (SELECT CASE WHEN SUM(total_amount) IS NULL THEN 0 ELSE SUM(total_amount) END 
+        FROM `civicrm_contribution` AS t2 
+        WHERE SUBSTR(receive_date,1,4)=YEAR(curdate()) AND t2.contact_id=t1.contact_id AND t2.contribution_status_id = 1)
+        AS total_this_year,
+      (SELECT CASE WHEN SUM(total_amount)IS NULL THEN 0 ELSE SUM(total_amount) END 
+        FROM `civicrm_contribution` AS t2
+        WHERE SUBSTR(receive_date,1,4)=YEAR(curdate())-1 AND t2.contact_id=t1.contact_id and t2.contribution_status_id = 1)
+        AS total_last_year,
+      (SELECT total_amount 
+        FROM `civicrm_contribution` AS t2
+        WHERE t2.contribution_status_id = 1 AND t2.contact_id=t1.contact_id 
+        ORDER BY t2.receive_date DESC LIMIT 1)
+        AS amount_last,
+      MAX(receive_date) AS date_last,
+      MIN(receive_date) AS date_first,
+      MAX(total_amount) AS largest,
+      COUNT(id) AS total_number
+    FROM `civicrm_contribution` AS t1 
+    WHERE contribution_status_id = 1
+    GROUP BY entity_id";
+
+  $dao = CRM_Core_DAO::executeQuery($sql);
 }
 
 /**
