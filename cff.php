@@ -1,12 +1,12 @@
 <?php
 
-require_once 'fcf.civix.php';
+require_once 'cff.civix.php';
 
 /**
  * Implementation of hook_civicrm_config
  */
-function fcf_civicrm_config(&$config) {
-  _fcf_civix_civicrm_config($config);
+function cff_civicrm_config(&$config) {
+  _cff_civix_civicrm_config($config);
 }
 
 /**
@@ -14,39 +14,39 @@ function fcf_civicrm_config(&$config) {
  *
  * @param $files array(string)
  */
-function fcf_civicrm_xmlMenu(&$files) {
-  _fcf_civix_civicrm_xmlMenu($files);
+function cff_civicrm_xmlMenu(&$files) {
+  _cff_civix_civicrm_xmlMenu($files);
 }
 
 /**
  * Implementation of hook_civicrm_install
  */
-function fcf_civicrm_install() {
-  _fcf_create_custom_fields();
-  _fcf_generate_data_based_on_current_contributions();
-  return _fcf_civix_civicrm_install();
+function cff_civicrm_install() {
+  _cff_create_custom_fields();
+  _cff_generate_data_based_on_current_contributions();
+  return _cff_civix_civicrm_install();
 }
 
 /**
  * Implementation of hook_civicrm_uninstall
  */
-function fcf_civicrm_uninstall() {
-  _fcf_delete_custom_fields();
-  return _fcf_civix_civicrm_uninstall();
+function cff_civicrm_uninstall() {
+  _cff_delete_custom_fields();
+  return _cff_civix_civicrm_uninstall();
 }
 
 /**
  * Implementation of hook_civicrm_enable
  */
-function fcf_civicrm_enable() {
-  return _fcf_civix_civicrm_enable();
+function cff_civicrm_enable() {
+  return _cff_civix_civicrm_enable();
 }
 
 /**
  * Implementation of hook_civicrm_disable
  */
-function fcf_civicrm_disable() {
-  return _fcf_civix_civicrm_disable();
+function cff_civicrm_disable() {
+  return _cff_civix_civicrm_disable();
 }
 
 /**
@@ -58,8 +58,8 @@ function fcf_civicrm_disable() {
  * @return mixed  based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
  *                for 'enqueue', returns void
  */
-function fcf_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _fcf_civix_civicrm_upgrade($op, $queue);
+function cff_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
+  return _cff_civix_civicrm_upgrade($op, $queue);
 }
 
 /**
@@ -68,8 +68,8 @@ function fcf_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * Generate a list of entities to create/deactivate/delete when this module
  * is installed, disabled, uninstalled.
  */
-function fcf_civicrm_managed(&$entities) {
-  return _fcf_civix_civicrm_managed($entities);
+function cff_civicrm_managed(&$entities) {
+  return _cff_civix_civicrm_managed($entities);
 }
 
 /**
@@ -78,7 +78,7 @@ function fcf_civicrm_managed(&$entities) {
  * Add triggers for our tables
  **/
 
-function fcf_civicrm_triggerInfo(&$info, $tableName) {
+function cff_civicrm_triggerInfo(&$info, $tableName) {
   // Our triggers all use custom fields. CiviCRM, when generating
   // custom fields, sometimes gives them different names (appending
   // the id in most cases) to avoid name collisions. 
@@ -88,14 +88,14 @@ function fcf_civicrm_triggerInfo(&$info, $tableName) {
 
   // Get the actual table name for calculated fundraising fields
   $calc_fr_table_base = 'calculated_fundraising_fields';
-  $calc_fr_table_info = _fcf_get_custom_table_info($calc_fr_table_base);
+  $calc_fr_table_info = _cff_get_custom_table_info($calc_fr_table_base);
   list($calc_fr_table_id, $calc_fr_table_name) = $calc_fr_table_info; 
 
   // Iterate over all the fields in this table
-  $custom_fields = _fcf_get_custom_field_definitions();
+  $custom_fields = _cff_get_custom_field_definitions();
   while(list($column_name) = each($custom_fields['Calculated_Fundraising_Fields'])) {
     $name_var = $column_name . '_field';
-    $field_info = _fcf_get_custom_field_info($column_name, $calc_fr_table_id);
+    $field_info = _cff_get_custom_field_info($column_name, $calc_fr_table_id);
 
     // This line creates a variable (e.g. $total_amount_field) that is populated
     // with the name of the total_amount field
@@ -155,9 +155,9 @@ function fcf_civicrm_triggerInfo(&$info, $tableName) {
  * This function is designed to be run once when
  * the extension is installed. 
  **/
-function _fcf_generate_data_based_on_current_contributions() {
+function _cff_generate_data_based_on_current_contributions() {
   $calc_fr_table_base = 'calculated_fundraising_fields';
-  $calc_fr_table_info = _fcf_get_custom_table_info($calc_fr_table_base);
+  $calc_fr_table_info = _cff_get_custom_table_info($calc_fr_table_base);
   list($id, $table_name) = $calc_fr_table_info; 
 
   $sql = "TRUNCATE TABLE `$table_name`";
@@ -199,7 +199,7 @@ function _fcf_generate_data_based_on_current_contributions() {
 /**
  * Create custom fields - should be called on install.
  **/
-function _fcf_create_custom_fields() {
+function _cff_create_custom_fields() {
   $xml_file = __DIR__ . '/CustomFields.xml';
   require_once 'CRM/Utils/Migrate/Import.php';
   $import = new CRM_Utils_Migrate_Import();
@@ -211,14 +211,14 @@ function _fcf_create_custom_fields() {
  * generated data, so no worry about deleting
  * anything that should be kept
  **/
-function _fcf_delete_custom_fields() {
+function _cff_delete_custom_fields() {
   $session = CRM_Core_Session::singleton();
-  $custom_fields = _fcf_get_custom_field_definitions();
+  $custom_fields = _cff_get_custom_field_definitions();
   while(list($table, $fields) = each($custom_fields)) {
-    $table_info = _fcf_get_custom_table_info($table);
+    $table_info = _cff_get_custom_table_info($table);
     list($table_id, $table_name) = $table_info;
     while(list($field, $label) = each($fields)) {
-      $field_info = _fcf_get_custom_field_info($field, $table_id);      
+      $field_info = _cff_get_custom_field_info($field, $table_id);      
       list($column_name, $column_id) = $field_info; 
       $result = civicrm_api('CustomField', 'delete', $params);
       if($result['is_error'] == 1) {
@@ -239,7 +239,7 @@ function _fcf_delete_custom_fields() {
  * the xml file
  **/
 
-function _fcf_get_custom_field_definitions() {
+function _cff_get_custom_field_definitions() {
   $xml_file = __DIR__ . '/CustomFields.xml';
   $xml = file_get_contents($xml_file);
   $data = new SimpleXMLElement($xml);
@@ -278,7 +278,7 @@ function _fcf_get_custom_field_definitions() {
  * id and the second is the table name.
  *
  **/
-function _fcf_get_custom_table_info($name_like) {
+function _cff_get_custom_table_info($name_like) {
   $sql = "SELECT id, table_name FROM civicrm_custom_group WHERE table_name 
       LIKE %1";
   $params = array(1 => array('civicrm_value_' . $name_like . '%', 'String'));
@@ -302,7 +302,7 @@ function _fcf_get_custom_table_info($name_like) {
  * id and the second is the column name.
  *
  **/
-function _fcf_get_custom_field_info($name_like, $option_group_id = NULL) {
+function _cff_get_custom_field_info($name_like, $option_group_id = NULL) {
   $sql = "SELECT id, column_name FROM civicrm_custom_field WHERE 
     column_name LIKE %1";
   $params = array(1 => array($name_like . '%', 'String'));

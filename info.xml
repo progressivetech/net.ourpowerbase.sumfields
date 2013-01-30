@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
-<extension key="net.ourpowerbase.fcf" type="module">
-  <file>fcf</file>
-  <name>Fundraising Calculated Fields</name>
-  <description>Creates custom data fields that extend Contact and contain up-to-date totals such as total lifetime contributions, last contribution amount, etc.</description>
+<extension key="net.ourpowerbase.cff" type="module">
+  <file>cff</file>
+  <name>Calculated Fundraising Fields</name>
+  <description>The cff extension creates read-only custom data fields that extend Contact and are automatically populated with up-to-date totals such as total lifetime contributions, last contribution amount, etc.</description>
   <license>GPL version 3</license>
   <maintainer>
     <author>Jamie McClelland/Progressive Technology Project</author>
     <email>jamie@progressivetech.org</email>
   </maintainer>
   <releaseDate>2013-01-25</releaseDate>
-  <version>1.0</version>
-  <develStage>alpha</develStage>
+  <version>0.1</version>
+  <develStage>beta</develStage>
   <compatibility>
     <ver>4.2</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments>This extension adds triggers to your database. Uninstalling this extension will cause the custom data fields created to be deleted.</comments>
   <civix>
-    <namespace>CRM/Fcf</namespace>
+    <namespace>CRM/Cff</namespace>
   </civix>
 </extension>
