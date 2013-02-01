@@ -22,8 +22,6 @@ function cff_civicrm_xmlMenu(&$files) {
  * Implementation of hook_civicrm_install
  */
 function cff_civicrm_install() {
-  _cff_create_custom_fields();
-  _cff_generate_data_based_on_current_contributions();
   return _cff_civix_civicrm_install();
 }
 
@@ -31,7 +29,6 @@ function cff_civicrm_install() {
  * Implementation of hook_civicrm_uninstall
  */
 function cff_civicrm_uninstall() {
-  _cff_delete_custom_fields();
   return _cff_civix_civicrm_uninstall();
 }
 
@@ -39,6 +36,8 @@ function cff_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function cff_civicrm_enable() {
+  if(FALSE === _cff_create_custom_fields_and_table()) return FALSE;
+  _cff_generate_data_based_on_current_contributions();
   return _cff_civix_civicrm_enable();
 }
 
@@ -46,6 +45,8 @@ function cff_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function cff_civicrm_disable() {
+  _cff_delete_custom_fields_and_table();
+  _cff_delete_settings();
   return _cff_civix_civicrm_disable();
 }
 
@@ -86,25 +87,18 @@ function cff_civicrm_triggerInfo(&$info, $tableName) {
   // So, we have to retrieve the actual name of each field that is in 
   // use.
 
-  // Get the actual table name for calculated fundraising fields
-  $calc_fr_table_base = 'calculated_fundraising_fields';
-  $calc_fr_table_info = _cff_get_custom_table_info($calc_fr_table_base);
-  list($calc_fr_table_id, $calc_fr_table_name) = $calc_fr_table_info; 
-
-  // Iterate over all the fields in this table
-  $custom_fields = _cff_get_custom_field_definitions();
-  while(list($column_name) = each($custom_fields['Calculated_Fundraising_Fields'])) {
+  $table_name = _cff_get_custom_table_name(); 
+  $custom_fields = _cff_get_custom_field_parameters();
+  while(list($column_name, $params) = each($custom_fields)) {
     $name_var = $column_name . '_field';
-    $field_info = _cff_get_custom_field_info($column_name, $calc_fr_table_id);
-
     // This line creates a variable (e.g. $total_amount_field) that is populated
     // with the name of the total_amount field
-    list($id, $$name_var) = $field_info;
+    $$name_var = $params['column_name'];
   } 
 
   // Mamba jamba trigger sql statement that hopefully won't
   // be a performance killer.
-  $sql = "REPLACE INTO `$calc_fr_table_name` SET 
+  $sql = "REPLACE INTO `$table_name` SET 
     `$total_lifetime_field` = 
     (SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount)) 
     FROM civicrm_contribution WHERE contact_id = NEW.contact_id 
@@ -157,10 +151,11 @@ function cff_civicrm_triggerInfo(&$info, $tableName) {
  * the extension is installed. 
  **/
 function _cff_generate_data_based_on_current_contributions() {
-  $calc_fr_table_base = 'calculated_fundraising_fields';
-  $calc_fr_table_info = _cff_get_custom_table_info($calc_fr_table_base);
-  list($id, $table_name) = $calc_fr_table_info; 
+  // Get the actual table name for calculated fundraising fields
+  $table_name = _cff_get_custom_table_name(); 
 
+  // In theory we shouldn't have to truncate the table, but we
+  // are doing it just to be sure it's empty.
   $sql = "TRUNCATE TABLE `$table_name`";
   $dao = CRM_Core_DAO::executeQuery($sql);
 
@@ -175,11 +170,11 @@ function _cff_generate_data_based_on_current_contributions() {
       NULL,
       contact_id AS entity_id,
       SUM(total_amount) AS total_lifetime,
-      (SELECT CASE WHEN SUM(total_amount) IS NULL THEN 0 ELSE SUM(total_amount) END 
+      (SELECT IF(SUM(total_amount) IS NULL,0,SUM(total_amount))
         FROM `civicrm_contribution` AS t2 
         WHERE SUBSTR(receive_date,1,4)=YEAR(curdate()) AND t2.contact_id=t1.contact_id AND t2.contribution_status_id = 1)
         AS total_this_year,
-      (SELECT CASE WHEN SUM(total_amount)IS NULL THEN 0 ELSE SUM(total_amount) END 
+      (SELECT IF(SUM(total_amount)IS NULL,0,SUM(total_amount))
         FROM `civicrm_contribution` AS t2
         WHERE SUBSTR(receive_date,1,4)=YEAR(curdate())-1 AND t2.contact_id=t1.contact_id and t2.contribution_status_id = 1)
         AS total_last_year,
@@ -195,18 +190,72 @@ function _cff_generate_data_based_on_current_contributions() {
     FROM `civicrm_contribution` AS t1 
     WHERE contribution_status_id = 1
     GROUP BY entity_id";
-
   $dao = CRM_Core_DAO::executeQuery($sql);
 }
 
 /**
- * Create custom fields - should be called on install.
+ * Create custom fields - should be called on enable.
  **/
-function _cff_create_custom_fields() {
-  $xml_file = __DIR__ . '/CustomFields.xml';
-  require_once 'CRM/Utils/Migrate/Import.php';
-  $import = new CRM_Utils_Migrate_Import();
-  $import->run($xml_file);
+function _cff_create_custom_fields_and_table() {
+  // Load the field and group definitions.
+  require_once('custom.php');
+  
+  // Create the custom group first.
+  $params = $custom['groups']['fundraising_summary'];
+  $params['version'] = 3;
+  $result = civicrm_api('CustomGroup', 'create', $params);
+  if($result['is_error'] == 1) {
+    // Bail. No point in continuing if we can't get the table built.
+    return FALSE;
+  }
+  // We need the id for creating the fields below.
+  $value = array_pop($result['values']);
+  $custom_group_id = $value['id'];
+  
+  // Save the info so we can delete it when uninstalling.
+  $custom_table_parameters = array(
+    'id' => $custom_group_id,
+    'table_name' => $value['table_name'],
+  );
+  _cff_save_setting('custom_table_parameters', $custom_table_parameters);
+  $custom_field_parameters = array();
+
+  // Now create the fields.
+  while(list($name, $field) = each($custom['fields'])) {
+    $params = $field;
+    $params['version'] = 3;
+    $params['custom_group_id'] = $custom_group_id;
+    $result = civicrm_api('CustomField', 'create', $params);
+    if($result['is_error'] == 1) {
+      $session->setStatus("Error creating custom field $name");
+      continue;
+    }
+    $value = array_pop($result['values']);
+    $custom_field_parameters[$name] = array(
+      'id' => $value['id'],
+      'column_name' => $value['column_name']
+    );
+  }
+  _cff_save_setting('custom_field_parameters', $custom_field_parameters);
+  return TRUE;
+}
+
+/**
+ * Helper function for storing persistant data
+ * for this extension.
+ **/
+function _cff_save_setting($key, $value) {
+  $group = 'Calculated Fundraising Fields';
+  CRM_Core_BAO_Setting::setItem($value, $group, $key);
+}
+
+/**
+ * Helper function for getting persistant data
+ * for this extension.
+ **/
+function _cff_get_setting($key) {
+  $group = 'Calculated Fundraising Fields';
+  return CRM_Core_BAO_Setting::getItem($group, $key);
 }
 
 /**
@@ -214,110 +263,64 @@ function _cff_create_custom_fields() {
  * generated data, so no worry about deleting
  * anything that should be kept.
  **/
-function _cff_delete_custom_fields() {
+function _cff_delete_custom_fields_and_table() {
   $session = CRM_Core_Session::singleton();
-  $custom_fields = _cff_get_custom_field_definitions();
-  while(list($table, $fields) = each($custom_fields)) {
-    $table_info = _cff_get_custom_table_info($table);
-    list($table_id, $table_name) = $table_info;
-    while(list($field, $label) = each($fields)) {
-      $field_info = _cff_get_custom_field_info($field, $table_id);      
-      list($column_name, $column_id) = $field_info; 
-      $result = civicrm_api('CustomField', 'delete', $params);
-      if($result['is_error'] == 1) {
-        $session->setStatus("Error deleting $column_name.");
-      }
-    }
-    $params = array('version' => 3, 'id' => $table_id);
-    $result = civicrm_api('CustomGroup', 'delete', $params);
+  $custom_field_parameters = _cff_get_custom_field_parameters();
+  
+  while(list($key, $field) = each($custom_field_parameters)) {
+    $params = array(
+      'id' => $field['id'],
+      'params' => 3
+    );
+    $result = civicrm_api('CustomField', 'delete', $params);
     if($result['is_error'] == 1) {
-      $session->setStatus("Error deleting $table_name.");
+      $column_name = $field['column_name'];
+      $session->setStatus("Error deleting $column_name.");
     }
+  }
+  $custom_table_parameters = _cff_get_custom_table_parameters();
+  $id = $custom_table_parameters['id'];
+  $params = array('version' => 3, 'id' => $id);
+  $result = civicrm_api('CustomGroup', 'delete', $params);
+  if($result['is_error'] == 1) {
+    $session->setStatus("Error deleting $table_name.");
   }
 }
 
-
 /**
- * Create an array of fields and field definitions from
- * the xml file.
+ * Remove our values from civicrm_setting table
  **/
-
-function _cff_get_custom_field_definitions() {
-  $xml_file = __DIR__ . '/CustomFields.xml';
-  $xml = file_get_contents($xml_file);
-  $data = new SimpleXMLElement($xml);
-
-  // Rebuild data into a more useful array
-  $custom_fields = array();
-  foreach($data as $elements) {
-    foreach($elements as $key => $element) {
-      if($key == 'CustomGroup') {
-        $group_name = (string) $element->name; 
-        if(!empty($group_name)) {
-          if(!array_key_exists($group_name, $custom_fields)) {
-            $custom_fields[$group_name] = array();
-          }
-        }
-      } 
-      else {
-        $custom_group_name = (string) $element->custom_group_name;
-        $column_name = (string) $element->column_name;
-        $label = (string) $element->label;
-        $custom_fields[$custom_group_name][$column_name] = $label;
-      }
-    }
-  }
-  return $custom_fields;
+function _cff_delete_settings() {
+  $sql = "DELETE FROM civicrm_setting WHERE group_name = 'Calculated Fundraising Fields'";
+  CRM_Core_DAO::executeQuery($sql);
 }
 
-
 /**
- * Since CiviCRM may give our table a different name on different
- * sites, we need to search for the actual name.
- *
- * @param name_like - the base table name to look for
- *
- * @return array - two element array, the first element is the
- * id and the second is the table name.
+ * Helper helper to get just the table name out of 
+ * table parameters 
  *
  **/
-function _cff_get_custom_table_info($name_like) {
-  $sql = "SELECT id, table_name FROM civicrm_custom_group WHERE table_name 
-      LIKE %1";
-  $params = array(1 => array('civicrm_value_' . $name_like . '%', 'String'));
-  $dao = CRM_Core_DAO::executeQuery($sql, $params);
-  $dao->fetch();
-  if(empty($dao->table_name)) {
-    // bail...
-    echo "bailing... $sql $name_like\n";
-    return FALSE;
-  }
-  return array(intval($dao->id), addslashes($dao->table_name));
+function _cff_get_custom_table_name() {
+  $table_info = _cff_get_custom_table_parameters(); 
+  return $table_info['table_name'];
 }
 
 /**
  * Since CiviCRM may give our fields a different name on different
- * sites, we need to search for the actual name.
- *
- * @param name_like - the base field name to look for
- *
- * @return array - two element array, the first element is the
- * id and the second is the column name.
+ * sites, we store the actual name and id that was used.
  *
  **/
-function _cff_get_custom_field_info($name_like, $option_group_id = NULL) {
-  $sql = "SELECT id, column_name FROM civicrm_custom_field WHERE 
-    column_name LIKE %1";
-  $params = array(1 => array($name_like . '%', 'String'));
-  if(!is_null($option_group_id)) {
-    $sql .= " AND custom_group_id = %2";
-    $params[2] = array($option_group_id, 'Integer');
-  }
-  $dao = CRM_Core_DAO::executeQuery($sql, $params);
-  
-  $dao->fetch();
-  if(empty($dao->column_name)) {
-    return FALSE;
-  }
-  return array($dao->id, $dao->column_name);
+function _cff_get_custom_field_parameters() {
+  return _cff_get_setting('custom_field_parameters');
 }
+
+/**
+ * Since CiviCRM may give our table a different name on different
+ * sites, we store the actual name and id that was used.
+ *
+ **/
+function _cff_get_custom_table_parameters() {
+  return _cff_get_setting('custom_table_parameters');
+}
+
+
