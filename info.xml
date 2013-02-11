@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<extension key="net.ourpowerbase.cff" type="module">
-  <file>cff</file>
-  <name>Calculated Fundraising Fields</name>
-  <description>The cff extension creates read-only custom data fields that extend Contact and are automatically populated with up-to-date totals such as total lifetime contributions, last contribution amount, etc.</description>
+<extension key="net.ourpowerbase.sumfields" type="module">
+  <file>sumfields</file>
+  <name>Summary Fields</name>
+  <description>The Summary Fields extension creates read-only custom data fields that extend Contact and are automatically populated with up-to-date totals such as total lifetime contributions, last contribution amount, last attended event, etc.</description>
   <license>GPL version 3</license>
   <maintainer>
     <author>Jamie McClelland/Progressive Technology Project</author>
@@ -14,8 +14,8 @@
   <compatibility>
     <ver>4.2</ver>
   </compatibility>
-  <comments>This extension adds triggers to your database. Uninstalling this extension will cause the custom data fields created to be deleted.</comments>
+  <comments>This extension adds custom data fields and triggers to your database. Disabling this extension will cause the custom data fields to be deleted and triggers removed.</comments>
   <civix>
-    <namespace>CRM/Cff</namespace>
+    <namespace>CRM/Sumfields</namespace>
   </civix>
 </extension>
