@@ -342,5 +342,7 @@ function _sumfields_get_custom_table_parameters() {
  * contribution summary fields.
  **/
 function sumfields_civicrm_get_contribution_type_ids() {
-  return array(1);
+  // FIXME: until we expose a user interface, return all of them.
+  $values = CRM_Contribute_PseudoConstant::contributionType();
+  return array_keys($values);
 }
