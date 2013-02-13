@@ -36,8 +36,9 @@ function sumfields_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function sumfields_civicrm_enable() {
-  if(FALSE === _sumfields_create_custom_fields_and_table()) return FALSE;
-  _sumfields_generate_data_based_on_current_contributions();
+  sumfields_initialize_contribution_type_ids();
+  sumfields_initialize_active_fields();
+  if(FALSE === sumfields_initialize()) return FALSE;
   return _sumfields_civix_civicrm_enable();
 }
 
@@ -45,8 +46,8 @@ function sumfields_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function sumfields_civicrm_disable() {
-  _sumfields_delete_custom_fields_and_table();
-  _sumfields_delete_settings();
+  sumfields_deinitialize(); 
+  sumfields_delete_settings();
   return _sumfields_civix_civicrm_disable();
 }
 
@@ -77,8 +78,8 @@ function sumfields_civicrm_managed(&$entities) {
  * Replace %contribution_type_ids with the actual
  * ids that the user has configured to limit to.
  **/
-function sumfields_civicrm_sql_rewrite_contribution_type_ids($sql) {
-  $ids = sumfields_civicrm_get_contribution_type_ids();
+function sumfields_sql_rewrite_contribution_type_ids($sql) {
+  $ids = sumfields_get_setting('contribution_type_ids', array());
   $str_ids = implode(',', $ids);
   return str_replace('%contribution_type_ids', $str_ids, $sql);
 }
@@ -102,24 +103,26 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
   $custom_fields = _sumfields_get_custom_field_parameters();
 
   // Load the field and group definitions because we need the trigger
-  // clause that is stored here. custom.php defines a variable called
-  // $custom. This can (and will need to) be required more than since this 
-  // function is called more than once. 
-  require 'custom.php';
+  // clause that is stored here. 
+  $custom = sumfields_get_custom_field_definitions();
 
   // We create a trigger sql statement for each table that should
   // have a trigger
   $tables = array();
   $generic_sql = "REPLACE INTO `$table_name` SET ";
   $sql_field_parts = array();
+ 
+  $active_fields = sumfields_get_setting('active_fields', array());
 
   // Iterate over all our fields, and build out a sql parts array for each
   // table that needs a trigger.
   while(list($base_column_name, $params) = each($custom_fields)) {
+    if(!in_array($base_column_name, $active_fields)) continue;
+
     $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
     $table = $custom['fields'][$base_column_name]['trigger_table'];
     $sql_field_parts[$table][] = '`' . $params['column_name'] . '` = ' . 
-      sumfields_civicrm_sql_rewrite_contribution_type_ids($trigger);
+      sumfields_sql_rewrite_contribution_type_ids($trigger);
     // Keep track of which tables we need to build triggers for.
     if(!in_array($table, $tables)) $tables[] = $table;
   } 
@@ -152,7 +155,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
  * This function is designed to be run once when
  * the extension is installed. 
  **/
-function _sumfields_generate_data_based_on_current_contributions() {
+function sumfields_generate_data_based_on_current_contributions() {
   // Get the actual table name for summary fields and the actual field names.
   $table_name = _sumfields_get_custom_table_name(); 
   $custom_fields = _sumfields_get_custom_field_parameters();
@@ -163,10 +166,8 @@ function _sumfields_generate_data_based_on_current_contributions() {
   $dao = CRM_Core_DAO::executeQuery($sql);
 
   // Load the field and group definitions because we need the trigger
-  // clause that is stored here. custom.php defines a variable called
-  // $custom. This can (and will need to) be required more than since this 
-  // function is called more than once. 
-  require 'custom.php';
+  // clause that is stored here. 
+  $custom = sumfields_get_custom_field_definitions();
 
   // We run an INSERT statement for each source table that is
   // going to be triggered. The first field (the id) is NULL.
@@ -174,15 +175,18 @@ function _sumfields_generate_data_based_on_current_contributions() {
   $generic_sql = "INSERT INTO `$table_name` SELECT ";
   $sql_field_parts = array('NULL');
 
+  $active_fields = sumfields_get_setting('active_fields', array());
+
   // Iterate over all our fields, and build out a sql parts array for each
   // table that needs a trigger.
   while(list($base_column_name, $params) = each($custom_fields)) {
+    if(!in_array($base_column_name, $active_fields)) continue;
     $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
     // We replace NEW.contact_id with t2.contact_id to reflect the difference
     // between the trigger sql statement and the initial sql statement
     // to load the data.
     $trigger = str_replace('NEW.contact_id', 't2.contact_id', $trigger);
-    $trigger = sumfields_civicrm_sql_rewrite_contribution_type_ids($trigger);
+    $trigger = sumfields_sql_rewrite_contribution_type_ids($trigger);
     $table = $custom['fields'][$base_column_name]['trigger_table'];
     $sql_field_parts[$table][] = $trigger;
     // Keep track of which tables we need to build triggers for.
@@ -208,9 +212,9 @@ function _sumfields_generate_data_based_on_current_contributions() {
 /**
  * Create custom fields - should be called on enable.
  **/
-function _sumfields_create_custom_fields_and_table() {
+function sumfields_create_custom_fields_and_table() {
   // Load the field and group definitions.
-  require_once('custom.php');
+  $custom = sumfields_get_custom_field_definitions();
   
   // Create the custom group first.
   $params = array_pop($custom['groups']);
@@ -229,11 +233,16 @@ function _sumfields_create_custom_fields_and_table() {
     'id' => $custom_group_id,
     'table_name' => $value['table_name'],
   );
-  _sumfields_save_setting('custom_table_parameters', $custom_table_parameters);
+  sumfields_save_setting('custom_table_parameters', $custom_table_parameters);
   $custom_field_parameters = array();
 
+  // Get an array of fields that the user wants to use.
+  $active_fields = sumfields_get_setting('active_fields', array());
   // Now create the fields.
   while(list($name, $field) = each($custom['fields'])) {
+    // Skip fields not selected by the user.
+    if(!in_array($name, $active_fields)) continue;
+
     $params = $field;
     $params['version'] = 3;
     $params['custom_group_id'] = $custom_group_id;
@@ -248,7 +257,7 @@ function _sumfields_create_custom_fields_and_table() {
       'column_name' => $value['column_name']
     );
   }
-  _sumfields_save_setting('custom_field_parameters', $custom_field_parameters);
+  sumfields_save_setting('custom_field_parameters', $custom_field_parameters);
   return TRUE;
 }
 
@@ -256,7 +265,7 @@ function _sumfields_create_custom_fields_and_table() {
  * Helper function for storing persistant data
  * for this extension.
  **/
-function _sumfields_save_setting($key, $value) {
+function sumfields_save_setting($key, $value) {
   $group = 'Summary Fields';
   CRM_Core_BAO_Setting::setItem($value, $group, $key);
 }
@@ -265,9 +274,11 @@ function _sumfields_save_setting($key, $value) {
  * Helper function for getting persistant data
  * for this extension.
  **/
-function _sumfields_get_setting($key) {
+function sumfields_get_setting($key, $default = NULL) {
   $group = 'Summary Fields';
-  return CRM_Core_BAO_Setting::getItem($group, $key);
+  $ret = CRM_Core_BAO_Setting::getItem($group, $key);
+  if(empty($ret)) return $default;
+  return $ret;
 }
 
 /**
@@ -275,11 +286,16 @@ function _sumfields_get_setting($key) {
  * generated data, so no worry about deleting
  * anything that should be kept.
  **/
-function _sumfields_delete_custom_fields_and_table() {
+function sumfields_delete_custom_fields_and_table() {
   $session = CRM_Core_Session::singleton();
   $custom_field_parameters = _sumfields_get_custom_field_parameters();
-  
+
+  $active_fields = sumfields_get_setting('active_fields', array());
   while(list($key, $field) = each($custom_field_parameters)) {
+    // Skip fields not active (they should not have been created so
+    // should not exist.
+    if(!in_array($key, $active_fields)) continue;
+
     $params = array(
       'id' => $field['id'],
       'params' => 3,
@@ -304,7 +320,7 @@ function _sumfields_delete_custom_fields_and_table() {
 /**
  * Remove our values from civicrm_setting table
  **/
-function _sumfields_delete_settings() {
+function sumfields_delete_settings() {
   $sql = "DELETE FROM civicrm_setting WHERE group_name = 'Summary Fields'";
   CRM_Core_DAO::executeQuery($sql);
 }
@@ -325,7 +341,7 @@ function _sumfields_get_custom_table_name() {
  *
  **/
 function _sumfields_get_custom_field_parameters() {
-  return _sumfields_get_setting('custom_field_parameters');
+  return sumfields_get_setting('custom_field_parameters', array());
 }
 
 /**
@@ -334,15 +350,65 @@ function _sumfields_get_custom_field_parameters() {
  *
  **/
 function _sumfields_get_custom_table_parameters() {
-  return _sumfields_get_setting('custom_table_parameters');
+  return sumfields_get_setting('custom_table_parameters', array());
 }
 
 /**
- * Return the contribution types that should be used in the 
- * contribution summary fields.
+ * Return the $custom array with all the custom field
+ * definitions.
  **/
-function sumfields_civicrm_get_contribution_type_ids() {
-  // FIXME: until we expose a user interface, return all of them.
+function sumfields_get_custom_field_definitions() {
+  static $custom = NULL;
+  if(is_null($custom)) {
+    // The custom.php file defines the $custom array of field
+    // definitions. Only require if necessary.
+    require 'custom.php';
+  }
+  return $custom;
+}
+
+/**
+ * Initialize the contribution_type_ids used when 
+ * calculating the summary fields. Use all available
+ * contribution_type_ids.
+ **/
+function sumfields_initialize_contribution_type_ids() {
   $values = CRM_Contribute_PseudoConstant::contributionType();
-  return array_keys($values);
+  sumfields_save_setting('contribution_type_ids', array_keys($values));
+}
+
+/**
+ * Initialize the active fields * with all available fields.
+ **/
+function sumfields_initialize_active_fields() {
+  $values = sumfields_get_all_custom_fields();
+  sumfields_save_setting('active_fields', $values);
+}
+
+/**
+ * Get all available active fields
+ **/
+function sumfields_get_all_custom_fields() {
+  $custom = sumfields_get_custom_field_definitions();
+  $values = array();
+  while(list($k) = each($custom['fields'])) {
+    $values[] = $k;
+  }
+  return $values;
+}
+
+/**
+ * Helper function to setup all data and tables
+ **/
+function sumfields_initialize() {
+
+  if(FALSE === sumfields_create_custom_fields_and_table()) return FALSE;
+  sumfields_generate_data_based_on_current_contributions();
+}
+
+/**
+ * Helper function to clean up
+ **/
+function sumfields_deinitialize() {
+  sumfields_delete_custom_fields_and_table();
 }
