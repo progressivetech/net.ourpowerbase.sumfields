@@ -167,8 +167,9 @@ $custom = array(
 			'is_active' => '1',
 			'is_view' => '1',
 			'text_length' => '32',
-      'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1 JOIN civicrm_membership_payment mp ON 
-      t1.id = mp.contribution_id WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 ORDER BY 
+      'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1 WHERE 
+      t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND  
+      t1.contribution_type_id IN (%membership_contribution_type_ids) ORDER BY 
       receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
 		),
@@ -182,10 +183,41 @@ $custom = array(
 			'is_active' => '1',
 			'is_view' => '1',
 			'text_length' => '32',
-      'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1 JOIN civicrm_membership_payment mp ON 
-      t1.id = mp.contribution_id WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 
-      ORDER BY receive_date DESC LIMIT 1)',
+      'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1 WHERE 
+      t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
+      t1.contribution_type_id IN (%membership_contribution_type_ids) ORDER BY 
+      receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
+		),
+    'event_last_attended_name' => array(
+			'label' => 'Name of the last attended event',
+			'data_type' => 'String',
+			'html_type' => 'text',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'weight' => '65',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '128',
+      'trigger_sql' => '(SELECT e.title AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON 
+      t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)  
+      AND e.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)',
+      'trigger_table' => 'civicrm_participant',
+		),
+    'event_last_attended_date' => array(
+			'label' => 'Date of the last attended event',
+			'data_type' => 'Date',
+			'html_type' => 'Select Date',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'weight' => '70',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '32',
+      'trigger_sql' => '(SELECT e.start_date AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON 
+      t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)  
+      AND e.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)',
+      'trigger_table' => 'civicrm_participant',
 		),
   ),
 );

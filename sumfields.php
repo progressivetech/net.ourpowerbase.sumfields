@@ -36,9 +36,8 @@ function sumfields_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function sumfields_civicrm_enable() {
-  sumfields_initialize_contribution_type_ids();
-  sumfields_initialize_active_fields();
-  if(FALSE === sumfields_initialize()) return FALSE;
+  sumfields_initialize_user_settings();
+  if(FALSE === sumfields_initialize_custom_data()) return FALSE;
   return _sumfields_civix_civicrm_enable();
 }
 
@@ -46,8 +45,8 @@ function sumfields_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function sumfields_civicrm_disable() {
-  sumfields_deinitialize(); 
-  sumfields_delete_settings();
+  sumfields_deinitialize_custom_data(); 
+  sumfields_delete_user_settings();
   return _sumfields_civix_civicrm_disable();
 }
 
@@ -75,13 +74,27 @@ function sumfields_civicrm_managed(&$entities) {
 }
 
 /**
- * Replace %contribution_type_ids with the actual
- * ids that the user has configured to limit to.
+ * Replace %variable with the actual
+ * values that the user has configured to limit to.
  **/
-function sumfields_sql_rewrite_contribution_type_ids($sql) {
+function sumfields_sql_rewrite($sql) {
   $ids = sumfields_get_setting('contribution_type_ids', array());
   $str_ids = implode(',', $ids);
-  return str_replace('%contribution_type_ids', $str_ids, $sql);
+  $sql = str_replace('%contribution_type_ids', $str_ids, $sql);
+
+  $ids = sumfields_get_setting('membership_contribution_type_ids', array());
+  $str_ids = implode(',', $ids);
+  $sql = str_replace('%membership_contribution_type_ids', $str_ids, $sql);
+
+  $ids = sumfields_get_setting('participant_status_ids', array());
+  $str_ids = implode(',', $ids);
+  $sql = str_replace('%participant_status_ids', $str_ids, $sql);
+
+  $ids = sumfields_get_setting('event_type_ids', array());
+  $str_ids = implode(',', $ids);
+  $sql = str_replace('%event_type_ids', $str_ids, $sql);
+
+  return $sql;
 }
 
 /**
@@ -114,27 +127,26 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
  
   $active_fields = sumfields_get_setting('active_fields', array());
 
-  // Iterate over all our fields, and build out a sql parts array for each
-  // table that needs a trigger.
+  // Iterate over all our fields, and build out a sql parts array
   while(list($base_column_name, $params) = each($custom_fields)) {
     if(!in_array($base_column_name, $active_fields)) continue;
 
     $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
-    $table = $custom['fields'][$base_column_name]['trigger_table'];
-    $sql_field_parts[$table][] = '`' . $params['column_name'] . '` = ' . 
-      sumfields_sql_rewrite_contribution_type_ids($trigger);
+    $sql_field_parts[] = '`' . $params['column_name'] . '` = ' . 
+      sumfields_sql_rewrite($trigger);
     // Keep track of which tables we need to build triggers for.
+    $table = $custom['fields'][$base_column_name]['trigger_table'];
     if(!in_array($table, $tables)) $tables[] = $table;
   } 
 
+  $sql_field_parts[] = 'entity_id = NEW.contact_id;';
   // Iterate over each table that needs a trigger, build the trigger's
   // sql clause.
   while(list(, $table) = each($tables)) {
-    $sql_field_parts[$table][] = 'entity_id = NEW.contact_id;';
-    $parts = implode(',', $sql_field_parts[$table]);
+    $parts = implode(',', $sql_field_parts);
     $sql = $generic_sql . $parts;
 
-    // We want to fire this trigger on both insert and update.
+    // We want to fire this trigger on insert, update and delete.
     $info[] = array(
       'table' => $table,
       'when' => 'AFTER',
@@ -142,9 +154,17 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
       'sql' => $sql,
      );
     $info[] = array(
-      'table' => 'civicrm_contribution',
+      'table' => $table,
       'when' => 'AFTER',
       'event' => 'UPDATE',
+      'sql' => $sql,
+    );
+    // For delete, we reference OLD.contact_id instead of NEW.contact_id
+    $sql = str_replace('NEW.contact_id', 'OLD.contact_id', $sql);
+    $info[] = array(
+      'table' => $table,
+      'when' => 'AFTER',
+      'event' => 'DELETE',
       'sql' => $sql,
     );
   }
@@ -153,9 +173,9 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
 /**
  * Generate calculated fields for all contacts.
  * This function is designed to be run once when
- * the extension is installed. 
+ * the extension is installed or initialized. 
  **/
-function sumfields_generate_data_based_on_current_contributions() {
+function sumfields_generate_data_based_on_current_data() {
   // Get the actual table name for summary fields and the actual field names.
   $table_name = _sumfields_get_custom_table_name(); 
   $custom_fields = _sumfields_get_custom_field_parameters();
@@ -169,43 +189,97 @@ function sumfields_generate_data_based_on_current_contributions() {
   // clause that is stored here. 
   $custom = sumfields_get_custom_field_definitions();
 
-  // We run an INSERT statement for each source table that is
-  // going to be triggered. The first field (the id) is NULL.
+  // Most fields are based on contribution records, so build
+  // one big sql INSERT table to populate our new custom with
+  // summary info based on existing contribution data.
   $tables = array();
   $generic_sql = "INSERT INTO `$table_name` SELECT ";
-  $sql_field_parts = array('NULL');
-
   $active_fields = sumfields_get_setting('active_fields', array());
-
-  // Iterate over all our fields, and build out a sql parts array for each
-  // table that needs a trigger.
   while(list($base_column_name, $params) = each($custom_fields)) {
     if(!in_array($base_column_name, $active_fields)) continue;
-    $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
-    // We replace NEW.contact_id with t2.contact_id to reflect the difference
-    // between the trigger sql statement and the initial sql statement
-    // to load the data.
-    $trigger = str_replace('NEW.contact_id', 't2.contact_id', $trigger);
-    $trigger = sumfields_sql_rewrite_contribution_type_ids($trigger);
     $table = $custom['fields'][$base_column_name]['trigger_table'];
-    $sql_field_parts[$table][] = $trigger;
-    // Keep track of which tables we need to build triggers for.
-    if(!in_array($table, $tables)) $tables[] = $table;
-  }
 
-  while(list(,$table) = each($tables)) {
-    // The first and second fields inserted should be null and contact_id
-    array_unshift($sql_field_parts[$table], 'contact_id');
-    array_unshift($sql_field_parts[$table], 'NULL');
-
-    $parts = implode(",\n", $sql_field_parts[$table]);
-    $sql = $generic_sql . $parts;
-    $sql .= ' FROM `' . $table . '` AS t2';
-    if($table == 'civicrm_contribution') {
-      $sql .= ' WHERE t2.contribution_status_id = 1';
+    // We only handle civicrm_contribution fields, we'll get the
+    // other fields later. Insert NULL value which will get updated
+    // below.
+    if($table != 'civicrm_contribution') {
+      $trigger = 'NULL'; 
     }
-    $sql .= ' GROUP BY contact_id';
-    $dao = CRM_Core_DAO::executeQuery($sql);
+    else {
+      $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
+      // We replace NEW.contact_id with t2.contact_id to reflect the difference
+      // between the trigger sql statement and the initial sql statement
+      // to load the data.
+      $trigger = str_replace('NEW.contact_id', 't2.contact_id', $trigger);
+      $trigger = sumfields_sql_rewrite($trigger);
+    }
+    $sql_field_parts['civicrm_contribution'][] = $trigger;
+  }
+  // The first and second fields inserted should be null and contact_id
+  array_unshift($sql_field_parts['civicrm_contribution'], 'contact_id');
+  array_unshift($sql_field_parts['civicrm_contribution'], 'NULL');
+
+  $parts = implode(",\n", $sql_field_parts['civicrm_contribution']);
+  $sql = $generic_sql . $parts;
+  $sql .= ' FROM `civicrm_contribution` AS t2';
+  if($table == 'civicrm_contribution') {
+    $sql .= ' WHERE t2.contribution_status_id = 1';
+  }
+  $sql .= ' GROUP BY contact_id';
+  $dao = CRM_Core_DAO::executeQuery($sql);
+
+  // Update the table with data from the civicrm_participant table
+  // We iterate over every contact_id in the participant table
+  // and update them one by one... optimization ideas?
+  $sql = "SELECT DISTINCT contact_id FROM civicrm_participant";
+  $dao = CRM_Core_DAO::executeQuery($sql);
+  while($dao->fetch()) {
+    $contact_id = $dao->contact_id;
+    reset($custom_fields);
+    // Iterate over our custom fields looking for ones using the
+    // civicrm_participant table.
+    while(list($base_column_name, $column_settings) = each($custom_fields)) {
+      if(!in_array($base_column_name, $active_fields)) continue;
+      $table = $custom['fields'][$base_column_name]['trigger_table'];
+      if($table != 'civicrm_participant') continue;
+
+      $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
+      // We replace NEW.contact_id with the value of $contact_id to reflect the difference
+      // between the trigger sql statement and the initial sql statement
+      // to load the data.
+      $trigger = str_replace('NEW.contact_id', '%1', $trigger);
+      $params = array( 1 => array($contact_id, 'Integer'));
+      $trigger = sumfields_sql_rewrite($trigger);
+
+      // Retrieve the summary value by executing the trigger sql
+      $trigger_dao = CRM_Core_DAO::executeQuery($trigger, $params);
+      $trigger_dao->fetch();
+      if(!property_exists($trigger_dao, 'summary_value')) {
+        continue;
+      }
+      $summary_value = $trigger_dao->summary_value;
+
+      if(empty($summary_value)) continue;
+      // Update the summary table with this new value
+      // REPLACE INTO will wipe out the existing data, so we
+      // have to check if the record exists first...
+      $sql = "SELECT id FROM `$table_name` WHERE entity_id = %1";
+      $params = array( 1 => array($contact_id, 'Integer'));
+      $exists_dao = CRM_Core_DAO::executeQuery($sql, $params);
+      $exists_dao->fetch();
+      $column_name = $column_settings['column_name'];
+      if($exists_dao->N == 0) {
+        $sql = "INSERT INTO `$table_name` SET `$column_name` = %1, entity_id = %2";
+      }
+      else {
+        $sql = "UPDATE `$table_name` SET `$column_name` = %1 WHERE entity_id = %2";
+      }
+      $params = array(
+        1 => array($summary_value, 'String'),
+        2 => array($contact_id, 'Integer' ),
+      );
+      CRM_Core_DAO::executeQuery($sql, $params);
+    }
   }
 }
 
@@ -213,6 +287,8 @@ function sumfields_generate_data_based_on_current_contributions() {
  * Create custom fields - should be called on enable.
  **/
 function sumfields_create_custom_fields_and_table() {
+  $session = CRM_Core_Session::singleton();
+
   // Load the field and group definitions.
   $custom = sumfields_get_custom_field_definitions();
   
@@ -249,6 +325,7 @@ function sumfields_create_custom_fields_and_table() {
     $result = civicrm_api('CustomField', 'create', $params);
     if($result['is_error'] == 1) {
       $session->setStatus("Error creating custom field $name");
+      $session->setStatus(print_r($result, TRUE));
       continue;
     }
     $value = array_pop($result['values']);
@@ -320,7 +397,7 @@ function sumfields_delete_custom_fields_and_table() {
 /**
  * Remove our values from civicrm_setting table
  **/
-function sumfields_delete_settings() {
+function sumfields_delete_user_settings() {
   $sql = "DELETE FROM civicrm_setting WHERE group_name = 'Summary Fields'";
   CRM_Core_DAO::executeQuery($sql);
 }
@@ -368,21 +445,36 @@ function sumfields_get_custom_field_definitions() {
 }
 
 /**
- * Initialize the contribution_type_ids used when 
- * calculating the summary fields. Use all available
- * contribution_type_ids.
+ * Initialize all user settings. 
+ *
+ * The user has the option to choose which fields they want,
+ * which contribution types to include, which event types, 
+ * etc. When initialize, we choose all available fields and
+ * types and let users de-select the ones they don't want. 
  **/
-function sumfields_initialize_contribution_type_ids() {
-  $values = CRM_Contribute_PseudoConstant::contributionType();
-  sumfields_save_setting('contribution_type_ids', array_keys($values));
-}
+function sumfields_initialize_user_settings() {
 
-/**
- * Initialize the active fields * with all available fields.
- **/
-function sumfields_initialize_active_fields() {
+  // Which of the available fields does the user want to activate?
   $values = sumfields_get_all_custom_fields();
   sumfields_save_setting('active_fields', $values);
+
+  // Which contribution_type_ids are used to calculate the general contribution
+  // summary fields?
+  $values = CRM_Contribute_PseudoConstant::contributionType();
+  sumfields_save_setting('contribution_type_ids', array_keys($values));
+
+  // Which contribution_type_ids are used to calculate the last membership
+  // payment fields?
+  sumfields_save_setting('membership_contribution_type_ids', array_keys($values));
+
+  // Which event ids are used when calculating last event attended fields?
+  $values = CRM_Event_PseudoConstant::eventType();
+  sumfields_save_setting('event_type_ids', array_keys($values));
+
+  // Which participant status ids are used to calculate last event attended
+  // fields?
+  $values = CRM_Event_PseudoConstant::participantStatus();
+  sumfields_save_setting('participant_status_ids', array_keys($values));
 }
 
 /**
@@ -400,15 +492,14 @@ function sumfields_get_all_custom_fields() {
 /**
  * Helper function to setup all data and tables
  **/
-function sumfields_initialize() {
-
+function sumfields_initialize_custom_data() {
   if(FALSE === sumfields_create_custom_fields_and_table()) return FALSE;
-  sumfields_generate_data_based_on_current_contributions();
+  sumfields_generate_data_based_on_current_data();
 }
 
 /**
  * Helper function to clean up
  **/
-function sumfields_deinitialize() {
+function sumfields_deinitialize_custom_data() {
   sumfields_delete_custom_fields_and_table();
 }
