@@ -503,7 +503,7 @@ function sumfields_initialize_user_settings() {
 
   // Which contribution_type_ids are used to calculate the general contribution
   // summary fields?
-  $values = CRM_Contribute_PseudoConstant::contributionType();
+  $values = sumfields_get_all_contribution_types();
   sumfields_save_setting('contribution_type_ids', array_keys($values));
 
   // Which contribution_type_ids are used to calculate the last membership
@@ -511,15 +511,40 @@ function sumfields_initialize_user_settings() {
   sumfields_save_setting('membership_contribution_type_ids', array_keys($values));
 
   // Which event ids are used when calculating last event attended fields?
-  $values = CRM_Event_PseudoConstant::eventType();
+  $values = sumfields_get_all_event_types();
   sumfields_save_setting('event_type_ids', array_keys($values));
 
   // Which participant status ids are used to calculate last event attended
   // fields?
-  $values = CRM_Event_PseudoConstant::participantStatus();
+  $values = sumfields_get_all_participant_status_types();
   sumfields_save_setting('participant_status_ids', array_keys($values));
 }
 
+/**
+ * Get all contribution types
+ **/
+function sumfields_get_all_contribution_types() {
+  $values = array();
+  CRM_Core_PseudoConstant::populate($values, 'CRM_Contribute_DAO_ContributionType', $all = TRUE);
+  return $values; 
+}
+
+/**
+ * Get all event types
+ **/
+function sumfields_get_all_event_types() {
+  $values = CRM_Core_OptionGroup::values('event_type', FALSE, FALSE, FALSE, NULL, 'label', $onlyActive = FALSE);
+  return $values; 
+}
+
+/**
+ * Get all participant status types.
+ **/
+function sumfields_get_all_participant_status_types() {
+  $values = array();
+  CRM_Core_PseudoConstant::populate($values, 'CRM_Event_DAO_ParticipantStatusType', $all = TRUE);
+  return $values; 
+}
 /**
  * Get all available active fields
  **/

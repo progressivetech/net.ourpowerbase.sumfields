@@ -20,22 +20,22 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $this->addCheckBox(
       'contribution_type_ids', 
       ts('Contribution Types'),
-      array_flip(CRM_Contribute_PseudoConstant::contributionType())
+      array_flip(sumfields_get_all_contribution_types())
     );
     $this->addCheckBox(
       'membership_contribution_type_ids', 
       ts('Membership Contribution Types'),
-      array_flip(CRM_Contribute_PseudoConstant::contributionType())
+      array_flip(sumfields_get_all_contribution_types())
     );
     $this->addCheckBox(
       'event_type_ids', 
       ts('Event Types'),
-      array_flip(CRM_Event_PseudoConstant::eventType())
+      array_flip(sumfields_get_all_event_types())
     );
     $this->addCheckBox(
       'participant_status_ids', 
       ts('Participant Status'),
-      array_flip(CRM_Event_PseudoConstant::participantStatus())
+      array_flip(sumfields_get_all_participant_status_types())
     );
 
     $this->addButtons(array(
