@@ -274,7 +274,7 @@ function sumfields_generate_data_based_on_current_data() {
   // Update the table with data from the civicrm_participant table
   // We iterate over every contact_id in the participant table
   // and update them one by one... optimization ideas?
-  $sql = "SELECT DISTINCT contact_id FROM civicrm_participant";
+  $sql = "SELECT DISTINCT contact_id FROM civicrm_participant JOIN civicrm_contact ";
   $dao = CRM_Core_DAO::executeQuery($sql);
   while($dao->fetch()) {
     $contact_id = $dao->contact_id;
