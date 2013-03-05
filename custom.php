@@ -126,7 +126,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_total_number' => array(
-			'label' => 'Total Contributions',
+			'label' => 'Count of Contributions',
 			'data_type' => 'Int',
 			'html_type' => 'Text',
 			'is_required' => '0',
