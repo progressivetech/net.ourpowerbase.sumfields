@@ -176,7 +176,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
 
     $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
     $sql_field_parts[] = '`' . $params['column_name'] . '` = ' . 
-      sumfields_sql_rewrite($trigger);
+    sumfields_sql_rewrite($trigger);
     // Keep track of which tables we need to build triggers for.
     $table = $custom['fields'][$base_column_name]['trigger_table'];
     if(!in_array($table, $tables)) $tables[] = $table;
@@ -274,7 +274,10 @@ function sumfields_generate_data_based_on_current_data() {
   // Update the table with data from the civicrm_participant table
   // We iterate over every contact_id in the participant table
   // and update them one by one... optimization ideas?
-  $sql = "SELECT DISTINCT contact_id FROM civicrm_participant JOIN civicrm_contact ";
+
+  // If no event fields are selected, skip it.
+  if(!sumfields_are_any_event_fields_active()) return;
+  $sql = "SELECT DISTINCT contact_id FROM civicrm_participant p JOIN civicrm_contact c ON p.contact_id = c.id";
   $dao = CRM_Core_DAO::executeQuery($sql);
   while($dao->fetch()) {
     $contact_id = $dao->contact_id;
@@ -324,6 +327,27 @@ function sumfields_generate_data_based_on_current_data() {
       CRM_Core_DAO::executeQuery($sql, $params);
     }
   }
+}
+
+/**
+ * Helper function to see if any of the event fields
+ * are active.
+ **/
+
+function sumfields_are_any_event_fields_active() {
+  // Fields chosen by the user 
+  $active_fields = sumfields_get_setting('active_fields', array());
+  // All custom field definitions.
+  $custom = sumfields_get_custom_field_definitions();
+  // Iterate over our active fields looking for ones using the
+  // civicrm_participant table.
+  while(list(,$base_column_name) = each($active_fields)) {
+    $table = $custom['fields'][$base_column_name]['trigger_table'];
+    if($table == 'civicrm_participant') {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -499,6 +523,14 @@ function sumfields_initialize_user_settings() {
 
   // Which of the available fields does the user want to activate?
   $values = sumfields_get_all_custom_fields();
+  // By default, don't include the event fields because they are resource
+  // intensive to initialize.
+  $unsets = array('event_last_attended_name', 'event_last_attended_date');
+  while(list(,$unsetit) = each($unsets)) {
+    $keys = array_keys($values, $unsetit);
+    $key = array_pop($keys);
+    unset($values[$key]);
+  }
   sumfields_save_setting('active_fields', $values);
 
   // Which contribution_type_ids are used to calculate the general contribution
@@ -517,7 +549,9 @@ function sumfields_initialize_user_settings() {
   // Which participant status ids are used to calculate last event attended
   // fields?
   $values = sumfields_get_all_participant_status_types();
-  sumfields_save_setting('participant_status_ids', array_keys($values));
+  // When initializing, only use the attended.
+  $initial_status_types = preg_grep('/Attended/', $values);
+  sumfields_save_setting('participant_status_ids', array_keys($initial_status_types));
 }
 
 /**
