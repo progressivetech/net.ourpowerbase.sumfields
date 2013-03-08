@@ -71,6 +71,9 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     if(array_key_exists('contribution_type_ids', $values)) {
       sumfields_save_setting('contribution_type_ids', $this->options_to_array($values['contribution_type_ids']));
     }
+    if(array_key_exists('membership_contribution_type_ids', $values)) {
+      sumfields_save_setting('membership_contribution_type_ids', $this->options_to_array($values['membership_contribution_type_ids']));
+    }
     if(array_key_exists('event_type_ids', $values)) {
       sumfields_save_setting('event_type_ids', $this->options_to_array($values['event_type_ids']));
     }
