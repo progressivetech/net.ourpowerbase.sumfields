@@ -137,7 +137,63 @@ function sumfields_sql_rewrite($sql) {
   $str_ids = implode(',', $ids);
   $sql = str_replace('%event_type_ids', $str_ids, $sql);
 
+  $fiscal_dates = sumfields_get_fiscal_dates();
+  $keys = array_keys($fiscal_dates);
+  $values = array_values($fiscal_dates);
+  $sql = str_replace($keys, $values, $sql);
+
   return $sql;
+}
+
+/**
+ * Based on the civicrm fiscal date setting, determine the dates for the
+ * various begin and end fiscal year dates needed by the rewrite function.
+ **/
+function sumfields_get_fiscal_dates() {
+  $ret = array(
+    '%current_fiscal_year_begin' => NULL,
+    '%current_fiscal_year_end' => NULL,
+    '%last_fiscal_year_begin' => NULL,
+    '%last_fiscal_year_end' => NULL,
+  );
+  $config = CRM_Core_Config::singleton();
+
+  // These are returned as not zero-padded numbers,
+  // e.g. 1 and 1 or 9 and 1
+  $fiscal_month = sumfields_zero_pad($config->fiscalYearStart['M']);
+  $fiscal_day = sumfields_zero_pad($config->fiscalYearStart['d']);
+
+  $this_calendar_year_fiscal_year_begin_ts = strtotime(date('Y') . '-' . $fiscal_month . '-' . $fiscal_day);
+  $now = time();
+  if($now < $this_calendar_year_fiscal_year_begin_ts) {
+    // We need to adjust the current fiscal year back one year. For example, it's Feb 3
+    // and the fiscal year begins Sep 1, the current fiscal year started Sep 1 of the
+    // last calendar year.
+    $current_fiscal_year_begin_ts = strtotime('-1 year', $this_calendar_year_fiscal_year_begin_ts);
+    $current_fiscal_year_end_ts = strtotime('-1 day', $this_calendar_year_fiscal_year_begin_ts);
+    $last_fiscal_year_begin_ts = strtotime('-2 year', $this_calendar_year_fiscal_year_begin_ts);
+    $last_fiscal_year_end_ts = strtotime('-1 year -1 day', $this_calendar_year_fiscal_year_begin_ts);
+  }
+  else {
+    $current_fiscal_year_begin_ts = $this_calendar_year_fiscal_year_begin_ts;
+    $current_fiscal_year_end_ts = strtotime('+1 year -1 day', $this_calendar_year_fiscal_year_begin_ts);
+    $last_fiscal_year_begin_ts = strtotime('-1 year', $this_calendar_year_fiscal_year_begin_ts);
+    $last_fiscal_year_end_ts = strtotime('-1 day', $this_calendar_year_fiscal_year_begin_ts);
+  }
+  return array(
+    '%current_fiscal_year_begin' => date('Y-m-d', $current_fiscal_year_begin_ts),
+    '%current_fiscal_year_end' => date('Y-m-d', $current_fiscal_year_end_ts),
+    '%last_fiscal_year_begin' => date('Y-m-d', $last_fiscal_year_begin_ts),
+    '%last_fiscal_year_end' => date('Y-m-d', $last_fiscal_year_end_ts),
+  );
+}
+
+/**
+ * Utility function for calculating fiscal years
+ **/
+function sumfields_zero_pad($num) {
+  if(strlen($num) == 1) return '0' . $num;
+  return $num;
 }
 
 /**

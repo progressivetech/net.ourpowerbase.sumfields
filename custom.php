@@ -44,9 +44,9 @@ $custom = array(
 			'is_view' => '1',
 			'text_length' => '32',
       'trigger_sql' => '(SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount)) 
-      FROM civicrm_contribution t1 WHERE SUBSTR(receive_date,1,4)=YEAR(curdate()) 
-      AND t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND 
-      t1.contribution_type_id IN (%contribution_type_ids))',
+      FROM civicrm_contribution t1 WHERE receive_date BETWEEN "%current_fiscal_year_begin"
+      AND "%current_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND 
+      t1.contribution_status_id = 1 AND t1.contribution_type_id IN (%contribution_type_ids))',
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_total_last_year' => array(
@@ -61,9 +61,9 @@ $custom = array(
 			'is_view' => '1',
 			'text_length' => '32',
       'trigger_sql' => '(SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount)) 
-      FROM civicrm_contribution t1 WHERE SUBSTR(receive_date,1,4)=YEAR(curdate())-1 
-      AND t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND 
-      t1.contribution_type_id IN (%contribution_type_ids))',
+      FROM civicrm_contribution t1 WHERE receive_date BETWEEN "%last_fiscal_year_begin"
+      AND "%last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND 
+      t1.contribution_status_id = 1 AND t1.contribution_type_id IN (%contribution_type_ids))',
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_amount_last' => array(
@@ -149,7 +149,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_average_annual_amount' => array(
-			'label' => 'Average Annual Contribution',
+			'label' => 'Average Annual (Calendar Year) Contribution',
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
