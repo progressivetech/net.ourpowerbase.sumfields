@@ -65,8 +65,19 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
   function postProcess() {
     $values = $this->controller->exportValues($this->_name);
+
+    // Keep track of whether or not active_fields have changed. If they have changed, we have to
+    // re-create the table below. If they haven't change, don't re-create the table. We want to 
+    // avoid re-creating the table because it causes custom fields assigned to profiles to be 
+    // deleted.
+    $active_fields_have_changed = FALSE;
     if(array_key_exists('active_fields', $values)) {
-      sumfields_save_setting('active_fields', $this->options_to_array($values['active_fields']));
+      $current_active_fields = sumfields_get_setting('active_fields');
+      $new_active_fields = $this->options_to_array($values['active_fields']);
+      if($current_active_fields != $new_active_fields) {
+        $active_fields_have_changed = TRUE;
+        sumfields_save_setting('active_fields', $new_active_fields);
+      }
     }
     if(array_key_exists('contribution_type_ids', $values)) {
       sumfields_save_setting('contribution_type_ids', $this->options_to_array($values['contribution_type_ids']));
@@ -82,15 +93,20 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     }
     $session = CRM_Core_Session::singleton();
 
-
-    // Now we have to re-initialize the custom table and fields...
-    if(FALSE === sumfields_deinitialize_custom_data()) {
-      $session->setStatus("Error deninitializing.");
-      return;
+    if($active_fields_have_changed) {
+      // Now we have to re-initialize the custom table and fields...
+      $session->setStatus("Active fields have changed, re-building the table. WARNING: fields assigned to profiles will need to be re-assigned.");
+      if(FALSE === sumfields_deinitialize_custom_data()) {
+        $session->setStatus("Error deninitializing.");
+        return;
+      }
+      if(FALSE === sumfields_initialize_custom_data()) {
+        $session->setStatus("Error initializing.");
+        return;
+      }
     }
-    if(FALSE === sumfields_initialize_custom_data()) {
-      $session->setStatus("Error initializing.");
-      return;
+    else {
+      sumfields_generate_data_based_on_current_data();
     }
     CRM_Core_DAO::triggerRebuild();
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));

@@ -38,6 +38,6 @@
   </tr>
 
 </table>
- <div class="description">Please be patient - when saving these settings, the summary table is re-generated from scratch. This procedure may take a few minutes.</div>
+ <div class="description">Please be patient - when saving these settings, the contents of the summary table is re-created from scratch. This procedure may take a few minutes.</div>
  <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
 
