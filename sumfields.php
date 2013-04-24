@@ -121,13 +121,13 @@ function sumfields_civicrm_managed(&$entities) {
  * values that the user has configured to limit to.
  **/
 function sumfields_sql_rewrite($sql) {
-  $ids = sumfields_get_setting('contribution_type_ids', array());
+  $ids = sumfields_get_setting('financial_type_ids', array());
   $str_ids = implode(',', $ids);
-  $sql = str_replace('%contribution_type_ids', $str_ids, $sql);
+  $sql = str_replace('%financial_type_ids', $str_ids, $sql);
 
-  $ids = sumfields_get_setting('membership_contribution_type_ids', array());
+  $ids = sumfields_get_setting('membership_financial_type_ids', array());
   $str_ids = implode(',', $ids);
-  $sql = str_replace('%membership_contribution_type_ids', $str_ids, $sql);
+  $sql = str_replace('%membership_financial_type_ids', $str_ids, $sql);
 
   $ids = sumfields_get_setting('participant_status_ids', array());
   $str_ids = implode(',', $ids);
@@ -513,6 +513,7 @@ function sumfields_delete_custom_fields_and_table() {
   $params = array('version' => 3, 'id' => $id);
   $result = civicrm_api('CustomGroup', 'delete', $params);
   if($result['is_error'] == 1) {
+    $table_name = $custom_table_parameters['table_name'];
     $session->setStatus("Error deleting $table_name.");
   }
 }
@@ -589,14 +590,14 @@ function sumfields_initialize_user_settings() {
   }
   sumfields_save_setting('active_fields', $values);
 
-  // Which contribution_type_ids are used to calculate the general contribution
+  // Which financial_type_ids are used to calculate the general contribution
   // summary fields?
-  $values = sumfields_get_all_contribution_types();
-  sumfields_save_setting('contribution_type_ids', array_keys($values));
+  $values = sumfields_get_all_financial_types();
+  sumfields_save_setting('financial_type_ids', array_keys($values));
 
-  // Which contribution_type_ids are used to calculate the last membership
+  // Which financial_type_ids are used to calculate the last membership
   // payment fields?
-  sumfields_save_setting('membership_contribution_type_ids', array_keys($values));
+  sumfields_save_setting('membership_financial_type_ids', array_keys($values));
 
   // Which event ids are used when calculating last event attended fields?
   $values = sumfields_get_all_event_types();
@@ -613,9 +614,9 @@ function sumfields_initialize_user_settings() {
 /**
  * Get all contribution types
  **/
-function sumfields_get_all_contribution_types() {
+function sumfields_get_all_financial_types() {
   $values = array();
-  CRM_Core_PseudoConstant::populate($values, 'CRM_Contribute_DAO_ContributionType', $all = TRUE);
+  CRM_Core_PseudoConstant::populate($values, 'CRM_Financial_DAO_FinancialType', $all = TRUE);
   return $values; 
 }
 

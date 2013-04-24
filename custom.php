@@ -29,7 +29,7 @@ $custom = array(
 			'text_length' => '32',
       'trigger_sql' => '(SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount)) 
       FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id 
-      AND t1.contribution_status_id = 1 AND t1.contribution_type_id IN (%contribution_type_ids))',
+      AND t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_total_this_year' => array(
@@ -46,7 +46,7 @@ $custom = array(
       'trigger_sql' => '(SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount)) 
       FROM civicrm_contribution t1 WHERE receive_date BETWEEN "%current_fiscal_year_begin"
       AND "%current_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND 
-      t1.contribution_status_id = 1 AND t1.contribution_type_id IN (%contribution_type_ids))',
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_total_last_year' => array(
@@ -63,7 +63,7 @@ $custom = array(
       'trigger_sql' => '(SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount)) 
       FROM civicrm_contribution t1 WHERE receive_date BETWEEN "%last_fiscal_year_begin"
       AND "%last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND 
-      t1.contribution_status_id = 1 AND t1.contribution_type_id IN (%contribution_type_ids))',
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_amount_last' => array(
@@ -79,8 +79,8 @@ $custom = array(
 			'text_length' => '32',
       'trigger_sql' => '(SELECT IF(total_amount IS NULL, 0, total_amount) 
       FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id 
-      AND t1.contribution_status_id = 1  AND t1.contribution_type_id IN 
-      (%contribution_type_ids) ORDER BY t1.receive_date DESC LIMIT 1)', 
+      AND t1.contribution_status_id = 1  AND t1.financial_type_id IN 
+      (%financial_type_ids) ORDER BY t1.receive_date DESC LIMIT 1)', 
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_date_last' => array(
@@ -96,7 +96,7 @@ $custom = array(
 			'text_length' => '32',
       'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1
       WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND 
-      t1.contribution_type_id IN (%contribution_type_ids))',
+      t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_date_first' => array(
@@ -112,7 +112,7 @@ $custom = array(
 			'text_length' => '32',
       'trigger_sql' => '(SELECT MIN(receive_date) FROM civicrm_contribution t1 
       WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND 
-      t1.contribution_type_id IN (%contribution_type_ids))', 
+      t1.financial_type_id IN (%financial_type_ids))', 
       'trigger_table' => 'civicrm_contribution',
 
 		),
@@ -129,7 +129,7 @@ $custom = array(
 			'text_length' => '32',
       'trigger_sql' => '(SELECT IF(MAX(total_amount) IS NULL, 0, MAX(total_amount)) 
       FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id AND 
-      t1.contribution_status_id = 1 AND t1.contribution_type_id IN (%contribution_type_ids))', 
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))', 
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_total_number' => array(
@@ -145,7 +145,7 @@ $custom = array(
 			'text_length' => '32',
       'trigger_sql' => '(SELECT IF(COUNT(id) IS NULL, 0, COUNT(id)) FROM civicrm_contribution t1
       WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND 
-      t1.contribution_type_id IN (%contribution_type_ids))', 
+      t1.financial_type_id IN (%financial_type_ids))', 
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_average_annual_amount' => array(
@@ -160,9 +160,9 @@ $custom = array(
 			'is_view' => '1',
 			'text_length' => '32',
       'trigger_sql' => '(SELECT SUM(total_amount) / (SELECT COUNT(DISTINCT SUBSTR(receive_date, 1, 4)) 
-      FROM civicrm_contribution t0 WHERE t0.contact_id = NEW.contact_id AND t0.contribution_type_id 
-      IN (%contribution_type_ids) AND t0.contribution_status_id = 1) FROM civicrm_contribution t1 
-      WHERE t1.contact_id = NEW.contact_id AND t1.contribution_type_id IN (%contribution_type_ids) 
+      FROM civicrm_contribution t0 WHERE t0.contact_id = NEW.contact_id AND t0.financial_type_id 
+      IN (%financial_type_ids) AND t0.contribution_status_id = 1) FROM civicrm_contribution t1 
+      WHERE t1.contact_id = NEW.contact_id AND t1.financial_type_id IN (%financial_type_ids) 
       AND t1.contribution_status_id = 1)', 
       'trigger_table' => 'civicrm_contribution',
 		),
@@ -179,7 +179,7 @@ $custom = array(
 			'text_length' => '32',
       'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1 WHERE 
       t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND  
-      t1.contribution_type_id IN (%membership_contribution_type_ids) ORDER BY 
+      t1.financial_type_id IN (%membership_financial_type_ids) ORDER BY 
       receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
 		),
@@ -196,7 +196,7 @@ $custom = array(
 			'text_length' => '32',
       'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1 WHERE 
       t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
-      t1.contribution_type_id IN (%membership_contribution_type_ids) ORDER BY 
+      t1.financial_type_id IN (%membership_financial_type_ids) ORDER BY 
       receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
 		),

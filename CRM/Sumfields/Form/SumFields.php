@@ -18,14 +18,14 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       array_flip($field_options)
     );
     $this->addCheckBox(
-      'contribution_type_ids', 
-      ts('Contribution Types'),
-      array_flip(sumfields_get_all_contribution_types())
+      'financial_type_ids', 
+      ts('Financial Types'),
+      array_flip(sumfields_get_all_financial_types())
     );
     $this->addCheckBox(
-      'membership_contribution_type_ids', 
-      ts('Membership Contribution Types'),
-      array_flip(sumfields_get_all_contribution_types())
+      'membership_financial_type_ids', 
+      ts('Membership Financial Types'),
+      array_flip(sumfields_get_all_financial_types())
     );
     $this->addCheckBox(
       'event_type_ids', 
@@ -56,8 +56,8 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
   function setDefaultValues() {
     $defaults = parent::setDefaultValues();
     $defaults['active_fields'] = $this->array_to_options(sumfields_get_setting('active_fields', array()));
-    $defaults['contribution_type_ids'] = $this->array_to_options(sumfields_get_setting('contribution_type_ids', array()));
-    $defaults['membership_contribution_type_ids'] = $this->array_to_options(sumfields_get_setting('membership_contribution_type_ids', array()));
+    $defaults['financial_type_ids'] = $this->array_to_options(sumfields_get_setting('financial_type_ids', array()));
+    $defaults['membership_financial_type_ids'] = $this->array_to_options(sumfields_get_setting('membership_financial_type_ids', array()));
     $defaults['event_type_ids'] = $this->array_to_options(sumfields_get_setting('event_type_ids', array()));
     $defaults['participant_status_ids'] = $this->array_to_options(sumfields_get_setting('participant_status_ids', array()));
     return $defaults;
@@ -79,11 +79,11 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         sumfields_save_setting('active_fields', $new_active_fields);
       }
     }
-    if(array_key_exists('contribution_type_ids', $values)) {
-      sumfields_save_setting('contribution_type_ids', $this->options_to_array($values['contribution_type_ids']));
+    if(array_key_exists('financial_type_ids', $values)) {
+      sumfields_save_setting('financial_type_ids', $this->options_to_array($values['financial_type_ids']));
     }
-    if(array_key_exists('membership_contribution_type_ids', $values)) {
-      sumfields_save_setting('membership_contribution_type_ids', $this->options_to_array($values['membership_contribution_type_ids']));
+    if(array_key_exists('membership_financial_type_ids', $values)) {
+      sumfields_save_setting('membership_financial_type_ids', $this->options_to_array($values['membership_financial_type_ids']));
     }
     if(array_key_exists('event_type_ids', $values)) {
       sumfields_save_setting('event_type_ids', $this->options_to_array($values['event_type_ids']));

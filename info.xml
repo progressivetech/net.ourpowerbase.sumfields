@@ -12,7 +12,7 @@
   <version>0.1</version>
   <develStage>beta</develStage>
   <compatibility>
-    <ver>4.2</ver>
+    <ver>4.3</ver>
   </compatibility>
   <comments>This extension adds custom data fields and triggers to your database. Disabling this extension will cause the custom data fields to be deleted and triggers removed.</comments>
   <civix>

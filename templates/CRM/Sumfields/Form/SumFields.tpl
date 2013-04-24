@@ -9,18 +9,18 @@
     <td>{$form.active_fields.html}</td>
   </tr> 
   <tr>
-    <td colspan="2" class="description">Please indicate the contribution types you would like included when calculating contribution related summary fields.</td>
+    <td colspan="2" class="description">Please indicate the financial types you would like included when calculating contribution related summary fields.</td>
   </tr>
-  <tr class="crm-sumfields-form-block-sumfields_contribution_type_ids">
-    <td class="label">{$form.contribution_type_ids.label}</td>
-    <td>{$form.contribution_type_ids.html}</td>
+  <tr class="crm-sumfields-form-block-sumfields_financial_type_ids">
+    <td class="label">{$form.financial_type_ids.label}</td>
+    <td>{$form.financial_type_ids.html}</td>
   </tr> 
   <tr>
-    <td colspan="2" class="description">Please indicate the contribution types you would like included when calculating membership payment related summary fields.</td>
+    <td colspan="2" class="description">Please indicate the financial types you would like included when calculating membership payment related summary fields.</td>
   </tr>
-  <tr class="crm-sumfields-form-block-sumfields_membership_contribution_type_ids">
-    <td class="label">{$form.membership_contribution_type_ids.label}</td>
-    <td>{$form.membership_contribution_type_ids.html}</td>
+  <tr class="crm-sumfields-form-block-sumfields_membership_financial_type_ids">
+    <td class="label">{$form.membership_financial_type_ids.label}</td>
+    <td>{$form.membership_financial_type_ids.html}</td>
   </tr> 
   <tr>
     <td colspan="2" class="description">Please indicate the event types you would like included when calculating event-related summary fields.</td>
