@@ -9,8 +9,8 @@
     <email>jamie@progressivetech.org</email>
   </maintainer>
   <releaseDate>2013-01-25</releaseDate>
-  <version>0.1</version>
-  <develStage>beta</develStage>
+  <version>1.0.1</version>
+  <develStage>production</develStage>
   <compatibility>
     <ver>4.3</ver>
   </compatibility>
