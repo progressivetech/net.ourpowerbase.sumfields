@@ -662,3 +662,117 @@ function sumfields_initialize_custom_data() {
 function sumfields_deinitialize_custom_data() {
   sumfields_delete_custom_fields_and_table();
 }
+
+/**
+ * Find incorrect total lifetime contributions.
+ *
+ * Diangostic tool for collecting records with an incorrect
+ * total lifetime contribution value in the summary field.
+ *
+ */
+function sumfields_find_incorrect_total_lifetime_contribution_records() {
+  $ret = array();
+
+  // We're only interested in one field for this test.
+  $base_column_name = 'contribution_total_lifetime';
+
+  // We need to ensure this field is enabled on this site.
+  $active_fields = sumfields_get_setting('active_fields', array());
+  if(!in_array($base_column_name, $active_fields)) {
+    drush_log(dt("The total lifetime contribution is not active, this test will not work."), 'error');
+    return;
+  }
+
+  // Get the name of the actual summary fields table.
+  $table_name = _sumfields_get_custom_table_name();
+
+  // Get the actual names of the field in question
+  $custom_fields = _sumfields_get_custom_field_parameters();
+  $column_name = $custom_fields[$base_column_name]['column_name'];
+
+  // Load the field and group definitions because we need the trigger
+  // clause that is stored here.
+  $custom = sumfields_get_custom_field_definitions();
+
+  // Get the base sql
+  $trigger_sql = $custom['fields'][$base_column_name]['trigger_sql'];
+  if(empty($table_name) || empty($column_name) || empty($trigger_sql)) {
+    // Perhaps we are not properly enabled?
+    return FALSE;
+  }
+  // Rewrite the sql with the appropriate variables filled in.
+  $trigger_sql = sumfields_sql_rewrite($trigger_sql);
+
+  // Iterate over all contacts with a contribution
+  $contact_sql = "SELECT DISTINCT(contact_id) FROM civicrm_contribution WHERE ".
+    "is_test = 0";
+  $dao = CRM_Core_DAO::executeQuery($contact_sql);
+
+  $trigger_dao = new CRM_Core_DAO();
+  while($dao->fetch()) {
+    $sql = str_replace("NEW.contact_id", $dao->contact_id, $trigger_sql);
+    $trigger_dao->query($sql);
+    $trigger_result = $trigger_dao->getDatabaseResult();
+    $row = $trigger_result->fetchRow();
+    $trigger_total = empty($row[0]) ? '0.00' : $row[0];
+
+    $table_sql = "SELECT `$column_name` AS table_total FROM `$table_name` WHERE entity_id = %0";
+    $table_dao = CRM_Core_DAO::executeQuery($table_sql, array(0 => array($dao->contact_id, 'Integer')));
+    $table_dao->fetch();
+    $table_total = empty($table_dao->table_total) ? '0.00' : $table_dao->table_total;
+
+    if($table_total != $trigger_total) {
+      $ret[$dao->contact_id] = "Contact id: $dao->contact_id, Table total: " . $table_total . ", trigger total: $trigger_total";
+    }
+  }
+  return $ret;
+}
+
+/**
+ * Print incorrect total lifetime contributions.
+ *
+ * Diangostic tool for testing to see whether there are any records with an
+ * incorrect * total lifetime contribution value in the summary field. It appears
+ * as though the trigger * does not always run. This tools helps identify which
+ * records are affected. It can be run via * drush's php-eval sub-command, e.g.
+ *
+ *
+ * drush php-eval "_civicrm_init(); sumfields_print_inconsistent_summaries()'
+ *
+ */
+function sumfields_print_inconsistent_summaries() {
+  $ids = sumfields_find_incorrect_total_lifetime_contribution_records();
+  if($ids === FALSE) {
+    drush_log("Failed to test for inconsistent data.", 'error');
+    return;
+  }
+  while(list($id, $data) = each($ids)) {
+    drush_log($data, 'ok');
+  }
+}
+
+/**
+ * Fix incorrect contributions summary fields.
+ *
+ * Find all summary fields with incorrect amounts and fix them. You may need to add
+ * this as a cron job if you find that you are regularly getting inconsistent summaries.
+ *
+ */
+function sumfields_fix_inconsistent_summaries() {
+  // Get the update trigger statement - if we find rows that are out of sync we will
+  // trigger a fresh update.
+  $sql = "SELECT ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE TRIGGER_NAME = 'civicrm_contribution_after_update'";
+
+  $dao = CRM_Core_DAO::executeQuery($sql);
+  $dao->fetch();
+
+  $global_trigger = $dao->ACTION_STATEMENT;
+
+  $ids = sumfields_find_incorrect_total_lifetime_contribution_records();
+  while(list($id, $data) = each($ids)) {
+    $find = array('BEGIN', 'END', 'NEW.contact_id');
+    $replace = array('', '', $id);
+    $update_sql = str_replace($find, $replace, $global_trigger);
+    CRM_Core_DAO::executeQuery($update_sql);
+  }
+}
