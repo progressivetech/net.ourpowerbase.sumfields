@@ -10,7 +10,7 @@
   </maintainer>
   <releaseDate>2013-01-25</releaseDate>
   <version>1.0.1</version>
-  <develStage>production</develStage>
+  <develStage>stable</develStage>
   <compatibility>
     <ver>4.3</ver>
   </compatibility>
@@ -18,4 +18,7 @@
   <civix>
     <namespace>CRM/Sumfields</namespace>
   </civix>
+  <urls>
+    <url description="Documentation">http://git.progressivetech.org/?p=extensions/net.ourpowerbase.sumfields.git;a=blob;f=README</url>
+  </urls>
 </extension>
