@@ -94,20 +94,10 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $session = CRM_Core_Session::singleton();
 
     if($active_fields_have_changed) {
-      // Now we have to re-initialize the custom table and fields...
-      $session->setStatus("Active fields have changed, re-building the table. WARNING: fields assigned to profiles will need to be re-assigned.");
-      if(FALSE === sumfields_deinitialize_custom_data()) {
-        $session->setStatus("Error deninitializing.");
-        return;
-      }
-      if(FALSE === sumfields_initialize_custom_data()) {
-        $session->setStatus("Error initializing.");
-        return;
-      }
+      // Now we have add/remove fields 
+      sumfields_alter_table($current_active_fields, $new_active_fields);
     }
-    else {
-      sumfields_generate_data_based_on_current_data();
-    }
+    sumfields_generate_data_based_on_current_data();
     CRM_Core_DAO::triggerRebuild();
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
   }

@@ -498,7 +498,6 @@ function sumfields_delete_custom_fields_and_table() {
 
     $params = array(
       'id' => $field['id'],
-      'params' => 3,
       'version' => 3
     );
     $result = civicrm_api('CustomField', 'delete', $params);
@@ -775,4 +774,64 @@ function sumfields_fix_inconsistent_summaries() {
     $update_sql = str_replace($find, $replace, $global_trigger);
     CRM_Core_DAO::executeQuery($update_sql);
   }
+}
+
+/**
+ * Updates the custom table, ensuring all required fields are present
+ * and no longer needed fields are removed
+ *
+ * @old_fields: the currently active fields
+ * @new_fields: the desired fields 
+ *
+ **/
+function sumfields_alter_table($old_fields, $new_fields) {
+  $session = CRM_Core_Session::singleton();
+  $custom_field_parameters = sumfields_get_setting('custom_field_parameters', NULL);
+
+  // Delete fields no longer needed
+  reset($old_fields);
+  while(list(,$field) = each($old_fields)) {
+    if(!in_array($field, $new_fields)) {
+      $params['id'] = $custom_field_parameters[$field]['id'];
+      try {
+        civicrm_api3('CustomField', 'delete', $params);
+      }
+      catch (CiviCRM_API3_Exception $e) {
+        $session->setStatus("Error deleting custom field $field: " . $e->getMessage());
+        continue;
+      }
+      $session->setStatus("Deleted custom field $field");
+      unset($custom_field_parameters[$field]);
+    }
+  }
+
+  // Add new fields
+  $custom_table_parameters = sumfields_get_setting('custom_table_parameters', NULL);
+  if(is_null($custom_table_parameters)) {
+    $session->setStatus("Failed to get the custom group parameters. Can't add new fields.");
+    return;
+  }
+  $custom = sumfields_get_custom_field_definitions();
+  $group_id = $custom_table_parameters['id'];
+  reset($new_fields);
+  while(list(,$field) = each($new_fields)) {
+    if(!in_array($field, $old_fields)) {
+      $params = $custom['fields'][$field];
+      $params['custom_group_id'] = $group_id;
+      try {
+        $result = civicrm_api3('CustomField', 'create', $params);
+      }
+      catch (CiviCRM_API3_Exception $e) {
+        $session->setStatus("Error adding custom field $field: " . $e->getMessage());
+        continue;
+      }
+      $session->setStatus("Added custom field $field");
+      $value = array_pop($result['values']);
+      $custom_field_parameters[$field] = array(
+        'id' => $value['id'], 
+        'column_name' => $value['column_name']
+      );
+    }
+  }
+  sumfields_save_setting('custom_field_parameters', $custom_field_parameters);
 }
