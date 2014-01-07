@@ -24,41 +24,18 @@ function sumfields_civicrm_xmlMenu(&$files) {
  * @param $params array
  */
 function sumfields_civicrm_navigationMenu(&$params) {
-  $key = max(array_keys($params)) + 1;
-  // Find the Administer -> Customize Data and Screens
-  // part of the navigation menu and make our item
-  // and child of it.
-  while(list($k,$v) = each($params)) {
-    $attributes = CRM_Utils_Array::value('attributes', $v);
-    $child = CRM_Utils_Array::value('child', $v);
-    if($child && $attributes) {
-      $name = CRM_Utils_Array::value('name', $v['attributes']);
-      if($name == 'Administer') {
-        while(list($k1, $v1) = each($v['child'])) {
-          $attributes = CRM_Utils_Array::value('attributes', $v1);
-          $child = CRM_Utils_Array::value('child', $v1);
-          if($child && $attributes) {
-            $name = CRM_Utils_Array::value('name', $v1['attributes']);
-            if($name == 'Customize Data and Screens') {
-              $params[$k]['child'][$k1]['child'][] = array(
-                'attributes' => array(
-                  'label' => 'Summary Fields',
-                  'name' => 'Summary Fields',
-                  'url' => 'civicrm/admin/setting/sumfields',
-                  'permission' => 'administer CiviCRM',
-                  'operator' => '',
-                  'separator' => '',
-                  'parentID' => $k1,
-                  'navID' => $key,
-                  'active' => 1),
-                'child' => NULL,
-              );
-            }
-          }
-        }
-      }
-    }
-  }
+  $path = "Administer/Customize Data and Screens";
+  $item = array(
+    'label' => 'Summary Fields',
+    'name' => 'Summary Fields',
+    'url' => 'civicrm/admin/setting/sumfields',
+    'permission' => 'administer CiviCRM',
+    'operator' => '',
+    'separator' => '',
+    'active' => 1,
+  );
+
+  $ret = _sumfields_civix_insert_navigation_menu($params, $path, $item);
 }
 
 /**
