@@ -31,7 +31,7 @@ function _sumfields_civix_civicrm_config(&$config = NULL) {
  * @param $files array(string)
  */
 function _sumfields_civix_civicrm_xmlMenu(&$files) {
-  foreach (glob(__DIR__ . '/xml/Menu/*.xml') as $file) {
+  foreach (_sumfields_civix_glob(__DIR__ . '/xml/Menu/*.xml') as $file) {
     $files[] = $file;
   }
 }
@@ -96,26 +96,33 @@ function _sumfields_civix_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
 }
 
 function _sumfields_civix_upgrader() {
-  if (!file_exists(__DIR__.'/CRM/Fcf/Upgrader.php')) {
+  if (!file_exists(__DIR__.'/CRM/Sumfields/Upgrader.php')) {
     return NULL;
   } else {
-    return CRM_Fcf_Upgrader_Base::instance();
+    return CRM_Sumfields_Upgrader_Base::instance();
   }
 }
 
 /**
  * Search directory tree for files which match a glob pattern
  *
+ * Note: Dot-directories (like "..", ".git", or ".svn") will be ignored.
+ * Note: In Civi 4.3+, delegate to CRM_Utils_File::findFiles()
+ *
  * @param $dir string, base dir
  * @param $pattern string, glob pattern, eg "*.txt"
  * @return array(string)
  */
 function _sumfields_civix_find_files($dir, $pattern) {
+  if (is_callable(array('CRM_Utils_File', 'findFiles'))) {
+    return CRM_Utils_File::findFiles($dir, $pattern);
+  }
+
   $todos = array($dir);
   $result = array();
   while (!empty($todos)) {
     $subdir = array_shift($todos);
-    foreach (glob("$subdir/$pattern") as $match) {
+    foreach (_sumfields_civix_glob("$subdir/$pattern") as $match) {
       if (!is_dir($match)) {
         $result[] = $match;
       }
@@ -123,7 +130,7 @@ function _sumfields_civix_find_files($dir, $pattern) {
     if ($dh = opendir($subdir)) {
       while (FALSE !== ($entry = readdir($dh))) {
         $path = $subdir . DIRECTORY_SEPARATOR . $entry;
-        if ($entry == '.' || $entry == '..') {
+        if ($entry{0} == '.') {
         } elseif (is_dir($path)) {
           $todos[] = $path;
         }
@@ -149,6 +156,50 @@ function _sumfields_civix_civicrm_managed(&$entities) {
       $entities[] = $e;
     }
   }
+}
+
+/**
+ * (Delegated) Implementation of hook_civicrm_caseTypes
+ *
+ * Find any and return any files matching "xml/case/*.xml"
+ *
+ * Note: This hook only runs in CiviCRM 4.4+.
+ */
+function _sumfields_civix_civicrm_caseTypes(&$caseTypes) {
+  if (!is_dir(__DIR__ . '/xml/case')) {
+    return;
+  }
+
+  foreach (_sumfields_civix_glob(__DIR__ . '/xml/case/*.xml') as $file) {
+    $name = preg_replace('/\.xml$/', '', basename($file));
+    if ($name != CRM_Case_XMLProcessor::mungeCaseType($name)) {
+      $errorMessage = sprintf("Case-type file name is malformed (%s vs %s)", $name, CRM_Case_XMLProcessor::mungeCaseType($name));
+      CRM_Core_Error::fatal($errorMessage);
+      // throw new CRM_Core_Exception($errorMessage);
+    }
+    $caseTypes[$name] = array(
+      'module' => 'net.ourpowerbase.sumfields',
+      'name' => $name,
+      'file' => $file,
+    );
+  }
+}
+
+/**
+ * Glob wrapper which is guaranteed to return an array.
+ *
+ * The documentation for glob() says, "On some systems it is impossible to
+ * distinguish between empty match and an error." Anecdotally, the return
+ * result for an empty match is sometimes array() and sometimes FALSE.
+ * This wrapper provides consistency.
+ *
+ * @see http://php.net/glob
+ * @param string $pattern
+ * @return array, possibly empty
+ */
+function _sumfields_civix_glob($pattern) {
+  $result = glob($pattern);
+  return is_array($result) ? $result : array();
 }
 
 /**
@@ -183,7 +234,7 @@ function _sumfields_civix_insert_navigation_menu(&$menu, $path, $item, $parentId
     foreach ($menu as $key => &$entry) {
       if ($entry['attributes']['name'] == $first) {
         if (!$entry['child']) $entry['child'] = array();
-        $found = _assessment_civix_insert_navigation_menu($entry['child'], implode('/', $path), $item, $key);
+        $found = _sumfields_civix_insert_navigation_menu($entry['child'], implode('/', $path), $item, $key);
       }
     }
     return $found;
