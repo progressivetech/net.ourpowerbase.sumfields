@@ -132,6 +132,8 @@ function sumfields_get_fiscal_dates() {
     '%current_fiscal_year_end' => NULL,
     '%last_fiscal_year_begin' => NULL,
     '%last_fiscal_year_end' => NULL,
+    '%year_before_last_fiscal_year_begin' => NULL,
+    '%year_before_last_fiscal_year_end' => NULL,
   );
   $config = CRM_Core_Config::singleton();
 
@@ -150,12 +152,16 @@ function sumfields_get_fiscal_dates() {
     $current_fiscal_year_end_ts = strtotime('-1 day', $this_calendar_year_fiscal_year_begin_ts);
     $last_fiscal_year_begin_ts = strtotime('-2 year', $this_calendar_year_fiscal_year_begin_ts);
     $last_fiscal_year_end_ts = strtotime('-1 year -1 day', $this_calendar_year_fiscal_year_begin_ts);
+    $year_before_last_fiscal_year_begin_ts = strtotime('-3 year', $this_calendar_year_fiscal_year_begin_ts);
+    $year_before_last_fiscal_year_end_ts = strtotime('-2 year -1 day', $this_calendar_year_fiscal_year_begin_ts);
   }
   else {
     $current_fiscal_year_begin_ts = $this_calendar_year_fiscal_year_begin_ts;
     $current_fiscal_year_end_ts = strtotime('+1 year -1 day', $this_calendar_year_fiscal_year_begin_ts);
     $last_fiscal_year_begin_ts = strtotime('-1 year', $this_calendar_year_fiscal_year_begin_ts);
     $last_fiscal_year_end_ts = strtotime('-1 day', $this_calendar_year_fiscal_year_begin_ts);
+    $year_before_last_fiscal_year_begin_ts = strtotime('-2 year', $this_calendar_year_fiscal_year_begin_ts);
+    $year_before_last_fiscal_year_end_ts = strtotime('-2 day', $this_calendar_year_fiscal_year_begin_ts);
   }
   return array(
     '%current_fiscal_year_begin' => date('Y-m-d', $current_fiscal_year_begin_ts),
