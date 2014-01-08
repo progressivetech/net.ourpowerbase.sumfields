@@ -140,24 +140,6 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
 		),
-    'soft_contribution_total_year_before_last_year' => array(
-			'label' => 'Total Soft Contributions Year Before Last',
-			'data_type' => 'Money',
-			'html_type' => 'Text',
-			'is_required' => '0',
-			'is_searchable' => '1',
-			'is_search_range' => '1',
-			'weight' => '20',
-			'is_active' => '1',
-			'is_view' => '1',
-			'text_length' => '32',
-      'trigger_sql' => '(SELECT COALESCE(SUM(t2.amount),0) AS summary_value FROM civicrm_contribution t1 
-      JOIN civicrm_contribution_soft t2 ON t1.id = t2.contribution_id 
-      WHERE receive_date BETWEEN "%year_before_last_fiscal_year_begin"
-      AND "%year_before_last_fiscal_year_end" AND t2.contact_id = NEW.contact_id AND
-      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution_soft',
-		),
 		'contribution_amount_last' => array(
 			'label' => 'Amount of last contribution',
 			'data_type' => 'Money',
