@@ -168,6 +168,8 @@ function sumfields_get_fiscal_dates() {
     '%current_fiscal_year_end' => date('Y-m-d', $current_fiscal_year_end_ts),
     '%last_fiscal_year_begin' => date('Y-m-d', $last_fiscal_year_begin_ts),
     '%last_fiscal_year_end' => date('Y-m-d', $last_fiscal_year_end_ts),
+    '%year_before_last_fiscal_year_begin' => date('Y-m-d', $year_before_last_fiscal_year_begin_ts),
+    '%year_before_last_fiscal_year_end' => date('Y-m-d', $year_before_last_fiscal_year_end_ts),
   );
 }
 
