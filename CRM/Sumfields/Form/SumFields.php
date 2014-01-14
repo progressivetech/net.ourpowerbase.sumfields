@@ -66,10 +66,8 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
   function postProcess() {
     $values = $this->controller->exportValues($this->_name);
 
-    // Keep track of whether or not active_fields have changed. If they have changed, we have to
-    // re-create the table below. If they haven't change, don't re-create the table. We want to 
-    // avoid re-creating the table because it causes custom fields assigned to profiles to be 
-    // deleted.
+    // Keep track of whether or not active_fields have changed so we know whether or not
+    // to alter the table.
     $active_fields_have_changed = FALSE;
     if(array_key_exists('active_fields', $values)) {
       $current_active_fields = sumfields_get_setting('active_fields');
@@ -98,6 +96,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       sumfields_alter_table($current_active_fields, $new_active_fields);
     }
     sumfields_generate_data_based_on_current_data();
+    $session->setStatus(ts("All summary fields have been updated."));
     CRM_Core_DAO::triggerRebuild();
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
   }
