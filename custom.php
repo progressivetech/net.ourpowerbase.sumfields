@@ -44,7 +44,7 @@ $custom = array(
 			'is_view' => '1',
 			'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
-      FROM civicrm_contribution t1 WHERE receive_date BETWEEN "%current_fiscal_year_begin"
+      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin"
       AND "%current_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
@@ -63,7 +63,7 @@ $custom = array(
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
       t1.financial_type_id = t2.id AND is_deductible = 1
-      WHERE receive_date BETWEEN "%current_fiscal_year_begin" AND
+      WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin" AND
       "%current_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
@@ -80,7 +80,7 @@ $custom = array(
 			'is_view' => '1',
 			'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
-      FROM civicrm_contribution t1 WHERE receive_date BETWEEN "%last_fiscal_year_begin"
+      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin"
       AND "%last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
@@ -99,7 +99,7 @@ $custom = array(
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
       t1.financial_type_id = t2.id AND is_deductible = 1
-      WHERE receive_date BETWEEN "%last_fiscal_year_begin" AND
+      WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin" AND
       "%last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
@@ -116,7 +116,7 @@ $custom = array(
 			'is_view' => '1',
 			'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
-      FROM civicrm_contribution t1 WHERE receive_date BETWEEN "%year_before_last_fiscal_year_begin"
+      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin"
       AND "%year_before_last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
@@ -135,7 +135,7 @@ $custom = array(
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
       t1.financial_type_id = t2.id AND is_deductible = 1
-      WHERE receive_date BETWEEN "%year_before_last_fiscal_year_begin" AND
+      WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin" AND
       "%year_before_last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
