@@ -161,7 +161,7 @@ function sumfields_get_fiscal_dates() {
     $last_fiscal_year_begin_ts = strtotime('-1 year', $this_calendar_year_fiscal_year_begin_ts);
     $last_fiscal_year_end_ts = strtotime('-1 day', $this_calendar_year_fiscal_year_begin_ts);
     $year_before_last_fiscal_year_begin_ts = strtotime('-2 year', $this_calendar_year_fiscal_year_begin_ts);
-    $year_before_last_fiscal_year_end_ts = strtotime('-2 day', $this_calendar_year_fiscal_year_begin_ts);
+    $year_before_last_fiscal_year_end_ts = strtotime('-1 year -1 day', $this_calendar_year_fiscal_year_begin_ts);
   }
   return array(
     '%current_fiscal_year_begin' => date('Y-m-d', $current_fiscal_year_begin_ts),
