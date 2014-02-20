@@ -26,7 +26,7 @@ function sumfields_civicrm_xmlMenu(&$files) {
 function sumfields_civicrm_navigationMenu(&$params) {
   $path = "Administer/Customize Data and Screens";
   $item = array(
-    'label' => 'Summary Fields',
+    'label' => ts('Summary Fields'),
     'name' => 'Summary Fields',
     'url' => 'civicrm/admin/setting/sumfields',
     'permission' => 'administer CiviCRM',
@@ -432,7 +432,7 @@ function sumfields_create_custom_fields_and_table() {
     $params['custom_group_id'] = $custom_group_id;
     $result = civicrm_api('CustomField', 'create', $params);
     if($result['is_error'] == 1) {
-      $session->setStatus("Error creating custom field $name");
+      $session->setStatus(sprintf(ts("Error creating custom field '%s'"), $name));
       $session->setStatus(print_r($result, TRUE));
       continue;
     }
@@ -488,7 +488,7 @@ function sumfields_delete_custom_fields_and_table() {
     $result = civicrm_api('CustomField', 'delete', $params);
     if($result['is_error'] == 1) {
       $column_name = $field['column_name'];
-      $session->setStatus("Error deleting $column_name.");
+      $session->setStatus(sprintf(ts("Error deleting '%s'"), $column_name));
       $session->setStatus(print_r($result,TRUE));
     }
   }
@@ -498,7 +498,7 @@ function sumfields_delete_custom_fields_and_table() {
   $result = civicrm_api('CustomGroup', 'delete', $params);
   if($result['is_error'] == 1) {
     $table_name = $custom_table_parameters['table_name'];
-    $session->setStatus("Error deleting $table_name.");
+    $session->setStatus(sprintf(ts("Error deleting '%s'"), $table_name));
   }
 }
 
@@ -782,10 +782,10 @@ function sumfields_alter_table($old_fields, $new_fields) {
         civicrm_api3('CustomField', 'delete', $params);
       }
       catch (CiviCRM_API3_Exception $e) {
-        $session->setStatus("Error deleting custom field $field: " . $e->getMessage());
+        $session->setStatus(sprintf(ts("Error deleting custom field '%s': %s"), $field, $e->getMessage()));
         continue;
       }
-      $session->setStatus("Deleted custom field $field");
+      $session->setStatus(sprintf(ts("Deleted custom field '%s'"), $field));
       unset($custom_field_parameters[$field]);
     }
   }
@@ -793,7 +793,7 @@ function sumfields_alter_table($old_fields, $new_fields) {
   // Add new fields
   $custom_table_parameters = sumfields_get_setting('custom_table_parameters', NULL);
   if(is_null($custom_table_parameters)) {
-    $session->setStatus("Failed to get the custom group parameters. Can't add new fields.");
+    $session->setStatus(ts("Failed to get the custom group parameters. Can't add new fields."));
     return;
   }
   $custom = sumfields_get_custom_field_definitions();
@@ -807,10 +807,10 @@ function sumfields_alter_table($old_fields, $new_fields) {
         $result = civicrm_api3('CustomField', 'create', $params);
       }
       catch (CiviCRM_API3_Exception $e) {
-        $session->setStatus("Error adding custom field $field: " . $e->getMessage());
+        $session->setStatus(sprintf(ts("Error adding custom field '%s': %s"), $field, $e->getMessage()));
         continue;
       }
-      $session->setStatus("Added custom field $field");
+      $session->setStatus(sprintf(ts("Added custom field '%s'"), $field));
       $value = array_pop($result['values']);
       $custom_field_parameters[$field] = array(
         'id' => $value['id'], 

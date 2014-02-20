@@ -3,7 +3,7 @@ $custom = array(
 	'groups' => array(
 		'summary_fields' => array(
 			'name' => 'Summary_Fields',
-			'title' => 'Summary Fields',
+			'title' => ts('Summary Fields'),
 			'extends' => 'Contact',
 			'style' => 'Tab',
 			'collapse_display' => '0',
@@ -17,7 +17,7 @@ $custom = array(
   ),
 	'fields' => array(
 		'contribution_total_lifetime' => array(
-			'label' => 'Total Lifetime Contributions',
+			'label' => ts('Total Lifetime Contributions'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -33,7 +33,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_total_this_year' => array(
-			'label' => 'Total Contributions this Year',
+			'label' => ts('Total Contributions this Year'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -50,7 +50,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_total_deductible_this_year' => array(
-			'label' => 'Total Deductible Contributions this Year',
+			'label' => ts('Total Deductible Contributions this Year'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -69,7 +69,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_total_last_year' => array(
-			'label' => 'Total Contributions last Year',
+			'label' => ts('Total Contributions last Year'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -86,7 +86,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_total_deductible_last_year' => array(
-			'label' => 'Total Deductible Contributions last Year',
+			'label' => ts('Total Deductible Contributions last Year'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -105,7 +105,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_total_year_before_last' => array(
-			'label' => 'Total Contributions Year Before Last',
+			'label' => ts('Total Contributions Year Before Last'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -122,7 +122,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_total_deductible_year_before_last_year' => array(
-			'label' => 'Total Deductible Contributions Year Before Last',
+			'label' => ts('Total Deductible Contributions Year Before Last'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -141,7 +141,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_amount_last' => array(
-			'label' => 'Amount of last contribution',
+			'label' => ts('Amount of last contribution'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -158,7 +158,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_date_last' => array(
-			'label' => 'Date of Last Contribution',
+			'label' => ts('Date of Last Contribution'),
 			'data_type' => 'Date',
 			'html_type' => 'Select Date',
 			'is_required' => '0',
@@ -174,7 +174,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_date_first' => array(
-			'label' => 'Date of First Contribution',
+			'label' => ts('Date of First Contribution'),
 			'data_type' => 'Date',
 			'html_type' => 'Select Date',
 			'is_required' => '0',
@@ -191,7 +191,7 @@ $custom = array(
 
 		),
 		'contribution_largest' => array(
-			'label' => 'Largest Contribution',
+			'label' => ts('Largest Contribution'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -207,7 +207,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
 		'contribution_total_number' => array(
-			'label' => 'Count of Contributions',
+			'label' => ts('Count of Contributions'),
 			'data_type' => 'Int',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -223,7 +223,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_average_annual_amount' => array(
-			'label' => 'Average Annual (Calendar Year) Contribution',
+			'label' => ts('Average Annual (Calendar Year) Contribution'),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -241,7 +241,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_date_last_membership_payment' => array(
-			'label' => 'Date of Last Membership Payment',
+			'label' => ts('Date of Last Membership Payment'),
 			'data_type' => 'Date',
 			'html_type' => 'Select Date',
 			'is_required' => '0',
@@ -258,7 +258,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'contribution_amount_last_membership_payment' => array(
-			'label' => 'Amount of Last Membership Payment',
+			'label' => ts('Amount of Last Membership Payment'),
 			'data_type' => 'Money',
 			'html_type' => 'text',
 			'is_required' => '0',
@@ -275,7 +275,7 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
 		),
     'event_last_attended_name' => array(
-			'label' => 'Name of the last attended event',
+			'label' => ts('Name of the last attended event'),
 			'data_type' => 'String',
 			'html_type' => 'text',
 			'is_required' => '0',
@@ -291,7 +291,7 @@ $custom = array(
       'trigger_table' => 'civicrm_participant',
 		),
     'event_last_attended_date' => array(
-			'label' => 'Date of the last attended event',
+			'label' => ts('Date of the last attended event'),
 			'data_type' => 'Date',
 			'html_type' => 'Select Date',
 			'is_required' => '0',
