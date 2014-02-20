@@ -1,0 +1,170 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Summary Fields\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Bjoern Endres <Bjoern.Endres@didonai.com>\n"
+"Language-Team: Systopia <endres@systopia.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: custom.php sumfields.php
+msgid "Summary Fields"
+msgstr "Akkumulierte Daten"
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Active Fields"
+msgstr "Aktivierte Datenfelder"
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Financial Types"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Membership Financial Types"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Event Types"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Participant Status"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Save"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Cancel"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "All summary fields have been updated."
+msgstr "Alle akkumulierten Datenfelder wurden aktualisiert."
+
+#: custom.php
+msgid "Total Lifetime Contributions"
+msgstr "Gesamtzuwendung"
+
+#: custom.php
+msgid "Total Contributions this Year"
+msgstr "Gesamtzuwendung dieses Jahr"
+
+#: custom.php
+msgid "Total Deductible Contributions this Year"
+msgstr "Absetzbare Gesamtzuwendung dieses Jahr"
+
+#: custom.php
+msgid "Total Contributions last Year"
+msgstr "Gesamtzuwendung letztes Jahr"
+
+#: custom.php
+msgid "Total Deductible Contributions last Year"
+msgstr "Absetzbare Gesamtzuwendung letztes Jahr"
+
+#: custom.php
+msgid "Total Contributions Year Before Last"
+msgstr "Gesamtzuwendung vorletztes Jahr"
+
+#: custom.php
+msgid "Total Deductible Contributions Year Before Last"
+msgstr "Absetzbare Gesamtzuwendung vorletztes Jahr"
+
+#: custom.php
+msgid "Amount of last contribution"
+msgstr "Höhe der letzten Zuwendung"
+
+#: custom.php
+msgid "Date of Last Contribution"
+msgstr "Datum der letzten Zuwendung"
+
+#: custom.php
+msgid "Date of First Contribution"
+msgstr "Datum der ersten Zuwendung"
+
+#: custom.php
+msgid "Largest Contribution"
+msgstr "Größte Zuwendung"
+
+#: custom.php
+msgid "Count of Contributions"
+msgstr "Anzahl der Zuwendungen"
+
+#: custom.php
+msgid "Average Annual (Calendar Year) Contribution"
+msgstr "Jährliche Zuwendungshöhe (Durchschnitt)"
+
+#: custom.php
+msgid "Date of Last Membership Payment"
+msgstr "Datum des letzten Mitgliedschaftsbeitrags"
+
+#: custom.php
+msgid "Amount of Last Membership Payment"
+msgstr "Höhe des letzten Mitgliedschaftsbeitrags"
+
+#: custom.php
+msgid "Name of the last attended event"
+msgstr "Zuletzt besuchte Veranstaltung"
+
+#: custom.php
+msgid "Date of the last attended event"
+msgstr "Datum der zuletzt besuchten Veranstaltung"
+
+#: sumfields.php
+msgid "Deleted custom field '%s'"
+msgstr "Benutzerdefiniertes Feld '%s' wurde gelöscht."
+
+#: sumfields.php
+msgid "Failed to get the custom group parameters. Can't add new fields."
+msgstr "Kein Zugriff auf Benutzerdefinierte Gruppe. Neue Felder können nicht hinzugefügt werden."
+
+#: sumfields.php
+msgid "Added custom field '%s'"
+msgstr "Benutzerdefiniertes Feld '%s' wurde hinzugefügt."
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid "Please indicate which of the available summary fields you would like to enable."
+msgstr "Bitte markieren Sie die Datenfelder, die aktiviert werden sollen."
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid "Please indicate the financial types you would like included when calculating contribution related summary fields."
+msgstr "Bitte markieren Sie die Zuwendungsarten, die bei Datenakkumulationen zu Zuwendungen ausgewertet werden sollen."
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid "Please indicate the financial types you would like included when calculating membership payment related summary fields."
+msgstr "Bitte markieren Sie die Zuwendungsarten, die bei Datenakkumulationen zu Mitgliedschaften ausgewertet werden sollen."
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid "Please indicate the event types you would like included when calculating event-related summary fields."
+msgstr "Bitte markieren Sie die Veranstaltungstypen, die bei Datenakkumulationen zu Veranstaltungen ausgewertet werden sollen."
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid "Please indicate the participat status you would like included when calculating event-related summary fields."
+msgstr "Bitte markieren Sie die Teilnehmerstatus, die bei Datenakkumulationen zu Veranstaltungen ausgewertet werden sollen."
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid "Please be patient - when saving these settings, the contents of the summary table is re-created from scratch. This procedure may take a few minutes."
+msgstr "Achtung: Beim Speichern dieser Einstellungen wird die gesamte Akkumulation neu berechnet. Dies kann -je nach Datenbankgröße- bis zu mehreren Stunden dauern."
+
+#: sumfields.php
+msgid "Error creating custom field '%s'"
+msgstr "Fehler beim Erstellen des benutzerdefinierten Feldes '%s'"
+
+#: sumfields.php
+msgid "Error deleting '%s'"
+msgstr "Fehler beim Löschen von '%s'"
+
+#: sumfields.php
+msgid "Error deleting custom field '%s': %s"
+msgstr "Fehler beim Löschen des benutzerdefinierten Feldes '%s': '%s'"
+
+#: sumfields.php
+msgid "Error adding custom field '%s': %s"
+msgstr "Fehler beim Erstellen des benutzerdefinierten Feldes '%s': '%s'"
+

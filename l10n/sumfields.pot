@@ -1,0 +1,175 @@
+#: custom.php sumfields.php
+msgid "Summary Fields"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Active Fields"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Financial Types"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Membership Financial Types"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Event Types"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Participant Status"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Save"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "Cancel"
+msgstr ""
+
+#: CRM/Sumfields/Form/SumFields.php
+msgid "All summary fields have been updated."
+msgstr ""
+
+#: custom.php
+msgid "Total Lifetime Contributions"
+msgstr ""
+
+#: custom.php
+msgid "Total Contributions this Year"
+msgstr ""
+
+#: custom.php
+msgid "Total Deductible Contributions this Year"
+msgstr ""
+
+#: custom.php
+msgid "Total Contributions last Year"
+msgstr ""
+
+#: custom.php
+msgid "Total Deductible Contributions last Year"
+msgstr ""
+
+#: custom.php
+msgid "Total Contributions Year Before Last"
+msgstr ""
+
+#: custom.php
+msgid "Total Deductible Contributions Year Before Last"
+msgstr ""
+
+#: custom.php
+msgid "Amount of last contribution"
+msgstr ""
+
+#: custom.php
+msgid "Date of Last Contribution"
+msgstr ""
+
+#: custom.php
+msgid "Date of First Contribution"
+msgstr ""
+
+#: custom.php
+msgid "Largest Contribution"
+msgstr ""
+
+#: custom.php
+msgid "Count of Contributions"
+msgstr ""
+
+#: custom.php
+msgid "Average Annual (Calendar Year) Contribution"
+msgstr ""
+
+#: custom.php
+msgid "Date of Last Membership Payment"
+msgstr ""
+
+#: custom.php
+msgid "Amount of Last Membership Payment"
+msgstr ""
+
+#: custom.php
+msgid "Name of the last attended event"
+msgstr ""
+
+#: custom.php
+msgid "Date of the last attended event"
+msgstr ""
+
+#: sumfields.php
+msgid "Deleted custom field '%s'"
+msgstr ""
+
+#: sumfields.php
+msgid "Failed to get the custom group parameters. Can't add new fields."
+msgstr ""
+
+#: sumfields.php
+msgid "Added custom field '%s'"
+msgstr ""
+
+#: sumfields.php
+msgid "Error deleting custom field $field '%s'"
+msgstr ""
+
+#: sumfields.php
+msgid "Error adding custom field $field '%s'"
+msgstr ""
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid ""
+"Please indicate which of the available summary fields you would like to "
+"enable."
+msgstr ""
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid ""
+"Please indicate the financial types you would like included when calculating "
+"contribution related summary fields."
+msgstr ""
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid ""
+"Please indicate the financial types you would like included when calculating "
+"membership payment related summary fields."
+msgstr ""
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid ""
+"Please indicate the event types you would like included when calculating "
+"event-related summary fields."
+msgstr ""
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid ""
+"Please indicate the participat status you would like included when "
+"calculating event-related summary fields."
+msgstr ""
+
+#: templates/CRM/Sumfields/Form/SumFields.tpl
+msgid ""
+"Please be patient - when saving these settings, the contents of the summary "
+"table is re-created from scratch. This procedure may take a few minutes."
+msgstr ""
+
+#: sumfields.php
+msgid "Error creating custom field '%s'"
+msgstr ""
+
+#: sumfields.php
+msgid "Error deleting '%s'"
+msgstr ""
+
+#: sumfields.php
+msgid "Error deleting custom field '%s': %s"
+msgstr ""
+
+#: sumfields.php
+msgid "Error adding custom field '%s': %s"
+msgstr ""
