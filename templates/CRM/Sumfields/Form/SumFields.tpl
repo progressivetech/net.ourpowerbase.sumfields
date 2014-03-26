@@ -36,6 +36,10 @@
     <td class="label">{$form.participant_status_ids.label}</td>
     <td>{$form.participant_status_ids.html}</td>
   </tr>
+  <tr class="crm-sumfields-form-block-sumfields_participant_noshow_status_ids">
+    <td class="label">{$form.participant_noshow_status_ids.label}</td>
+    <td>{$form.participant_noshow_status_ids.html}</td>
+  </tr>
 
 </table>
  <div class="description">{ts}Please be patient - when saving these settings, the contents of the summary table is re-created from scratch. This procedure may take a few minutes.{/ts}</div>

@@ -110,6 +110,10 @@ function sumfields_sql_rewrite($sql) {
   $str_ids = implode(',', $ids);
   $sql = str_replace('%participant_status_ids', $str_ids, $sql);
 
+  $ids = sumfields_get_setting('participant_noshow_status_ids', array());
+  $str_ids = implode(',', $ids);
+  $sql = str_replace('%participant_noshow_status_ids', $str_ids, $sql);
+
   $ids = sumfields_get_setting('event_type_ids', array());
   $str_ids = implode(',', $ids);
   $sql = str_replace('%event_type_ids', $str_ids, $sql);
@@ -593,6 +597,15 @@ function sumfields_initialize_user_settings() {
   // When initializing, only use the attended.
   $initial_status_types = preg_grep('/Attended/', $values);
   sumfields_save_setting('participant_status_ids', array_keys($initial_status_types));
+
+  // Which participant status ids are used to calculate last event attended
+  // fields?
+  $values = sumfields_get_all_participant_status_types();
+  // When initializing, only use 'No-show' if it exists, otherwise nothing
+  // (note: no-show was added in 4.4) 
+  $initial_noshow_status_types = preg_grep('/No-show/', $values);
+  sumfields_save_setting('participant_noshow_status_ids', array_keys($initial_noshow_status_types));
+
 }
 
 /**
