@@ -719,7 +719,11 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
     $table_total = empty($table_dao->table_total) ? '0.00' : $table_dao->table_total;
 
     if($table_total != $trigger_total) {
-      $ret[$dao->contact_id] = "Contact id: $dao->contact_id, Table total: " . $table_total . ", trigger total: $trigger_total";
+      $sql = "SELECT MAX(receive_date) AS last FROM civicrm_contribution WHERE contact_id = %0";
+      $last_dao = CRM_Core_DAO::executeQuery($sql, array(0 => array($dao->contact_id, 'Integer')));
+      $last_dao->fetch();
+      $last_contribution = $last_dao->last;
+      $ret[$dao->contact_id] = "Contact id: $dao->contact_id, Summary Table total: " . $table_total . ", Current trigger total: $trigger_total, Last Contribution: $last_contribution";
     }
   }
   return $ret;
