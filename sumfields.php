@@ -670,6 +670,19 @@ function sumfields_deinitialize_custom_data() {
 function sumfields_find_incorrect_total_lifetime_contribution_records() {
   $ret = array();
 
+  if(!$db_trigger_sql = sumfields_get_update_trigger()) { 
+    // This means there is no update triggered defined.
+    $msg = dt("Update trigger is not defined. This might explain inconsistent responses. ".
+      "Rebuilding triggers, this may take a while.");
+    drush_log($msg, 'error');
+    CRM_Core_DAO::triggerRebuild();
+    if(!sumfields_get_update_trigger()) { 
+      $msg = dt("Still can't find trigger after rebuilding. Bailing...");
+      drush_log($msg, 'error');
+      return FALSE;
+    }
+  }
+
   // We're only interested in one field for this test.
   $base_column_name = 'contribution_total_lifetime';
 
@@ -692,13 +705,20 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
   $custom = sumfields_get_custom_field_definitions();
 
   // Get the base sql
-  $trigger_sql = $custom['fields'][$base_column_name]['trigger_sql'];
-  if(empty($table_name) || empty($column_name) || empty($trigger_sql)) {
+  $config_trigger_sql = $custom['fields'][$base_column_name]['trigger_sql'];
+
+  if(empty($table_name) || empty($column_name) || empty($config_trigger_sql)) {
     // Perhaps we are not properly enabled?
+    drush_log(dt("Can't get table name or column name or trigger sql. Something is wrong."), 'error');
     return FALSE;
   }
+  if($db_trigger_sql != $config_trigger_sql) {
+    drush_log(dt("Mis-match between db_trigger_sql (@db) and config_trigger_sql (@config). Using config.", 
+      array('@db' => $db_trigger_sql, '@config' => $config_trigger_sql)));
+  }
+  
   // Rewrite the sql with the appropriate variables filled in.
-  $trigger_sql = sumfields_sql_rewrite($trigger_sql);
+  $trigger_sql = sumfields_sql_rewrite($config_trigger_sql);
 
   // Iterate over all contacts with a contribution
   $contact_sql = "SELECT DISTINCT(contact_id) FROM civicrm_contribution WHERE ".
@@ -733,12 +753,11 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
  * Print incorrect total lifetime contributions.
  *
  * Diangostic tool for testing to see whether there are any records with an
- * incorrect * total lifetime contribution value in the summary field. It appears
- * as though the trigger * does not always run. This tools helps identify which
+ * incorrect total lifetime contribution value in the summary field. It appears
+ * as though the trigger does not always get set. This tools helps identify which
  * records are affected. It can be run via * drush's php-eval sub-command, e.g.
  *
- *
- * drush php-eval "_civicrm_init(); sumfields_print_inconsistent_summaries()'
+ * drush php-eval "_civicrm_init(); sumfields_print_inconsistent_summaries()"
  *
  */
 function sumfields_print_inconsistent_summaries() {
@@ -753,28 +772,36 @@ function sumfields_print_inconsistent_summaries() {
 }
 
 /**
- * Fix incorrect contributions summary fields.
+ * Get the update trigger statement as configured in the database.
  *
- * Find all summary fields with incorrect amounts and fix them. You may need to add
- * this as a cron job if you find that you are regularly getting inconsistent summaries.
- *
- */
-function sumfields_fix_inconsistent_summaries() {
-  // Get the update trigger statement - if we find rows that are out of sync we will
-  // trigger a fresh update.
+ **/
+function sumfields_get_update_trigger() {
   $sql = "SELECT ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE TRIGGER_NAME = 'civicrm_contribution_after_update'";
 
   $dao = CRM_Core_DAO::executeQuery($sql);
   $dao->fetch();
 
-  $global_trigger = $dao->ACTION_STATEMENT;
+  if($dao->N == 0) return FALSE;
+  return $dao->ACTION_STATEMENT;
+}
 
+
+/**
+ * Fix incorrect contributions summary fields.
+ *
+ * Find all summary fields with incorrect amounts and fix them. You may need to
+ * add this as a cron job if you find that you are regularly getting
+ * inconsistent summaries.
+ *
+ */
+function sumfields_fix_inconsistent_summaries() {
   $ids = sumfields_find_incorrect_total_lifetime_contribution_records();
-  while(list($id, $data) = each($ids)) {
-    $find = array('BEGIN', 'END', 'NEW.contact_id');
-    $replace = array('', '', $id);
-    $update_sql = str_replace($find, $replace, $global_trigger);
-    CRM_Core_DAO::executeQuery($update_sql);
+  if($ids && count($ids) > 0) {
+    // Just re-initiate everything - who knows what might have gone wrong.
+    drush_log(dt("Data is wrong. Re-running trigger creation."), 'error'); 
+    CRM_Core_DAO::triggerRebuild();
+    drush_log(dt("Repopulating all data."), 'error'); 
+    sumfields_generate_data_based_on_current_data();
   }
 }
 
