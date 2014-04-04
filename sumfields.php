@@ -56,8 +56,10 @@ function sumfields_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function sumfields_civicrm_enable() {
+  // Note: CiviCRM reloads the triggers automatically.
   sumfields_initialize_user_settings();
-  if(FALSE === sumfields_initialize_custom_data()) return FALSE;
+  if(FALSE === sumfields_create_custom_fields_and_table()) return FALSE;
+  if(FALSE == sumfields_generate_data_based_on_current_data()) return FALSE;
   return _sumfields_civix_civicrm_enable();
 }
 
@@ -268,6 +270,13 @@ function sumfields_generate_data_based_on_current_data() {
   $table_name = _sumfields_get_custom_table_name();
   $custom_fields = _sumfields_get_custom_field_parameters();
 
+  if(empty($table_name)) {
+    $session = CRM_Core_Session::singleton();
+    $session->setStatus(ts("Your configuration may be corrupted. 
+      Please disable and renable this extension."));
+    return FALSE;
+  }
+
   // In theory we shouldn't have to truncate the table, but we
   // are doing it just to be sure it's empty.
   $sql = "TRUNCATE TABLE `$table_name`";
@@ -372,6 +381,7 @@ function sumfields_generate_data_based_on_current_data() {
       CRM_Core_DAO::executeQuery($sql, $params);
     }
   }
+  return TRUE;
 }
 
 /**
@@ -521,7 +531,10 @@ function sumfields_delete_user_settings() {
  **/
 function _sumfields_get_custom_table_name() {
   $table_info = _sumfields_get_custom_table_parameters();
-  return $table_info['table_name'];
+  if(array_key_exists('table_name', $table_info)) {
+    return $table_info['table_name'];
+  }
+  return NULL;
 }
 
 /**
@@ -553,7 +566,34 @@ function sumfields_get_custom_field_definitions() {
     // definitions. Only require if necessary.
     require 'custom.php';
   }
+  // Not all custom field definitions will be relevant to this
+  // installation, so we have filter out any fields that come
+  // from tables that are not installed.
+  while(list($k, $v) = each($custom['fields'])) {
+    if($v['trigger_table'] == 'civicrm_contribution') {
+      if(!sumfields_component_enabled('CiviContribute')) {
+        unset($custom['fields'][$k]);
+      }
+    }
+    elseif($v['trigger_table'] == 'civicrm_participant') {
+      if(!sumfields_component_enabled('CiviEvent')) {
+        unset($custom['fields'][$k]);
+      }
+    }
+  }
+  reset($custom);
   return $custom;
+}
+
+/**
+ * Helper script - report if Component is enabled
+ **/
+function sumfields_component_enabled($component) {
+  static $config;
+  if(is_null($config)) {
+    $config = CRM_Core_Config::singleton();
+  }
+  return in_array($component, $config->enableComponents);
 }
 
 /**
@@ -646,14 +686,6 @@ function sumfields_get_all_custom_fields() {
 }
 
 /**
- * Helper function to setup all data and tables
- **/
-function sumfields_initialize_custom_data() {
-  if(FALSE === sumfields_create_custom_fields_and_table()) return FALSE;
-  sumfields_generate_data_based_on_current_data();
-}
-
-/**
  * Helper function to clean up
  **/
 function sumfields_deinitialize_custom_data() {
@@ -670,13 +702,13 @@ function sumfields_deinitialize_custom_data() {
 function sumfields_find_incorrect_total_lifetime_contribution_records() {
   $ret = array();
 
-  if(!$db_trigger_sql = sumfields_get_update_trigger()) { 
+  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) { 
     // This means there is no update triggered defined.
     $msg = dt("Update trigger is not defined. This might explain inconsistent responses. ".
       "Rebuilding triggers, this may take a while.");
     drush_log($msg, 'error');
     CRM_Core_DAO::triggerRebuild();
-    if(!sumfields_get_update_trigger()) { 
+    if(!sumfields_get_update_trigger('civicrm_contribution')) { 
       $msg = dt("Still can't find trigger after rebuilding. Bailing...");
       drush_log($msg, 'error');
       return FALSE;
@@ -775,8 +807,9 @@ function sumfields_print_inconsistent_summaries() {
  * Get the update trigger statement as configured in the database.
  *
  **/
-function sumfields_get_update_trigger() {
-  $sql = "SELECT ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE TRIGGER_NAME = 'civicrm_contribution_after_update'";
+function sumfields_get_update_trigger($table = 'civicrm_contribution') {
+  $sql = "SELECT ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE
+    TRIGGER_NAME = '${table}_after_update'";
 
   $dao = CRM_Core_DAO::executeQuery($sql);
   $dao->fetch();

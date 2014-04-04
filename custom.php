@@ -306,37 +306,5 @@ $custom = array(
       AND e.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_participant',
 		),
-    'event_attended_total_lifetime' => array(
-			'label' => ts('Total lifetime events attended'),
-			'data_type' => 'Int',
-			'html_type' => 'Text',
-			'is_required' => '0',
-			'is_searchable' => '1',
-			'is_search_range' => '1',
-			'weight' => '75',
-			'is_active' => '1',
-			'is_view' => '1',
-			'text_length' => '8',
-      'trigger_sql' => '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
-      t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
-      AND e.event_type_id IN (%event_type_ids))',
-      'trigger_table' => 'civicrm_participant',
-		),
-    'event_noshow_total_lifetime' => array(
-			'label' => ts('Total lifetime no-show events'),
-			'data_type' => 'Int',
-			'html_type' => 'Text',
-			'is_required' => '0',
-			'is_searchable' => '1',
-			'is_search_range' => '1',
-			'weight' => '75',
-			'is_active' => '1',
-			'is_view' => '1',
-			'text_length' => '8',
-      'trigger_sql' => '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
-      t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_noshow_status_ids)
-      AND e.event_type_id IN (%event_type_ids))',
-      'trigger_table' => 'civicrm_participant',
-		),
   ),
 );
