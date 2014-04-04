@@ -2,13 +2,16 @@
 
 <table class="form-layout-compressed">
   <tr>
-    <td colspan="2" class="description"><h3>{ts}Status{/ts}</h3></td>
+    <td colspan="2" class="description"><h3>{ts}Trigger Status{/ts}</h3></td>
   </tr>
   <tr>
-    <td colspan="2" class="description">{ts}Contribution Table Trigger:{/ts} {$contribution_table_trigger_status}</td>
+    <td colspan="2" class="description">{ts}Contribution Table Updates:{/ts} {$contribution_table_trigger_status}</td>
   </tr>
   <tr>
-    <td colspan="2" class="description">{ts}Participant Table Trigger:{/ts} {$participant_table_trigger_status}</td>
+    <td colspan="2" class="description">{ts}Participant Table Updates:{/ts} {$participant_table_trigger_status}</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="description">{ts}Participant Info Table Updates (requires civicrm_engage Drupal module):{/ts} {$participant_info_table_trigger_status}</td>
   </tr>
   <tr>
     <td colspan="2" class="description"><h3>{ts}Settings{/ts}</h3></td>

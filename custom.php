@@ -306,5 +306,20 @@ $custom = array(
       AND e.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_participant',
 		),
+    'event_turnout_attempts' => array(
+			'label' => ts('Number of turnout attempts'),
+			'data_type' => 'Int',
+			'html_type' => 'Text',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'is_search_range' => '1',
+			'weight' => '75',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '8',
+      'trigger_sql' => '(SELECT COUNT(id) AS summary_value FROM %civicrm_value_participant_info WHERE entity_id = NEW.entity_id AND
+        (%reminder_response IS NOT NULL OR %invitation_response IS NOT NULL))',
+      'trigger_table' => 'civicrm_value_participant_info',
+		),
   ),
 );

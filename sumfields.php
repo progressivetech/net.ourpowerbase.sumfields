@@ -59,7 +59,7 @@ function sumfields_civicrm_enable() {
   // Note: CiviCRM reloads the triggers automatically.
   sumfields_initialize_user_settings();
   if(FALSE === sumfields_create_custom_fields_and_table()) return FALSE;
-  if(FALSE == sumfields_generate_data_based_on_current_data()) return FALSE;
+  if(FALSE == sumfields_generate_data_based_on_current_data($session = NULL)) return FALSE;
   return _sumfields_civix_civicrm_enable();
 }
 
@@ -125,6 +125,18 @@ function sumfields_sql_rewrite($sql) {
   $values = array_values($fiscal_dates);
   $sql = str_replace($keys, $values, $sql);
 
+  $participant_info_table_name = sumfields_get_participant_info_table();
+  if($participant_info_table_name) {
+    $sql = str_replace('%civicrm_value_participant_info', $participant_info_table_name, $sql);
+  }
+  $reminder_response_field = sumfields_get_column_name('reminder_response');
+  if($reminder_response_field) {
+    $sql = str_replace('%reminder_response', $reminder_response_field, $sql);
+  }
+  $invitation_response_field = sumfields_get_column_name('invitation_response');
+  if($invitation_response_field) {
+    $sql = str_replace('%invitation_response', $invitation_response_field, $sql);
+  }
   return $sql;
 }
 
@@ -220,21 +232,36 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
   // Iterate over all our fields, and build out a sql parts array
   while(list($base_column_name, $params) = each($custom_fields)) {
     if(!in_array($base_column_name, $active_fields)) continue;
-
-    $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
-    $sql_field_parts[] = '`' . $params['column_name'] . '` = ' .
-    sumfields_sql_rewrite($trigger);
-    // Keep track of which tables we need to build triggers for.
     $table = $custom['fields'][$base_column_name]['trigger_table'];
+    if(!is_null($tableName) && $tableName != $table) {
+      // if triggerInfo is called with particular table name, we should
+      // only respond if we are contributing triggers to that table.
+      continue;
+    }
+    $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
+    $sql_field_parts[$table][] = '`' . $params['column_name'] . '` = ' .
+      sumfields_sql_rewrite($trigger);
+    // Keep track of which tables we need to build triggers for.
     if(!in_array($table, $tables)) $tables[] = $table;
   }
-
-  $sql_field_parts[] = 'entity_id = NEW.contact_id;';
+  
   // Iterate over each table that needs a trigger, build the trigger's
   // sql clause.
   while(list(, $table) = each($tables)) {
-    $parts = implode(',', $sql_field_parts);
-    $sql = $generic_sql . $parts;
+    $parts = $sql_field_parts[$table];
+
+    // For the civicrm_contribution and civicrm_participant tables,
+    // the key field is NEW.contact_id. However, for civicrm_value_participant_info
+    // it's entity_id.
+    if($table == 'civicrm_contribution' || $table == 'civicrm_participant') {
+      $parts[] = 'entity_id = NEW.contact_id;';
+    }
+    else {
+      $parts[] = 'entity_id = NEW.entity_id;';
+    }
+
+    $extra_sql = implode(',', $parts);
+    $sql = $generic_sql . $extra_sql;
 
     // We want to fire this trigger on insert, update and delete.
     $info[] = array(
@@ -249,8 +276,8 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
       'event' => 'UPDATE',
       'sql' => $sql,
     );
-    // For delete, we reference OLD.contact_id instead of NEW.contact_id
-    $sql = str_replace('NEW.contact_id', 'OLD.contact_id', $sql);
+    // For delete, we reference OLD.field instead of NEW.field
+    $sql = str_replace('NEW.', 'OLD.', $sql);
     $info[] = array(
       'table' => $table,
       'when' => 'AFTER',
@@ -265,13 +292,15 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
  * This function is designed to be run once when
  * the extension is installed or initialized.
  **/
-function sumfields_generate_data_based_on_current_data() {
+function sumfields_generate_data_based_on_current_data(&$session) {
   // Get the actual table name for summary fields and the actual field names.
   $table_name = _sumfields_get_custom_table_name();
   $custom_fields = _sumfields_get_custom_field_parameters();
 
   if(empty($table_name)) {
-    $session = CRM_Core_Session::singleton();
+    if(is_null($session)) {
+      $session = CRM_Core_Session::singleton();
+    }
     $session->setStatus(ts("Your configuration may be corrupted. 
       Please disable and renable this extension."));
     return FALSE;
@@ -330,57 +359,113 @@ function sumfields_generate_data_based_on_current_data() {
   // and update them one by one... optimization ideas?
 
   // If no event fields are selected, skip it.
-  if(!sumfields_are_any_event_fields_active()) return;
-  $sql = "SELECT DISTINCT contact_id FROM civicrm_participant p JOIN civicrm_contact c ON p.contact_id = c.id";
-  $dao = CRM_Core_DAO::executeQuery($sql);
-  while($dao->fetch()) {
-    $contact_id = $dao->contact_id;
-    reset($custom_fields);
-    // Iterate over our custom fields looking for ones using the
-    // civicrm_participant table.
-    while(list($base_column_name, $column_settings) = each($custom_fields)) {
-      if(!in_array($base_column_name, $active_fields)) continue;
-      $table = $custom['fields'][$base_column_name]['trigger_table'];
-      if($table != 'civicrm_participant') continue;
+  if(sumfields_are_any_event_fields_active()) {
+    $sql = "SELECT DISTINCT contact_id FROM civicrm_participant p JOIN civicrm_contact c ON p.contact_id = c.id";
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    while($dao->fetch()) {
+      $contact_id = $dao->contact_id;
+      reset($custom_fields);
+      // Iterate over our custom fields looking for ones using the
+      // civicrm_participant table.
+      while(list($base_column_name, $column_settings) = each($custom_fields)) {
+        if(!in_array($base_column_name, $active_fields)) continue;
+        $table = $custom['fields'][$base_column_name]['trigger_table'];
+        if($table != 'civicrm_participant') continue;
 
-      $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
-      // We replace NEW.contact_id with the value of $contact_id to reflect the difference
-      // between the trigger sql statement and the initial sql statement
-      // to load the data.
-      $trigger = str_replace('NEW.contact_id', '%1', $trigger);
-      $params = array( 1 => array($contact_id, 'Integer'));
-      $trigger = sumfields_sql_rewrite($trigger);
+        $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
+        // We replace NEW.contact_id with the value of $contact_id to reflect the difference
+        // between the trigger sql statement and the initial sql statement
+        // to load the data.
+        $trigger = str_replace('NEW.contact_id', '%1', $trigger);
+        $params = array( 1 => array($contact_id, 'Integer'));
+        $trigger = sumfields_sql_rewrite($trigger);
 
-      // Retrieve the summary value by executing the trigger sql
-      $trigger_dao = CRM_Core_DAO::executeQuery($trigger, $params);
-      $trigger_dao->fetch();
-      if(!property_exists($trigger_dao, 'summary_value')) {
-        continue;
-      }
-      $summary_value = $trigger_dao->summary_value;
+        // Retrieve the summary value by executing the trigger sql
+        $trigger_dao = CRM_Core_DAO::executeQuery($trigger, $params);
+        $trigger_dao->fetch();
+        if(!property_exists($trigger_dao, 'summary_value')) {
+          continue;
+        }
+        $summary_value = $trigger_dao->summary_value;
 
-      if(empty($summary_value)) continue;
-      // Update the summary table with this new value
-      // REPLACE INTO will wipe out the existing data, so we
-      // have to check if the record exists first...
-      $sql = "SELECT id FROM `$table_name` WHERE entity_id = %1";
-      $params = array( 1 => array($contact_id, 'Integer'));
-      $exists_dao = CRM_Core_DAO::executeQuery($sql, $params);
-      $exists_dao->fetch();
-      $column_name = $column_settings['column_name'];
-      if($exists_dao->N == 0) {
-        $sql = "INSERT INTO `$table_name` SET `$column_name` = %1, entity_id = %2";
+        if(empty($summary_value)) continue;
+        // Update the summary table with this new value
+        // REPLACE INTO will wipe out the existing data, so we
+        // have to check if the record exists first...
+        $sql = "SELECT id FROM `$table_name` WHERE entity_id = %1";
+        $params = array( 1 => array($contact_id, 'Integer'));
+        $exists_dao = CRM_Core_DAO::executeQuery($sql, $params);
+        $exists_dao->fetch();
+        $column_name = $column_settings['column_name'];
+        if($exists_dao->N == 0) {
+          $sql = "INSERT INTO `$table_name` SET `$column_name` = %1, entity_id = %2";
+        }
+        else {
+          $sql = "UPDATE `$table_name` SET `$column_name` = %1 WHERE entity_id = %2";
+        }
+        $params = array(
+          1 => array($summary_value, 'String'),
+          2 => array($contact_id, 'Integer' ),
+        );
+        CRM_Core_DAO::executeQuery($sql, $params);
       }
-      else {
-        $sql = "UPDATE `$table_name` SET `$column_name` = %1 WHERE entity_id = %2";
-      }
-      $params = array(
-        1 => array($summary_value, 'String'),
-        2 => array($contact_id, 'Integer' ),
-      );
-      CRM_Core_DAO::executeQuery($sql, $params);
     }
   }
+  // Update the table with data from the civicrm_value_participant_info table
+  // If no event fields are selected, skip it.
+  if(sumfields_are_any_participant_info_fields_active()) {
+    $participant_info_table = sumfields_get_participant_info_table();
+    $sql = "SELECT DISTINCT contact_id FROM $participant_info_table p JOIN civicrm_contact c ON p.contact_id = c.id";
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    while($dao->fetch()) {
+      $contact_id = $dao->contact_id;
+      reset($custom_fields);
+      // Iterate over our custom fields looking for ones using the
+      // civicrm_participant table.
+      while(list($base_column_name, $column_settings) = each($custom_fields)) {
+        if(!in_array($base_column_name, $active_fields)) continue;
+        $table = $custom['fields'][$base_column_name]['trigger_table'];
+        if($table != 'civicrm_value_participant_info') continue;
+
+        $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
+        // We replace NEW.contact_id with the value of $contact_id to reflect the difference
+        // between the trigger sql statement and the initial sql statement
+        // to load the data.
+        $trigger = str_replace('NEW.entity_id', '%1', $trigger);
+        $params = array( 1 => array($contact_id, 'Integer'));
+        $trigger = sumfields_sql_rewrite($trigger);
+
+        // Retrieve the summary value by executing the trigger sql
+        $trigger_dao = CRM_Core_DAO::executeQuery($trigger, $params);
+        $trigger_dao->fetch();
+        if(!property_exists($trigger_dao, 'summary_value')) {
+          continue;
+        }
+        $summary_value = $trigger_dao->summary_value;
+
+        if(empty($summary_value)) continue;
+        // Update the summary table with this new value
+        // REPLACE INTO will wipe out the existing data, so we
+        // have to check if the record exists first...
+        $sql = "SELECT id FROM `$table_name` WHERE entity_id = %1";
+        $params = array( 1 => array($contact_id, 'Integer'));
+        $exists_dao = CRM_Core_DAO::executeQuery($sql, $params);
+        $exists_dao->fetch();
+        $column_name = $column_settings['column_name'];
+        if($exists_dao->N == 0) {
+          $sql = "INSERT INTO `$table_name` SET `$column_name` = %1, entity_id = %2";
+        }
+        else {
+          $sql = "UPDATE `$table_name` SET `$column_name` = %1 WHERE entity_id = %2";
+        }
+        $params = array(
+          1 => array($summary_value, 'String'),
+          2 => array($contact_id, 'Integer' ),
+        );
+        CRM_Core_DAO::executeQuery($sql, $params);
+      }
+    }
+  }    
   return TRUE;
 }
 
@@ -405,6 +490,26 @@ function sumfields_are_any_event_fields_active() {
   return FALSE;
 }
 
+/**
+ * Helper function to see if any of the civicrm_value_participant_info fields
+ * are active.
+ **/
+
+function sumfields_are_any_participant_info_fields_active() {
+  // Fields chosen by the user
+  $active_fields = sumfields_get_setting('active_fields', array());
+  // All custom field definitions.
+  $custom = sumfields_get_custom_field_definitions();
+  // Iterate over our active fields looking for ones using the
+  // civicrm_participant table.
+  while(list(,$base_column_name) = each($active_fields)) {
+    $table = $custom['fields'][$base_column_name]['trigger_table'];
+    if($table == 'civicrm_value_participant_info') {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
 /**
  * Create custom fields - should be called on enable.
  **/
@@ -580,11 +685,49 @@ function sumfields_get_custom_field_definitions() {
         unset($custom['fields'][$k]);
       }
     }
+    elseif($v['trigger_table'] == 'civicrm_value_participant_info') {
+      // Since it's a custom data table, it will have a different table
+      // name on each installation.
+      $actual_table_name = sumfields_get_participant_info_table();
+      if(!$actual_table_name) {
+        // Perhaps not enabled.
+        unset($custom['fields'][$k]);
+      }
+      else {
+        $custom['fields'][$k]['trigger_table'] = $actual_table_name;
+      }
+    }
   }
   reset($custom);
   return $custom;
 }
 
+/**
+ * Helper function: get name of civicrm_value_participant_info table
+ * for this installation or FALSE if it's not enabled. 
+ **/
+function sumfields_get_participant_info_table() {
+  $sql = "SELECT table_name FROM civicrm_custom_group WHERE name = 'participant_info';";
+  $dao = CRM_Core_DAO::executeQuery($sql);
+  if($dao->N == 0) return FALSE;
+
+  $dao->fetch();
+  return $dao->table_name;
+}
+
+/**
+ * Helper function: get column name for the given field 
+ * for this installation or FALSE if it's not enabled. 
+ **/
+function sumfields_get_column_name($name) {
+  $sql = "SELECT column_name FROM civicrm_custom_field WHERE name = %0";
+  $params = array(0 => array($name, 'String'));
+  $dao = CRM_Core_DAO::executeQuery($sql, $params);
+  if($dao->N == 0) return FALSE;
+
+  $dao->fetch();
+  return $dao->column_name;
+}
 /**
  * Helper script - report if Component is enabled
  **/
@@ -808,6 +951,13 @@ function sumfields_print_inconsistent_summaries() {
  *
  **/
 function sumfields_get_update_trigger($table = 'civicrm_contribution') {
+  if($table == 'civicrm_value_participant_info') {
+    // The civicrm_value_participant_info table will have a different name
+    // depending on the installation because it's a custom data table.
+    $table = sumfields_get_participant_info_table();
+  }
+  if(!$table) return FALSE;
+
   $sql = "SELECT ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE
     TRIGGER_NAME = '${table}_after_update'";
 
@@ -834,7 +984,7 @@ function sumfields_fix_inconsistent_summaries() {
     drush_log(dt("Data is wrong. Re-running trigger creation."), 'error'); 
     CRM_Core_DAO::triggerRebuild();
     drush_log(dt("Repopulating all data."), 'error'); 
-    sumfields_generate_data_based_on_current_data();
+    sumfields_generate_data_based_on_current_data($session = NULL);
   }
 }
 

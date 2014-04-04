@@ -27,6 +27,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $this->Assign(
       'contribution_table_trigger_status', $contribution_table_trigger_status
     );
+
     if(sumfields_get_update_trigger('civicrm_participant')) {
       $participant_table_trigger_status = 'Enabled';
     }
@@ -36,6 +37,16 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $this->Assign(
       'participant_table_trigger_status', $participant_table_trigger_status
     );
+    if(sumfields_get_update_trigger('civicrm_value_participant_info')) {
+      $participant_info_table_trigger_status = 'Enabled';
+    }
+    else {
+      $participant_info_table_trigger_status = 'Not Enabled';
+    }
+    $this->Assign(
+      'participant_info_table_trigger_status', $participant_info_table_trigger_status
+    );
+
     $this->addCheckBox(
       'active_fields', 
       ts('Active Fields'),
@@ -125,9 +136,12 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       // Now we have add/remove fields 
       sumfields_alter_table($current_active_fields, $new_active_fields);
     }
-    if(sumfields_generate_data_based_on_current_data()) {
+    if(sumfields_generate_data_based_on_current_data($session)) {
       $session->setStatus(ts("All summary fields have been updated."));
       CRM_Core_DAO::triggerRebuild();
+    }
+    else {
+      $session->setStatus(ts("There was an error re-generating the data."));
     }
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
   }
