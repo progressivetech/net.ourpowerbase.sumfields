@@ -11,9 +11,6 @@
     <td colspan="2" class="description">{ts}Participant Table Updates:{/ts} {$participant_table_trigger_status}</td>
   </tr>
   <tr>
-    <td colspan="2" class="description">{ts}Participant Info Table Updates (requires civicrm_engage Drupal module):{/ts} {$participant_info_table_trigger_status}</td>
-  </tr>
-  <tr>
     <td colspan="2" class="description"><h3>{ts}Settings{/ts}</h3></td>
   </tr>
 
@@ -32,6 +29,8 @@
       <td class="label">{$form.financial_type_ids.label}</td>
       <td>{$form.financial_type_ids.html}</td>
     </tr> 
+  {/if}
+  {if $sumfields_event && $sumfields_member}
     <tr>
       <td colspan="2" class="description">{ts}Please indicate the financial types you would like included when calculating membership payment related summary fields.{/ts}</td>
     </tr>

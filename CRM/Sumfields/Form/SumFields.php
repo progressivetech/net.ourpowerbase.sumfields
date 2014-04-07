@@ -37,21 +37,19 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $this->Assign(
       'participant_table_trigger_status', $participant_table_trigger_status
     );
-    if(sumfields_get_update_trigger('civicrm_value_participant_info')) {
-      $participant_info_table_trigger_status = 'Enabled';
-    }
-    else {
-      $participant_info_table_trigger_status = 'Not Enabled';
-    }
-    $this->Assign(
-      'participant_info_table_trigger_status', $participant_info_table_trigger_status
-    );
-
     $this->addCheckBox(
       'active_fields', 
       ts('Active Fields'),
       array_flip($field_options)
     );
+    if(sumfields_component_enabled('CiviMember')) {
+      $this->assign('sumfields_member', TRUE);
+      $this->addCheckBox(
+        'membership_financial_type_ids', 
+        ts('Membership Financial Types'),
+        array_flip(sumfields_get_all_financial_types())
+      );
+    }
     if(sumfields_component_enabled('CiviContribute')) {
       $this->assign('sumfields_contribute', TRUE);
       $this->addCheckBox(
@@ -59,11 +57,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         ts('Financial Types'),
         array_flip(sumfields_get_all_financial_types())
       );
-      $this->addCheckBox(
-        'membership_financial_type_ids', 
-        ts('Membership Financial Types'),
-        array_flip(sumfields_get_all_financial_types())
-      );
+      
     }
     if(sumfields_component_enabled('CiviEvent')) {
       $this->assign('sumfields_event', TRUE);
@@ -77,11 +71,6 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         ts('Participant Status'),
         array_flip(sumfields_get_all_participant_status_types())
       );
-     $this->addCheckBox(
-       'participant_noshow_status_ids', 
-       ts('Participant No Show Status'),
-       array_flip(sumfields_get_all_participant_status_types())
-     );
     }
 
     $this->addButtons(array(
@@ -106,7 +95,6 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $defaults['membership_financial_type_ids'] = $this->array_to_options(sumfields_get_setting('membership_financial_type_ids', array()));
     $defaults['event_type_ids'] = $this->array_to_options(sumfields_get_setting('event_type_ids', array()));
     $defaults['participant_status_ids'] = $this->array_to_options(sumfields_get_setting('participant_status_ids', array()));
-    $defaults['participant_noshow_status_ids'] = $this->array_to_options(sumfields_get_setting('participant_noshow_status_ids', array()));
     return $defaults;
   }
 
@@ -135,10 +123,6 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     }
     if(array_key_exists('participant_status_ids', $values)) {
       sumfields_save_setting('participant_status_ids', $this->options_to_array($values['participant_status_ids']));
-    }
-
-    if(array_key_exists('participant_noshow_status_ids', $values)) {
-      sumfields_save_setting('participant_noshow_status_ids', $this->options_to_array($values['participant_noshow_status_ids']));
     }
     $session = CRM_Core_Session::singleton();
 

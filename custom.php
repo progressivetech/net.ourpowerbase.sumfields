@@ -350,9 +350,10 @@ $custom = array(
 			'is_active' => '1',
 			'is_view' => '1',
 			'text_length' => '8',
-      'trigger_sql' => '(SELECT COUNT(id) AS summary_value FROM %civicrm_value_participant_info WHERE entity_id = NEW.entity_id AND
-        (%reminder_response IS NOT NULL OR %invitation_response IS NOT NULL))',
-      'trigger_table' => 'civicrm_value_participant_info',
+      'trigger_sql' => '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
+      ON t1.entity_id = p.id WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
+      OR (%invitation_response IS NOT NULL AND %invitation_response != "")))',
+      'trigger_table' => 'civicrm_participant',
 		),
   ),
 );
