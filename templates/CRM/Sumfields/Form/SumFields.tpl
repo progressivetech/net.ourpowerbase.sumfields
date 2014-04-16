@@ -5,10 +5,10 @@
     <td colspan="2" class="description"><h3>{ts}Trigger Status{/ts}</h3></td>
   </tr>
   <tr>
-    <td colspan="2" class="description">{ts}Contribution Table Updates:{/ts} {$contribution_table_trigger_status}</td>
+    <td colspan="2" class="description">{ts}Contribution Table:{/ts} {$contribution_table_trigger_status}</td>
   </tr>
   <tr>
-    <td colspan="2" class="description">{ts}Participant Table Updates:{/ts} {$participant_table_trigger_status}</td>
+    <td colspan="2" class="description">{ts}Participant Table:{/ts} {$participant_table_trigger_status}</td>
   </tr>
   <tr>
     <td colspan="2" class="description"><h3>{ts}Settings{/ts}</h3></td>
@@ -48,7 +48,7 @@
       <td>{$form.event_type_ids.html}</td>
     </tr>
     <tr>
-      <td colspan="2" class="description">{ts}Please indicate the participat status you would like included when calculating event-related summary fields.{/ts}</td>
+      <td colspan="2" class="description">{ts}Please indicate the participat status you would like included when calculating event-related summary fields to indicate attendance or non-attendance.{/ts}</td>
     </tr>
     <tr class="crm-sumfields-form-block-sumfields_participant_status_ids">
       <td class="label">{$form.participant_status_ids.label}</td>

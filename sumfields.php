@@ -694,19 +694,17 @@ function sumfields_initialize_user_settings() {
   // payment fields?
   sumfields_save_setting('membership_financial_type_ids', array_keys($values));
 
-  // Which event ids are used when calculating last event attended fields?
+  // Which event type ids are used when calculating event fields?
   $values = sumfields_get_all_event_types();
   sumfields_save_setting('event_type_ids', array_keys($values));
 
-  // Which participant status ids are used to calculate last event attended
-  // fields?
+  // Which participant status ids are used to calculate attendended events 
   $values = sumfields_get_all_participant_status_types();
   // When initializing, only use the attended.
   $initial_status_types = preg_grep('/Attended/', $values);
   sumfields_save_setting('participant_status_ids', array_keys($initial_status_types));
 
-  // Which participant status ids are used to calculate last event attended
-  // fields?
+  // Which participant status ids are used to calculate no shows
   $values = sumfields_get_all_participant_status_types();
   // When initializing, only use 'No-show' if it exists, otherwise nothing
   // (note: no-show was added in 4.4) 

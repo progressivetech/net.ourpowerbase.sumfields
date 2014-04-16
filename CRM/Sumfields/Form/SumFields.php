@@ -15,7 +15,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       $session = CRM_Core_Session::singleton();
       $session->setStatus(ts("Summary Fields is not particularly useful if
         CiviContribute and CiviEvent are both disabled. Try enabling at least
-        one.."));
+        one."));
       return;
     }
     if(sumfields_get_update_trigger('civicrm_contribution')) {
@@ -66,11 +66,22 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         ts('Event Types'),
         array_flip(sumfields_get_all_event_types())
       );
+      $label = ts('Participant Status (attended)');
+      $name = 'participant_status_ids';
       $this->addCheckBox(
-        'participant_status_ids', 
-        ts('Participant Status'),
+        $name, 
+        $label,
         array_flip(sumfields_get_all_participant_status_types())
       );
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
+      $label = ts('Participant Status (did not attend)');
+      $name = 'participant_noshow_status_ids';
+      $this->addCheckBox(
+        $name,
+        $label,
+        array_flip(sumfields_get_all_participant_status_types())
+      );
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
     }
 
     $this->addButtons(array(
