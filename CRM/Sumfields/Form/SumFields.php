@@ -18,6 +18,8 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         one."));
       return;
     }
+
+    // Evaluate status of the triggers and report to the user.
     if(sumfields_get_update_trigger('civicrm_contribution')) {
       $contribution_table_trigger_status = 'Enabled';
     }
@@ -37,35 +39,42 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $this->Assign(
       'participant_table_trigger_status', $participant_table_trigger_status
     );
+
+    // Add active fields
+    $name = 'active_fields';
+    $label = ts('Active Fields');
     $this->addCheckBox(
-      'active_fields', 
-      ts('Active Fields'),
-      array_flip($field_options)
+      $name, $label, array_flip($field_options)
     );
+    $this->addRule($name, ts('You must define at least one active field'), 'required');
+
     if(sumfields_component_enabled('CiviMember')) {
       $this->assign('sumfields_member', TRUE);
+      $name = 'membership_financial_type_ids';
+      $label = ts('Membership Financial Types');
       $this->addCheckBox(
-        'membership_financial_type_ids', 
-        ts('Membership Financial Types'),
-        array_flip(sumfields_get_all_financial_types())
+        $name, $label, array_flip(sumfields_get_all_financial_types())
       );
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
     }
     if(sumfields_component_enabled('CiviContribute')) {
       $this->assign('sumfields_contribute', TRUE);
+      $name = 'financial_type_ids';
+      $label = ts('Financial Types');
       $this->addCheckBox(
-        'financial_type_ids', 
-        ts('Financial Types'),
-        array_flip(sumfields_get_all_financial_types())
+        $name, $label, array_flip(sumfields_get_all_financial_types())
       );
-      
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
     }
     if(sumfields_component_enabled('CiviEvent')) {
       $this->assign('sumfields_event', TRUE);
+      $name = 'event_type_ids';
+      $label = ts('Event Types');
       $this->addCheckBox(
-        'event_type_ids', 
-        ts('Event Types'),
-        array_flip(sumfields_get_all_event_types())
+        $name, $label, array_flip(sumfields_get_all_event_types())
       );
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
+
       $label = ts('Participant Status (attended)');
       $name = 'participant_status_ids';
       $this->addCheckBox(
