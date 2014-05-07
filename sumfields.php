@@ -100,23 +100,44 @@ function sumfields_civicrm_managed(&$entities) {
  * values that the user has configured to limit to.
  **/
 function sumfields_sql_rewrite($sql) {
+  // Note: most of these token replacements fill in a sql IN statement,
+  // e.g. field_name IN (%token). That means if the token is empty, we
+  // get a SQL error. So... for each of these, if the token is empty,
+  // we fill it with all possible values at the moment. If a new option
+  // is added, summary fields will have to be re-configured.
   $ids = sumfields_get_setting('financial_type_ids', array());
+  if(count($ids) == 0) {
+    $ids = array_keys(sumfields_get_all_financial_types());
+  }
   $str_ids = implode(',', $ids);
   $sql = str_replace('%financial_type_ids', $str_ids, $sql);
 
   $ids = sumfields_get_setting('membership_financial_type_ids', array());
+  if(count($ids) == 0) {
+    // Surely this is wrong... but better to avoid a sql error
+    $ids = array_keys(sumfields_get_all_financial_types());
+  }
   $str_ids = implode(',', $ids);
   $sql = str_replace('%membership_financial_type_ids', $str_ids, $sql);
 
   $ids = sumfields_get_setting('participant_status_ids', array());
+  if(count($ids) == 0) {
+    $ids = array_keys(sumfields_get_all_participant_status_types());
+  }
   $str_ids = implode(',', $ids);
   $sql = str_replace('%participant_status_ids', $str_ids, $sql);
 
   $ids = sumfields_get_setting('participant_noshow_status_ids', array());
+  if(count($ids) == 0) {
+    $ids = array_keys(sumfields_get_all_participant_status_types());
+  }
   $str_ids = implode(',', $ids);
   $sql = str_replace('%participant_noshow_status_ids', $str_ids, $sql);
 
   $ids = sumfields_get_setting('event_type_ids', array());
+  if(count($ids) == 0) {
+    $ids = array_keys(sumfields_get_all_event_types());
+  }
   $str_ids = implode(',', $ids);
   $sql = str_replace('%event_type_ids', $str_ids, $sql);
 
