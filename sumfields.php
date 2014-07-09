@@ -60,7 +60,7 @@ function sumfields_civicrm_enable() {
   sumfields_initialize_user_settings();
   $session = CRM_Core_Session::singleton();
   if(!sumfields_create_custom_fields_and_table()) {
-    $msg = ts("Failed to cureate custom fields and table.");
+    $msg = ts("Failed to create custom fields and table. Maybe they already exist?");
     $session->setStatus($msg);
   }
   $msg = ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.");
