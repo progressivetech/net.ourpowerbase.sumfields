@@ -58,8 +58,14 @@ function sumfields_civicrm_uninstall() {
 function sumfields_civicrm_enable() {
   // Note: CiviCRM reloads the triggers automatically.
   sumfields_initialize_user_settings();
-  if(FALSE === sumfields_create_custom_fields_and_table()) return FALSE;
-  if(FALSE == sumfields_generate_data_based_on_current_data($session = NULL)) return FALSE;
+  $session = CRM_Core_Session::singleton();
+  if(!sumfields_create_custom_fields_and_table()) {
+    $msg = ts("Failed to cureate custom fields and table.");
+    $session->setStatus($msg);
+  }
+  $msg = ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.");
+  $session->setStatus($msg);
+
   return _sumfields_civix_civicrm_enable();
 }
 
@@ -149,14 +155,26 @@ function sumfields_sql_rewrite($sql) {
   $participant_info_table_name = sumfields_get_participant_info_table();
   if($participant_info_table_name) {
     $sql = str_replace('%civicrm_value_participant_info', $participant_info_table_name, $sql);
+  } 
+  elseif(preg_match('/%civicrm_value_participant_info/', $sql)) {
+    // This is an error - we have a variable we can't replace.
+    return FALSE;
   }
   $reminder_response_field = sumfields_get_column_name('reminder_response');
   if($reminder_response_field) {
     $sql = str_replace('%reminder_response', $reminder_response_field, $sql);
   }
+  elseif(preg_match('/%reminder_response/', $sql)) {
+    // This is an error - we have a variable we can't replace.
+    return FALSE;
+  }
   $invitation_response_field = sumfields_get_column_name('invitation_response');
   if($invitation_response_field) {
     $sql = str_replace('%invitation_response', $invitation_response_field, $sql);
+  }
+  elseif(preg_match('/%invitation_response/', $sql)) {
+    // This is an error - we have a variable we can't replace.
+    return FALSE;
   }
   return $sql;
 }
@@ -250,6 +268,8 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
 
   $active_fields = sumfields_get_setting('active_fields', array());
 
+  $session = CRM_Core_Session::singleton();
+
   // Iterate over all our fields, and build out a sql parts array
   while(list($base_column_name, $params) = each($custom_fields)) {
     if(!in_array($base_column_name, $active_fields)) continue;
@@ -260,8 +280,16 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
       continue;
     }
     $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
+    $trigger = sumfields_sql_rewrite($trigger);
+    // If we fail to properly rewrite the sql, don't set the trigger
+    // to avoid sql exceptions.
+    if(FALSE === $trigger) {
+      $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
+      $session->setStatus($msg);
+      continue;
+    }
     $sql_field_parts[$table][] = '`' . $params['column_name'] . '` = ' .
-      sumfields_sql_rewrite($trigger);
+      $trigger;
     // Keep track of which tables we need to build triggers for.
     if(!in_array($table, $tables)) $tables[] = $table;
   }
@@ -351,7 +379,11 @@ function sumfields_generate_data_based_on_current_data(&$session) {
       // between the trigger sql statement and the initial sql statement
       // to load the data.
       $trigger = str_replace('NEW.contact_id', 't2.contact_id', $trigger);
-      $trigger = sumfields_sql_rewrite($trigger);
+      if(FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
+        $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
+        $session->setStatus($msg);
+        continue;
+      }
     }
     $sql_field_parts['civicrm_contribution'][] = $trigger;
   }
@@ -392,8 +424,11 @@ function sumfields_generate_data_based_on_current_data(&$session) {
         // to load the data.
         $trigger = str_replace('NEW.contact_id', '%1', $trigger);
         $params = array( 1 => array($contact_id, 'Integer'));
-        $trigger = sumfields_sql_rewrite($trigger);
-
+        if(FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
+          $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
+          $session->setStatus($msg);
+          continue;
+        }
         // Retrieve the summary value by executing the trigger sql
         $trigger_dao = CRM_Core_DAO::executeQuery($trigger, $params);
         $trigger_dao->fetch();
@@ -665,8 +700,12 @@ function sumfields_get_participant_info_table() {
  * for this installation or FALSE if it's not enabled. 
  **/
 function sumfields_get_column_name($name) {
-  $sql = "SELECT column_name FROM civicrm_custom_field WHERE name = %0";
-  $params = array(0 => array($name, 'String'));
+  $sql = "SELECT column_name FROM civicrm_custom_field WHERE name = %0 ".
+    "OR column_name LIKE %1";
+  $params = array(
+    0 => array($name, 'String'),
+    1 => array("${name}%", 'String')
+  );
   $dao = CRM_Core_DAO::executeQuery($sql, $params);
   if($dao->N == 0) return FALSE;
 
@@ -697,8 +736,14 @@ function sumfields_initialize_user_settings() {
   // Which of the available fields does the user want to activate?
   $values = sumfields_get_all_custom_fields();
   // By default, don't include the event fields because they are resource
-  // intensive to initialize.
-  $unsets = array('event_last_attended_name', 'event_last_attended_date');
+  // intensive to initialize and might not all be present.
+  $unsets = array(
+    'event_last_attended_name',
+    'event_last_attended_date',
+    'event_attended_total_lifetime',
+    'event_noshow_total_lifetime',
+    'event_turnout_attempts'
+  );
   while(list(,$unsetit) = each($unsets)) {
     $keys = array_keys($values, $unsetit);
     $key = array_pop($keys);
@@ -836,8 +881,11 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
   }
   
   // Rewrite the sql with the appropriate variables filled in.
-  $trigger_sql = sumfields_sql_rewrite($config_trigger_sql);
-
+  if(FALSE === $trigger_sql = sumfields_sql_rewrite($config_trigger_sql)) {
+    $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
+    drush_log($msg, 'error');
+    return FALSE;
+  }
   // Iterate over all contacts with a contribution
   $contact_sql = "SELECT DISTINCT(contact_id) FROM civicrm_contribution WHERE ".
     "is_test = 0";
@@ -993,6 +1041,9 @@ function sumfields_print_triggers() {
   $custom = sumfields_get_custom_field_definitions();
   while(list($k, $v) = each($custom['fields'])) {
     $out = sumfields_sql_rewrite($v['trigger_sql']);
+    if(FALSE === $out) {
+      $out = "Failed sql_write.";
+    }
     drush_print("Field: $k");
     drush_print($out);
   }
