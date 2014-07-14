@@ -833,19 +833,6 @@ function sumfields_deinitialize_custom_data() {
 function sumfields_find_incorrect_total_lifetime_contribution_records() {
   $ret = array();
 
-  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) { 
-    // This means there is no update triggered defined.
-    $msg = dt("Update trigger is not defined. This might explain inconsistent responses. ".
-      "Rebuilding triggers, this may take a while.");
-    drush_log($msg, 'error');
-    CRM_Core_DAO::triggerRebuild();
-    if(!sumfields_get_update_trigger('civicrm_contribution')) { 
-      $msg = dt("Still can't find trigger after rebuilding. Bailing...");
-      drush_log($msg, 'error');
-      return FALSE;
-    }
-  }
-
   // We're only interested in one field for this test.
   $base_column_name = 'contribution_total_lifetime';
 
@@ -853,7 +840,7 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
   $active_fields = sumfields_get_setting('active_fields', array());
   if(!in_array($base_column_name, $active_fields)) {
     drush_log(dt("The total lifetime contribution is not active, this test will not work."), 'error');
-    return;
+    return FALSE;
   }
 
   // Get the name of the actual summary fields table.
@@ -916,6 +903,45 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
 }
 
 /**
+ * Test for inconsistent summaries
+ *
+ * Returns 1 if the test is successful, 2 if inconsistencies are found
+ * and 3 if there was an error running the test.
+ *
+ * FIXME: how can we convince drush to set error codes properly?
+ **/
+function sumfields_test_inconsistent_summaries() {
+  // We're only interested in one field for this test.
+  $base_column_name = 'contribution_total_lifetime';
+
+  // We need to ensure this field is enabled on this site.
+  $active_fields = sumfields_get_setting('active_fields', array());
+  if(!in_array($base_column_name, $active_fields)) {
+    echo "3\n"; 
+    return FALSE;
+  }
+
+  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) { 
+    // If no triger is defined, there's no way this will work. Bail early. Save CPU
+    // cycles.
+    echo "2\n";
+    return FALSE;
+  }
+
+  $ids = sumfields_find_incorrect_total_lifetime_contribution_records();
+  if($ids === FALSE) {
+    echo "3\n";
+    return FALSE;
+  }
+  if(count($ids) == 0) {
+    echo "1\n";
+    return TRUE;
+  }
+  echo "2\n";
+  return TRUE;
+}
+
+/**
  * Print incorrect total lifetime contributions.
  *
  * Diangostic tool for testing to see whether there are any records with an
@@ -925,12 +951,30 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
  *
  * drush php-eval "_civicrm_init(); sumfields_print_inconsistent_summaries()"
  *
+ *
  */
 function sumfields_print_inconsistent_summaries() {
+  // We're only interested in one field for this test.
+  $base_column_name = 'contribution_total_lifetime';
+
+  // We need to ensure this field is enabled on this site.
+  $active_fields = sumfields_get_setting('active_fields', array());
+  if(!in_array($base_column_name, $active_fields)) {
+    drush_log(dt("The total lifetime contribution is not active, this test will not work."), 'error');
+    return FALSE;
+  }
+
+  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) { 
+    // If no triger is defined, there's no way this will work. Bail early. Save CPU
+    // cycles.
+    drush_log("Contribution table trigger not defined. This won't work.", 'error');
+    return FALSE;
+  }
+
   $ids = sumfields_find_incorrect_total_lifetime_contribution_records();
   if($ids === FALSE) {
-    drush_log("Failed to test for inconsistent data.", 'error');
-    return;
+    drush_log("Failed to test for inconsistent data. Something went wrong.", 'error');
+    return FALSE;
   }
   while(list($id, $data) = each($ids)) {
     drush_log($data, 'ok');
@@ -952,6 +996,9 @@ function sumfields_get_update_trigger($table = 'civicrm_contribution') {
   return $dao->ACTION_STATEMENT;
 }
 
+function testo() {
+  drush_log('this is an error', 'error');
+}
 
 /**
  * Fix incorrect contributions summary fields.
@@ -962,6 +1009,18 @@ function sumfields_get_update_trigger($table = 'civicrm_contribution') {
  *
  */
 function sumfields_fix_inconsistent_summaries() {
+  // This means there is no update triggered defined.
+  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) { 
+    $msg = dt("Update trigger is not defined. This might explain inconsistent responses. ".
+      "Rebuilding triggers, this may take a while.");
+    drush_log($msg, 'error');
+    CRM_Core_DAO::triggerRebuild();
+    if(!sumfields_get_update_trigger('civicrm_contribution')) { 
+      $msg = dt("Still can't find trigger after rebuilding. Bailing...");
+      drush_log($msg, 'error');
+      return FALSE;
+    }
+  }
   $ids = sumfields_find_incorrect_total_lifetime_contribution_records();
   if($ids && count($ids) > 0) {
     // Just re-initiate everything - who knows what might have gone wrong.
@@ -969,6 +1028,7 @@ function sumfields_fix_inconsistent_summaries() {
     CRM_Core_DAO::triggerRebuild();
     drush_log(dt("Repopulating all data."), 'error'); 
     sumfields_generate_data_based_on_current_data($session = NULL);
+    return TRUE;
   }
 }
 
