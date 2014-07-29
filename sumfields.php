@@ -1108,3 +1108,15 @@ function sumfields_print_triggers() {
     drush_print($out);
   }
 }
+
+/**
+ * Help function: if we are multi-lingual, rewrite the
+ * given query.
+ **/
+function sumfields_multilingual_rewrite($query) {
+  global $dbLocale;
+  if($dbLocale) {
+    return CRM_Core_I18n_Schema::rewriteQuery($query);
+  }
+  return $query;
+}
