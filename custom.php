@@ -285,9 +285,10 @@ $custom = array(
 			'is_active' => '1',
 			'is_view' => '1',
 			'text_length' => '128',
-      'trigger_sql' => '(SELECT e.title AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
-      t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
-      AND e.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)',
+      'trigger_sql' => CRM_Core_I18n_Schema::rewriteQuery('(SELECT e.title AS summary_value
+      FROM civicrm_participant t1 JOIN civicrm_event e ON t1.event_id = e.id
+      WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
+      AND e.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)'),
       'trigger_table' => 'civicrm_participant',
 		),
     'event_last_attended_date' => array(
