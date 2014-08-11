@@ -307,7 +307,36 @@ $custom = array(
       AND e.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_participant',
 		),
-
+    'event_turnout_attempts' => array(
+			'label' => ts('Number of turnout attempts'),
+			'data_type' => 'Int',
+			'html_type' => 'Text',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'is_search_range' => '1',
+			'weight' => '75',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '8',
+      'trigger_sql' => '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
+      ON t1.entity_id = p.id WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
+      OR (%invitation_response IS NOT NULL AND %invitation_response != "")))',
+      'trigger_table' => 'civicrm_participant',
+		),
+    'event_total' => array(
+			'label' => ts('Number of events invited to'),
+			'data_type' => 'Int',
+			'html_type' => 'Text',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'is_search_range' => '1',
+			'weight' => '75',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '8',
+      'trigger_sql' => '(SELECT COUNT(id) AS summary_value FROM civicrm_participant WHERE contact_id = NEW.contact_id)',
+      'trigger_table' => 'civicrm_participant',
+		),
     'event_attended_total_lifetime' => array(
        'label' => ts('Total lifetime events attended'),
        'data_type' => 'Int',
@@ -340,21 +369,5 @@ $custom = array(
         AND e.event_type_id IN (%event_type_ids))',
         'trigger_table' => 'civicrm_participant',
     ),
-    'event_turnout_attempts' => array(
-			'label' => ts('Number of turnout attempts'),
-			'data_type' => 'Int',
-			'html_type' => 'Text',
-			'is_required' => '0',
-			'is_searchable' => '1',
-			'is_search_range' => '1',
-			'weight' => '75',
-			'is_active' => '1',
-			'is_view' => '1',
-			'text_length' => '8',
-      'trigger_sql' => '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
-      ON t1.entity_id = p.id WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
-      OR (%invitation_response IS NOT NULL AND %invitation_response != "")))',
-      'trigger_table' => 'civicrm_participant',
-		),
   ),
 );
