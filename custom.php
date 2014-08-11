@@ -1,4 +1,18 @@
 <?php
+
+// Define a few trigger sql queries first - because they need to be
+// referenced first for a total number and a second time for the
+// percent.
+$event_attended_total_lifetime_trigger_sql =
+  '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
+  t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
+  AND e.event_type_id IN (%event_type_ids))';
+$event_total_trigger_sql =
+  '(SELECT COUNT(id) AS summary_value FROM civicrm_participant WHERE contact_id = NEW.contact_id)';
+$event_turnout_attempts_trigger_sql =
+  '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
+  ON t1.entity_id = p.id WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
+  OR (%invitation_response IS NOT NULL AND %invitation_response != "")))';
 $custom = array(
 	'groups' => array(
 		'summary_fields' => array(
@@ -318,9 +332,7 @@ $custom = array(
 			'is_active' => '1',
 			'is_view' => '1',
 			'text_length' => '8',
-      'trigger_sql' => '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
-      ON t1.entity_id = p.id WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
-      OR (%invitation_response IS NOT NULL AND %invitation_response != "")))',
+      'trigger_sql' => $event_turnout_attempts_trigger_sql,
       'trigger_table' => 'civicrm_participant',
 		),
     'event_total' => array(
@@ -334,7 +346,7 @@ $custom = array(
 			'is_active' => '1',
 			'is_view' => '1',
 			'text_length' => '8',
-      'trigger_sql' => '(SELECT COUNT(id) AS summary_value FROM civicrm_participant WHERE contact_id = NEW.contact_id)',
+      'trigger_sql' => $event_total_trigger_sql, 
       'trigger_table' => 'civicrm_participant',
 		),
     'event_attended_total_lifetime' => array(
@@ -348,10 +360,42 @@ $custom = array(
        'is_active' => '1',
        'is_view' => '1',
        'text_length' => '8',
-        'trigger_sql' => '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
-        t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
-        AND e.event_type_id IN (%event_type_ids))',
+        'trigger_sql' => $event_attended_total_lifetime_trigger_sql,
         'trigger_table' => 'civicrm_participant',
+    ),
+    'event_attended_percent_total_lifetime' => array(
+       'label' => ts('Total lifetime of events attended as percent of those invited to'),
+       'data_type' => 'Int',
+       'html_type' => 'Text',
+       'is_required' => '0',
+       'is_searchable' => '1',
+       'is_search_range' => '1',
+       'weight' => '75',
+       'is_active' => '1',
+       'is_view' => '1',
+       'text_length' => '8',
+       // Divide event_attended_total_lifetime / event_total, substituting 0 if either field is NULL. Then, only
+       // take two decimal places and multiply by 100, so .8000 becomes 80.
+       'trigger_sql' => '(SELECT FORMAT(IFNULL(' . $event_attended_total_lifetime_trigger_sql .
+          ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql . ', 0), 2) * 100 AS summary_value)',
+       'trigger_table' => 'civicrm_participant',
+    ),
+    'event_attended_percent_turnout_attempts' => array(
+       'label' => ts('Total lifetime of events attended as percent of turn out attempts'),
+       'data_type' => 'Int',
+       'html_type' => 'Text',
+       'is_required' => '0',
+       'is_searchable' => '1',
+       'is_search_range' => '1',
+       'weight' => '75',
+       'is_active' => '1',
+       'is_view' => '1',
+       'text_length' => '8',
+       // Divide event_attended_total_lifetime / event_turnout_attempts substituting 0 if either field is NULL. Then, only
+       // take two decimal places and multiply by 100, so .8000 becomes 80.
+       'trigger_sql' => '(SELECT FORMAT(IFNULL(' . $event_attended_total_lifetime_trigger_sql .
+          ', 0)' . ' / ' .  'IFNULL(' . $event_turnout_attempts_trigger_sql . ', 0), 2) * 100 AS summary_value)',
+       'trigger_table' => 'civicrm_participant',
     ),
     'event_noshow_total_lifetime' => array(
        'label' => ts('Total lifetime no-show events'),
