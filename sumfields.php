@@ -56,7 +56,6 @@ function sumfields_civicrm_uninstall() {
  * Implementation of hook_civicrm_enable
  */
 function sumfields_civicrm_enable() {
-  // Note: CiviCRM reloads the triggers automatically.
   sumfields_initialize_user_settings();
   $session = CRM_Core_Session::singleton();
   if(!sumfields_create_custom_fields_and_table()) {
@@ -253,7 +252,6 @@ function sumfields_zero_pad($num) {
  **/
 
 function sumfields_civicrm_triggerInfo(&$info, $tableName) {
-
   // Our triggers all use custom fields. CiviCRM, when generating
   // custom fields, sometimes gives them different names (appending
   // the id in most cases) to avoid name collisions.
