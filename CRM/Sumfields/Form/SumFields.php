@@ -8,7 +8,8 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $options = array();
     $field_options = array();
     while(list($k,$v) = each($custom['fields'])) {
-      $field_options[$k] = $v['label'];
+      $display = $v['display'];
+      $field_options[$display][$k] = $v['label'];
     }
     if(count($field_options) == 0) {
       // This means neither CiviEvent or CiviContribute are enabled.
@@ -18,7 +19,6 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         one."));
       return;
     }
-
     // Evaluate status of the triggers and report to the user.
     if(sumfields_get_update_trigger('civicrm_contribution')) {
       $contribution_table_trigger_status = 'Enabled';
@@ -41,12 +41,42 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     );
 
     // Add active fields
-    $name = 'active_fields';
-    $label = ts('Active Fields');
-    $this->addCheckBox(
-      $name, $label, array_flip($field_options)
-    );
-    $this->addRule($name, ts('You must define at least one active field'), 'required');
+    if(array_key_exists('fundraising', $field_options)) {
+      $this->Assign('sumfields_active_fundraising', TRUE);
+      $name = 'active_fundraising_fields';
+      $label = ts('Fundraising Fields');
+      $this->addCheckBox(
+        $name, $label, array_flip($field_options['fundraising'])
+      );
+    }
+    
+    if(sumfields_component_enabled('CiviMember') && 
+      array_key_exists('membership', $field_options)) {
+
+      $this->Assign('sumfields_active_membership', TRUE);
+      $name = 'active_membership_fields';
+      $label = ts('Membership Fields');
+      $this->addCheckBox(
+        $name, $label, array_flip($field_options['membership'])
+      );
+    }
+
+    if(array_key_exists('event_standard', $field_options)) {
+      $this->Assign('sumfields_active_event_standard', TRUE);
+      $name = 'active_event_standard_fields';
+      $label = ts('Standard Event Fields');
+      $this->addCheckBox(
+        $name, $label, array_flip($field_options['event_standard'])
+      );
+    }
+    if(array_key_exists('event_turnout', $field_options)) {
+      $this->Assign('sumfields_active_event_turnout', TRUE);
+      $name = 'active_event_turnout_fields';
+      $label = ts('Turnout Event Fields');
+      $this->addCheckBox(
+        $name, $label, array_flip($field_options['event_turnout'])
+      );
+    }
 
     if(sumfields_component_enabled('CiviMember')) {
       $this->assign('sumfields_member', TRUE);
@@ -110,6 +140,34 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
   function setDefaultValues() {
     $defaults = parent::setDefaultValues();
+    $custom = sumfields_get_custom_field_definitions();
+    $active_fields = sumfields_get_setting('active_fields', array());
+    $active_fundraising_fields = array();
+    $active_membership_fields = array();
+    $active_event_standard_fields = array();
+    $active_event_turnout_fields = array();
+    while(list($field,$field_info) = each($custom['fields'])) {
+      if(in_array($field, $active_fields)) {
+        if($field_info['display'] == 'fundraising') {
+          $active_fundraising_fields[] = $field;
+        }
+        elseif($field_info['display'] == 'membership') {
+          $active_membership_fields[] = $field;
+        }
+        elseif($field_info['display'] == 'event_standard') {
+          $active_event_standard_fields[] = $field;
+        }
+        elseif($field_info['display'] == 'event_turnout') {
+          $active_event_turnout_fields[] = $field;
+        }
+      }
+    } 
+    $defaults['active_fundraising_fields'] = $this->array_to_options($active_fundraising_fields);
+    $defaults['active_membership_fields'] = $this->array_to_options($active_membership_fields);
+    $defaults['active_event_standard_fields'] = $this->array_to_options($active_event_standard_fields);
+    $defaults['active_event_turnout_fields'] = $this->array_to_options($active_event_turnout_fields);
+
+
     $defaults['active_fields'] = $this->array_to_options(sumfields_get_setting('active_fields', array()));
     $defaults['financial_type_ids'] = $this->array_to_options(sumfields_get_setting('financial_type_ids', array()));
     $defaults['membership_financial_type_ids'] = $this->array_to_options(sumfields_get_setting('membership_financial_type_ids', array()));
@@ -122,12 +180,26 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
   function postProcess() {
     $values = $this->controller->exportValues($this->_name);
 
+    // Combine all fields into on active_fields array for easier processing.
+    $active_fields = array();
+    if(array_key_exists('active_fundraising_fields', $values)) {
+      $active_fields = $active_fields + $values['active_fundraising_fields'];
+    }
+    if(array_key_exists('active_membership_fields', $values)) {
+      $active_fields = $active_fields + $values['active_membership_fields'];
+    }
+    if(array_key_exists('active_event_standard_fields', $values)) {
+      $active_fields = $active_fields + $values['active_event_standard_fields'];
+    }
+    if(array_key_exists('active_event_turnout_fields', $values)) {
+      $active_fields = $active_fields + $values['active_event_turnout_fields'];
+    }
     // Keep track of whether or not active_fields have changed so we know whether or not
     // to alter the table.
     $active_fields_have_changed = FALSE;
-    if(array_key_exists('active_fields', $values)) {
+    if(count($active_fields) > 0) {
       $current_active_fields = sumfields_get_setting('active_fields');
-      $new_active_fields = $this->options_to_array($values['active_fields']);
+      $new_active_fields = $this->options_to_array($active_fields);
       if($current_active_fields != $new_active_fields) {
         $active_fields_have_changed = TRUE;
         sumfields_save_setting('active_fields', $new_active_fields);
@@ -150,18 +222,19 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     }
     $session = CRM_Core_Session::singleton();
 
-    if($active_fields_have_changed) {
-      // Now we have add/remove fields 
-      sumfields_alter_table($current_active_fields, $new_active_fields);
-    }
-    if(sumfields_generate_data_based_on_current_data($session)) {
-      $session->setStatus(ts("All summary fields have been updated."));
-      CRM_Core_DAO::triggerRebuild();
-    }
-    else {
-      $session->setStatus(ts("There was an error re-generating the data."));
-    }
-    $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
+   if($active_fields_have_changed) {
+     // Now we have add/remove fields 
+     sumfields_alter_table($current_active_fields, $new_active_fields);
+   }
+   CRM_Core_DAO::triggerRebuild();
+   if(sumfields_generate_data_based_on_current_data($session)) {
+     $session->setStatus(ts("All summary fields have been updated."));
+   }
+   else {
+     $session->setStatus(ts("There was an error re-generating the data."));
+   }
+   $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
+
   }
 
   /**

@@ -17,10 +17,30 @@
   <tr>
     <td colspan="2" class="description">{ts}Please indicate which of the available summary fields you would like to enable.{/ts}</td>
   </tr>
-  <tr class="crm-sumfields-form-block-sumfields_active_fields">
-    <td class="label">{$form.active_fields.label}</td>
-    <td>{$form.active_fields.html}</td>
+  {if $sumfields_active_fundraising }
+  <tr class="crm-sumfields-form-block-sumfields_active_fundraising_fields">
+    <td class="label">{$form.active_fundraising_fields.label}</td>
+    <td>{$form.active_fundraising_fields.html}</td>
   </tr> 
+  {/if}
+  {if $sumfields_active_membership }
+  <tr class="crm-sumfields-form-block-sumfields_active_membership_fields">
+    <td class="label">{$form.active_membership_fields.label}</td>
+    <td>{$form.active_membership_fields.html}</td>
+  </tr> 
+  {/if}
+  {if $sumfields_active_event_standard }
+  <tr class="crm-sumfields-form-block-sumfields_active_event_standard_fields">
+    <td class="label">{$form.active_event_standard_fields.label}</td>
+    <td>{$form.active_event_standard_fields.html}</td>
+  </tr> 
+  {/if}
+  {if $sumfields_active_event_turnout }
+  <tr class="crm-sumfields-form-block-sumfields_active_event_turnout_fields">
+    <td class="label">{$form.active_event_turnout_fields.label}</td>
+    <td>{$form.active_event_turnout_fields.html}</td>
+  </tr> 
+  {/if}
   {if $sumfields_contribute}
     <tr>
       <td colspan="2" class="description">{ts}Please indicate the financial types you would like included when calculating contribution related summary fields.{/ts}</td>

@@ -176,6 +176,14 @@ function sumfields_sql_rewrite($sql) {
     // This is an error - we have a variable we can't replace.
     return FALSE;
   }
+  $event_attended_total_lifetime_field = sumfields_get_column_name('event_attended_total_lifetime');
+  if($event_attended_total_lifetime_field) {
+    $sql = str_replace('%event_attended_total_lifetime', $event_attended_total_lifetime_field, $sql);
+  }
+  elseif(preg_match('/%event_attended_total_lifetime/', $sql)) {
+    // This is an error - we have a variable we can't replace.
+    return FALSE;
+  }
   return $sql;
 }
 
@@ -732,23 +740,15 @@ function sumfields_component_enabled($component) {
  * types and let users de-select the ones they don't want.
  **/
 function sumfields_initialize_user_settings() {
-
   // Which of the available fields does the user want to activate?
   $values = sumfields_get_all_custom_fields();
-  // By default, don't include the event fields because they are resource
-  // intensive to initialize and might not all be present.
-  $unsets = array(
-    'event_last_attended_name',
-    'event_last_attended_date',
-    'event_attended_total_lifetime',
-    'event_noshow_total_lifetime',
-    'event_turnout_attempts'
-  );
-  while(list(,$unsetit) = each($unsets)) {
-    $keys = array_keys($values, $unsetit);
-    $key = array_pop($keys);
-    unset($values[$key]);
+
+  while(list($k, $v) = each($values)) {
+    if(preg_match('/^event_/', $v)) {
+      unset($values[$k]);
+    }
   }
+  
   sumfields_save_setting('active_fields', $values);
 
   // Which financial_type_ids are used to calculate the general contribution
