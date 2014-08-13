@@ -33,19 +33,19 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       $date = $matches[2];
       switch($status) {
       case 'scheduled':
-        $display_status = ts("Setting changes are not yet saved; they were scheduled to be saved on %1.",
+        $display_status = ts("Setting changes were saved on %1, but not yet applied; they should be applied shortly.",
           array(1 => $date));
         break;
       case 'running':
-        $display_status = ts("Setting changes are in the process of being saved; the process started on %1.",
+        $display_status = ts("Setting changes are in the process of being applied; the process started on %1.",
           array(1 => $date));
         break;
       case 'success':
-        $display_status = ts("Setting changes were successfully saved on %1.",
+        $display_status = ts("Setting changes were successfully applied on %1.",
           array(1 => $date));
         break;
       case 'fail':
-        $display_status = ts("Setting changes failed to save; the failed attempt happend on %1.",
+        $display_status = ts("Setting changes failed to apply; the failed attempt happend on %1.",
           array(1 => $date));
         break;
       }
