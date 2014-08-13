@@ -19,6 +19,40 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         one."));
       return;
     }
+    // Evaluate the status of form changes and report to the user
+    $apply_settings_status = sumfields_get_setting('run_gen_data', FALSE);
+
+    if(empty($apply_settings_status)) {
+      $display_status = ts('The settings have never been saved (newly enabled)');
+    }
+    elseif(!preg_match('/^(scheduled|running|success|failed):([0-9 :\-]+)$/', $apply_settings_status, $matches)) {
+      $display_status = ts("Unable to determine status (%1).", array(1 => $apply_settings_status));
+    }
+    else {
+      $status = $matches[1];
+      $date = $matches[2];
+      switch($status) {
+      case 'scheduled':
+        $display_status = ts("Setting changes are not yet saved; they were scheduled to be saved on %1.",
+          array(1 => $date));
+        break;
+      case 'running':
+        $display_status = ts("Setting changes are in the process of being saved; the process started on %1.",
+          array(1 => $date));
+        break;
+      case 'success':
+        $display_status = ts("Setting changes were successfully saved on %1.",
+          array(1 => $date));
+        break;
+      case 'fail':
+        $display_status = ts("Setting changes failed to save; the failed attempt happend on %1.",
+          array(1 => $date));
+        break;
+      }
+    }
+
+    $this->Assign('display_status', $display_status);
+
     // Evaluate status of the triggers and report to the user.
     if(sumfields_get_update_trigger('civicrm_contribution')) {
       $contribution_table_trigger_status = 'Enabled';
@@ -123,6 +157,16 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
     }
 
+    $name = ts('when_to_apply_change');
+    $label = ts('When should these changes be applied?');
+    $options = array(
+      'via_cron' => ts("On the next scheduled job (cron)"),
+      'on_submit' => ts("When I submit this form")
+    );
+    $this->addRadio(
+      $name, $label, $options
+    );
+
     $this->addButtons(array(
           array(
             'type' => 'next',
@@ -174,6 +218,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $defaults['event_type_ids'] = $this->array_to_options(sumfields_get_setting('event_type_ids', array()));
     $defaults['participant_status_ids'] = $this->array_to_options(sumfields_get_setting('participant_status_ids', array()));
     $defaults['participant_noshow_status_ids'] = $this->array_to_options(sumfields_get_setting('participant_noshow_status_ids', array()));
+    $defaults['when_to_apply_change'] = 'via_cron';
     return $defaults;
   }
 
@@ -198,11 +243,11 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     // to alter the table.
     $active_fields_have_changed = FALSE;
     if(count($active_fields) > 0) {
-      $current_active_fields = sumfields_get_setting('active_fields');
+      $current_active_fields = sumfields_get_setting('active_fields', array());
       $new_active_fields = $this->options_to_array($active_fields);
       if($current_active_fields != $new_active_fields) {
         $active_fields_have_changed = TRUE;
-        sumfields_save_setting('active_fields', $new_active_fields);
+        sumfields_save_setting('new_active_fields', $new_active_fields);
       }
     }
     if(array_key_exists('financial_type_ids', $values)) {
@@ -224,9 +269,10 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
    if($active_fields_have_changed) {
      // Now we have add/remove fields 
-     sumfields_alter_table($current_active_fields, $new_active_fields);
+     // sumfields_save_setting('new_active_fields', $new_active_fields);
+     // sumfields_alter_table($current_active_fields, $new_active_fields);
    }
-   sumfields_set_setting('run_gen_data', 'Scheduled');
+   sumfields_save_setting('run_gen_data', 'scheduled:'. date('Y-m-d H:i:s'));
    $session->setStatus(ts("Your summary fields will begin being generated on the next scheduled job. It may take up to an hour to complete."));
    $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
 

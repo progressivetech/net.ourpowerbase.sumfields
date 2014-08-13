@@ -2,13 +2,16 @@
 
 <table class="form-layout-compressed">
   <tr>
-    <td colspan="2" class="description"><h3>{ts}Trigger Status{/ts}</h3></td>
+    <td colspan="2" class="description"><h3>{ts}Extension Status{/ts}</h3></td>
   </tr>
   <tr>
-    <td colspan="2" class="description">{ts}Contribution Table:{/ts} {$contribution_table_trigger_status}</td>
+    <td colspan="2" class="description">{ts}Status of current settings:{/ts} {$display_status}</td>
   </tr>
   <tr>
-    <td colspan="2" class="description">{ts}Participant Table:{/ts} {$participant_table_trigger_status}</td>
+    <td colspan="2" class="description">{ts}Contribution Table Triggers:{/ts} {$contribution_table_trigger_status}</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="description">{ts}Participant Table Triggers:{/ts} {$participant_table_trigger_status}</td>
   </tr>
   <tr>
     <td colspan="2" class="description"><h3>{ts}Settings{/ts}</h3></td>
@@ -80,6 +83,11 @@
     </tr>
   {/if}
 </table>
- <div class="description">{ts}Please be patient - when saving these settings, the contents of the summary table is re-created from scratch. This procedure may take a few minutes.{/ts}</div>
+ <div id="when_to_apply_chyange">
+   <div class="description">{ts}Applying these settings via this form may cause your web server to time out. Applying changes on next scheduled job is recommended.{/ts}</div>
+   <div class="label">{$form.when_to_apply_change.label}</div>
+   <span>{$form.when_to_apply_change.html}</span>
+ </div>
+
  <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
 
