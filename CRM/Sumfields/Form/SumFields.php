@@ -20,7 +20,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       return;
     }
     // Evaluate the status of form changes and report to the user
-    $apply_settings_status = sumfields_get_setting('run_gen_data', FALSE);
+    $apply_settings_status = sumfields_get_setting('generate_schema_and_data', FALSE);
 
     if(empty($apply_settings_status)) {
       $display_status = ts('The settings have never been saved (newly enabled)');
@@ -157,7 +157,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
     }
 
-    $name = ts('when_to_apply_change');
+    $name = 'when_to_apply_change';
     $label = ts('When should these changes be applied?');
     $options = array(
       'via_cron' => ts("On the next scheduled job (cron)"),
@@ -267,15 +267,20 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     }
     $session = CRM_Core_Session::singleton();
 
-   if($active_fields_have_changed) {
-     // Now we have add/remove fields 
-     // sumfields_save_setting('new_active_fields', $new_active_fields);
-     // sumfields_alter_table($current_active_fields, $new_active_fields);
-   }
-   sumfields_save_setting('run_gen_data', 'scheduled:'. date('Y-m-d H:i:s'));
-   $session->setStatus(ts("Your summary fields will begin being generated on the next scheduled job. It may take up to an hour to complete."));
-   $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
-
+    sumfields_save_setting('generate_schema_and_data', 'scheduled:'. date('Y-m-d H:i:s'));
+    if($values['when_to_apply_change'] == 'on_submit') {
+      $returnValues = array();
+      if(!sumfields_gen_data($returnValues)) {
+        $msg = ts("There was an error applying your changes.");
+      }
+      else {
+        $msg = ts("Changes were applied successfully.");
+      }
+    }
+    else {
+      $session->setStatus(ts("Your summary fields will begin being generated on the next scheduled job. It may take up to an hour to complete."));
+    }
+    $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
   }
 
   /**

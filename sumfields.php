@@ -580,6 +580,7 @@ function sumfields_create_custom_fields_and_table() {
     $params = $field;
     $params['version'] = 3;
     $params['custom_group_id'] = $custom_group_id;
+    $params['triggerRebuild'] = FALSE;
     $result = civicrm_api('CustomField', 'create', $params);
     if($result['is_error'] == 1) {
       $session->setStatus(sprintf(ts("Error creating custom field '%s'"), $name));
@@ -1148,6 +1149,7 @@ function sumfields_alter_table() {
         $result = civicrm_api3('CustomField', 'get', $params);
         // Skip without error if it already exists.
         if($result['count'] == 0) {
+          $params['triggerRebuild'] = FALSE;
           $result = civicrm_api3('CustomField', 'create', $params);
         }
       }
@@ -1188,6 +1190,67 @@ function sumfields_print_triggers() {
     drush_print("Field: $k");
     drush_print($out);
   }
+}
+
+/**
+ * Used for generating the schema and data 
+ *
+ * Should be called whenever the extension has the chosen
+ * fields saved.
+ *
+ * Called by the API gendata.
+ */
+function sumfields_gen_data(&$returnValues) {
+  // generate_schema_and_data variable can be set to any of the following:
+  // 
+  // NULL It has never been run, no need to run
+  // scheduled:YYYY-MM-DD HH:MM:SS -> it should be run
+  // running:YYYY-MM-DD HH:MM:SS -> it is currently running, and started at the given date/time
+  // success:YYYY-MM-DD HH:MM:SS -> It completed successfully on the last run at the given date/time
+  // failed:YYYY-MM-DD HH:MM:SS -> It failed on the last run at the given date/time
+  //
+  $status = $new_status = sumfields_get_setting('generate_schema_and_data', FALSE);
+  $date = date('Y-m-d H:i:s');
+  $exception = FALSE;
+  if (preg_match('/^scheduled:/', $status)) {
+    $new_status = 'running:' . $date;
+    sumfields_save_setting('generate_schema_and_data', $new_status);
+
+    // Check to see if the new_active_fields setting is set. This means we have to alter the fields
+    // from the current setting.
+    $new_active_fields = sumfields_get_setting('new_active_fields', NULL);
+    if(!is_null($new_active_fields)) {
+      if(!sumfields_alter_table()) {
+        // If we fail to properly alter the table, bail and record that we had an error.
+        $date = date('Y-m-d H:i:s');
+        $new_status = 'failed:' . $date;
+        $exception = TRUE;
+      }
+      else {
+        // Set new active fields to NULL to indicate that they no longer
+        // need to be updated
+        sumfields_save_setting('new_active_fields', NULL);
+      }
+    }
+    if(!$exception) {
+      if(sumfields_generate_data_based_on_current_data()) {
+        CRM_Core_DAO::triggerRebuild();
+        $date = date('Y-m-d H:i:s');
+        $new_status = 'success:' . $date;
+      }
+      else {
+        $date = date('Y-m-d H:i:s');
+        $new_status = 'fail:' . $date;
+        $exception = TRUE;
+      }
+    }
+  }
+  $returnValues = array("Original Status: $status, New Status: $new_status");
+  sumfields_save_setting('generate_schema_and_data', $new_status);
+  if(!$exception) {
+    return FALSE;
+  }
+  return TRUE;
 }
 
 /**
