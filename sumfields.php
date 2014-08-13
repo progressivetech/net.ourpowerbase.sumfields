@@ -362,6 +362,12 @@ function sumfields_create_temporary_table($trigger_table) {
         $data_type = $field_definition['data_type'];
         if($data_type == 'Money') {
           $data_type = "DECIMAL(10,2)";
+        } 
+        elseif($data_type == 'Date') {
+          $data_type = 'datetime';
+        }
+        elseif($data_type == 'String') {
+          $data_type = 'varchar(128)';
         }
         $create_fields[] = "`$field_name` $data_type";
       }
