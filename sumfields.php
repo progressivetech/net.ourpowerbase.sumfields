@@ -1133,7 +1133,7 @@ function sumfields_alter_table() {
         $ret = FALSE;
         continue;
       }
-      $session->setStatus(sprintf(ts("Deleted custom field '%s'"), $field));
+      // $session->setStatus(sprintf(ts("Deleted custom field '%s'"), $field));
       unset($custom_field_parameters[$field]);
     }
   }
@@ -1164,7 +1164,7 @@ function sumfields_alter_table() {
         $ret = FALSE;
         continue;
       }
-      $session->setStatus(sprintf(ts("Added custom field '%s'"), $field));
+      // $session->setStatus(sprintf(ts("Added custom field '%s'"), $field));
       $value = array_pop($result['values']);
       $custom_field_parameters[$field] = array(
         'id' => $value['id'], 
