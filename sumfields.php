@@ -269,7 +269,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
   // We create a trigger sql statement for each table that should
   // have a trigger
   $tables = array();
-  $generic_sql = "REPLACE INTO `$table_name` SET ";
+  $generic_sql = "INSERT INTO `$table_name` SET ";
   $sql_field_parts = array();
 
   $active_fields = sumfields_get_setting('active_fields', array());
@@ -304,10 +304,10 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
   // sql clause.
   while(list(, $table) = each($tables)) {
     $parts = $sql_field_parts[$table];
-    $parts[] = 'entity_id = NEW.contact_id;';
+    $parts[] = 'entity_id = NEW.contact_id';
 
     $extra_sql = implode(',', $parts);
-    $sql = $generic_sql . $extra_sql;
+    $sql = $generic_sql . $extra_sql . ' ON DUPLICATE KEY UPDATE ' . $extra_sql . ';';
 
     // We want to fire this trigger on insert, update and delete.
     $info[] = array(
