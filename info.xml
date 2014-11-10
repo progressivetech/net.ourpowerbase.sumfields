@@ -13,12 +13,14 @@
   <develStage>beta</develStage>
   <compatibility>
     <ver>4.4</ver>
+    <ver>4.5</ver>
   </compatibility>
   <comments>This extension adds custom data fields and triggers to your database. Disabling this extension will cause the custom data fields to be deleted and triggers removed.</comments>
   <civix>
     <namespace>CRM/Sumfields</namespace>
   </civix>
   <urls>
-    <url description="Documentation">http://git.progressivetech.org/?p=extensions/net.ourpowerbase.sumfields.git;a=blob;f=README</url>
+    <url description="Main Extension Page">https://github.com/progressivetech/net.ourpowerbase.sumfields</url>
+    <url description="Documentation">https://github.com/progressivetech/net.ourpowerbase.sumfields</url>
   </urls>
 </extension>
