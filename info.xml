@@ -8,9 +8,9 @@
     <author>Jamie McClelland/Progressive Technology Project</author>
     <email>jamie@progressivetech.org</email>
   </maintainer>
-  <releaseDate>2014-07-28</releaseDate>
+  <releaseDate>2014-11-18</releaseDate>
   <version>2.0.0</version>
-  <develStage>beta</develStage>
+  <develStage>stable</develStage>
   <compatibility>
     <ver>4.4</ver>
     <ver>4.5</ver>
