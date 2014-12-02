@@ -29,6 +29,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       $display_status = ts("Unable to determine status (%1).", array(1 => $apply_settings_status));
     }
     else {
+      $display_status = NULL;
       $status = $matches[1];
       $date = $matches[2];
       switch($status) {
@@ -44,7 +45,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         $display_status = ts("Setting changes were successfully applied on %1.",
           array(1 => $date));
         break;
-      case 'fail':
+      case 'failed':
         $display_status = ts("Setting changes failed to apply; the failed attempt happend on %1.",
           array(1 => $date));
         break;
