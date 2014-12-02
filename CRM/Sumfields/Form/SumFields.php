@@ -240,14 +240,12 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     if(array_key_exists('active_event_turnout_fields', $values)) {
       $active_fields = $active_fields + $values['active_event_turnout_fields'];
     }
-    // Keep track of whether or not active_fields have changed so we know whether or not
-    // to alter the table.
-    $active_fields_have_changed = FALSE;
     if(count($active_fields) > 0) {
       $current_active_fields = sumfields_get_setting('active_fields', array());
       $new_active_fields = $this->options_to_array($active_fields);
       if($current_active_fields != $new_active_fields) {
-        $active_fields_have_changed = TRUE;
+        // Setting 'new_active_fields' will alert the system that we have 
+        // field changes to be applied.
         sumfields_save_setting('new_active_fields', $new_active_fields);
       }
     }
