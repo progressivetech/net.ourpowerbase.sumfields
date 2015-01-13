@@ -399,8 +399,6 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
       Please disable and renable this extension."));
     return FALSE;
   }
-  $session->setStatus(ts("Regenerating content in your summary fields table."));
-
   // In theory we shouldn't have to truncate the table, but we
   // are doing it just to be sure it's empty.
   $sql = "TRUNCATE TABLE `$table_name`";
@@ -437,6 +435,16 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $participant_temp_table = sumfields_create_temporary_table('civicrm_participant');
     $participant_sql = "INSERT INTO `$participant_temp_table` SELECT ";
   }
+
+  if(is_null($contribution_sql) && is_null($participant_sql)) {
+    // Is this an error? Not sure. But it will be an error if we let this
+    // function continue - it will produce a broken sql statement, so we
+    // short circuit here.
+    $session->setStatus(ts("Not regenerating content, no fields defined."));
+    return TRUE;
+  }
+
+  $session->setStatus(ts("Regenerating content in your summary fields table."));
 
   $tables = array();
   while(list($base_column_name, $params) = each($custom_fields)) {
