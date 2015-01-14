@@ -1210,7 +1210,7 @@ function sumfields_print_triggers() {
  * Used for generating the schema and data 
  *
  * Should be called whenever the extension has the chosen
- * fields saved.
+ * fields saved or via Cron job.
  *
  * Called by the API gendata.
  */
@@ -1223,10 +1223,33 @@ function sumfields_gen_data(&$returnValues) {
   // success:YYYY-MM-DD HH:MM:SS -> It completed successfully on the last run at the given date/time
   // failed:YYYY-MM-DD HH:MM:SS -> It failed on the last run at the given date/time
   //
+ 
+  // We will run if we are scheduled to run OR if the fiscal year has turned
+  // and we haven't yet run this fiscal year
   $status = $new_status = sumfields_get_setting('generate_schema_and_data', FALSE);
   $date = date('Y-m-d H:i:s');
   $exception = FALSE;
-  if (preg_match('/^scheduled:/', $status)) {
+
+  $status_name = NULL;
+  $status_date = NULL;
+  if(preg_match('/^([a-z]+):([0-9 -:]+)$/', $status, $matches)) {
+    $status_name = $matches[1];
+    $status_date = $matches[2];
+    // Check if the fiscal year has turned over since we last ran. 
+    // (also, only attempt to do a new fiscal year run if the last run
+    // was successful to avoid loops of failed runs).
+    if($status_name == 'success') {
+      $fiscal_dates = sumfields_get_fiscal_dates();
+      $ts_fiscal_year_begin = strtotime($fiscal_dates['%current_fiscal_year_begin']);
+      $ts_last_run = strtotime($status_date);
+      if($ts_fiscal_year_begin > $ts_last_run) {
+        // We need to re-generate totals because the fiscal year has changed.
+        $status_name = 'scheduled';
+      }
+    }
+  }
+  if ($status_name == 'scheduled') {
+
     $new_status = 'running:' . $date;
     sumfields_save_setting('generate_schema_and_data', $new_status);
 
