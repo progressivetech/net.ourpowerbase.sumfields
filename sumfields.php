@@ -1301,3 +1301,28 @@ function sumfields_multilingual_rewrite($query) {
   }
   return $query;
 }
+
+/**
+ * Implementation of hook_civicrm_batch.
+ *
+ * Don't create a conflict over summary fields. When batch merging you
+ * will always have conflicts if each record has a different number of
+ * contributions. We should not hold up the merge because these summaries
+ * are different.
+ */
+function sumfields_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL, $tables = NULL) {
+  if($type == 'batch') {
+    $custom_field_parameters = _sumfields_get_custom_field_parameters();
+    $active_fields = sumfields_get_setting('active_fields', array());
+    while(list($key, $field) = each($custom_field_parameters)) {
+      // Skip fields not active (they should not have been created so
+      // should not exist.
+      if(!in_array($key, $active_fields)) continue;
+      $check_key = 'move_custom_' . $field['id'];
+      // Unset summary fields
+      if(array_key_exists($check_key, $data['fields_in_conflict'])) {
+        unset($data['fields_in_conflict'][$check_key]);
+      }
+    }
+  }
+}
