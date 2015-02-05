@@ -14,19 +14,17 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     if(count($field_options) == 0) {
       // This means neither CiviEvent or CiviContribute are enabled.
       $session = CRM_Core_Session::singleton();
-      $session->setStatus(ts("Summary Fields is not particularly useful if
-        CiviContribute and CiviEvent are both disabled. Try enabling at least
-        one."));
+      $session->setStatus(ts("Summary Fields is not particularly useful if CiviContribute and CiviEvent are both disabled. Try enabling at least one.", array('domain' => 'net.ourpowerbase.sumfields')));
       return;
     }
     // Evaluate the status of form changes and report to the user
     $apply_settings_status = sumfields_get_setting('generate_schema_and_data', FALSE);
 
     if(empty($apply_settings_status)) {
-      $display_status = ts('The settings have never been saved (newly enabled)');
+      $display_status = ts('The settings have never been saved (newly enabled)', array('domain' => 'net.ourpowerbase.sumfields'));
     }
     elseif(!preg_match('/^(scheduled|running|success|failed):([0-9 :\-]+)$/', $apply_settings_status, $matches)) {
-      $display_status = ts("Unable to determine status (%1).", array(1 => $apply_settings_status));
+      $display_status = ts("Unable to determine status (%1).", array(1 => $apply_settings_status, 'domain' => 'net.ourpowerbase.sumfields'));
     }
     else {
       $display_status = NULL;
@@ -34,20 +32,16 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       $date = $matches[2];
       switch($status) {
       case 'scheduled':
-        $display_status = ts("Setting changes were saved on %1, but not yet applied; they should be applied shortly.",
-          array(1 => $date));
+        $display_status = ts("Setting changes were saved on %1, but not yet applied; they should be applied shortly.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
         break;
       case 'running':
-        $display_status = ts("Setting changes are in the process of being applied; the process started on %1.",
-          array(1 => $date));
+        $display_status = ts("Setting changes are in the process of being applied; the process started on %1.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
         break;
       case 'success':
-        $display_status = ts("Setting changes were successfully applied on %1.",
-          array(1 => $date));
+        $display_status = ts("Setting changes were successfully applied on %1.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
         break;
       case 'failed':
-        $display_status = ts("Setting changes failed to apply; the failed attempt happend on %1.",
-          array(1 => $date));
+        $display_status = ts("Setting changes failed to apply; the failed attempt happend on %1.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
         break;
       }
     }
@@ -79,7 +73,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     if(array_key_exists('fundraising', $field_options)) {
       $this->Assign('sumfields_active_fundraising', TRUE);
       $name = 'active_fundraising_fields';
-      $label = ts('Fundraising Fields');
+      $label = ts('Fundraising Fields', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->addCheckBox(
         $name, $label, array_flip($field_options['fundraising'])
       );
@@ -90,7 +84,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
       $this->Assign('sumfields_active_membership', TRUE);
       $name = 'active_membership_fields';
-      $label = ts('Membership Fields');
+      $label = ts('Membership Fields', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->addCheckBox(
         $name, $label, array_flip($field_options['membership'])
       );
@@ -99,7 +93,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     if(array_key_exists('event_standard', $field_options)) {
       $this->Assign('sumfields_active_event_standard', TRUE);
       $name = 'active_event_standard_fields';
-      $label = ts('Standard Event Fields');
+      $label = ts('Standard Event Fields', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->addCheckBox(
         $name, $label, array_flip($field_options['event_standard'])
       );
@@ -107,7 +101,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     if(array_key_exists('event_turnout', $field_options)) {
       $this->Assign('sumfields_active_event_turnout', TRUE);
       $name = 'active_event_turnout_fields';
-      $label = ts('Turnout Event Fields');
+      $label = ts('Turnout Event Fields', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->addCheckBox(
         $name, $label, array_flip($field_options['event_turnout'])
       );
@@ -116,53 +110,53 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     if(sumfields_component_enabled('CiviMember')) {
       $this->assign('sumfields_member', TRUE);
       $name = 'membership_financial_type_ids';
-      $label = ts('Membership Financial Types');
+      $label = ts('Membership Financial Types', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->addCheckBox(
         $name, $label, array_flip(sumfields_get_all_financial_types())
       );
-      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label, 'domain' => 'net.ourpowerbase.sumfields')), 'required');
     }
     if(sumfields_component_enabled('CiviContribute')) {
       $this->assign('sumfields_contribute', TRUE);
       $name = 'financial_type_ids';
-      $label = ts('Financial Types');
+      $label = ts('Financial Types', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->addCheckBox(
         $name, $label, array_flip(sumfields_get_all_financial_types())
       );
-      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label, 'domain' => 'net.ourpowerbase.sumfields')), 'required');
     }
     if(sumfields_component_enabled('CiviEvent')) {
       $this->assign('sumfields_event', TRUE);
       $name = 'event_type_ids';
-      $label = ts('Event Types');
+      $label = ts('Event Types', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->addCheckBox(
         $name, $label, array_flip(sumfields_get_all_event_types())
       );
-      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label, 'domain' => 'net.ourpowerbase.sumfields')), 'required');
 
-      $label = ts('Participant Status (attended)');
+      $label = ts('Participant Status (attended)', array('domain' => 'net.ourpowerbase.sumfields'));
       $name = 'participant_status_ids';
       $this->addCheckBox(
         $name, 
         $label,
         array_flip(sumfields_get_all_participant_status_types())
       );
-      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
-      $label = ts('Participant Status (did not attend)');
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label, 'domain' => 'net.ourpowerbase.sumfields')), 'required');
+      $label = ts('Participant Status (did not attend)', array('domain' => 'net.ourpowerbase.sumfields'));
       $name = 'participant_noshow_status_ids';
       $this->addCheckBox(
         $name,
         $label,
         array_flip(sumfields_get_all_participant_status_types())
       );
-      $this->addRule($name, ts('%1 is a required field.', array(1 => $label)), 'required');
+      $this->addRule($name, ts('%1 is a required field.', array(1 => $label, 'domain' => 'net.ourpowerbase.sumfields')), 'required');
     }
 
     $name = 'when_to_apply_change';
-    $label = ts('When should these changes be applied?');
+    $label = ts('When should these changes be applied?', array('domain' => 'net.ourpowerbase.sumfields'));
     $options = array(
-      'via_cron' => ts("On the next scheduled job (cron)"),
-      'on_submit' => ts("When I submit this form")
+      'via_cron' => ts("On the next scheduled job (cron)", array('domain' => 'net.ourpowerbase.sumfields')),
+      'on_submit' => ts("When I submit this form", array('domain' => 'net.ourpowerbase.sumfields'))
     );
     $this->addRadio(
       $name, $label, $options
@@ -270,14 +264,14 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     if($values['when_to_apply_change'] == 'on_submit') {
       $returnValues = array();
       if(!sumfields_gen_data($returnValues)) {
-        $msg = ts("There was an error applying your changes.");
+        $msg = ts("There was an error applying your changes.", array('domain' => 'net.ourpowerbase.sumfields'));
       }
       else {
-        $msg = ts("Changes were applied successfully.");
+        $msg = ts("Changes were applied successfully.", array('domain' => 'net.ourpowerbase.sumfields'));
       }
     }
     else {
-      $session->setStatus(ts("Your summary fields will begin being generated on the next scheduled job. It may take up to an hour to complete."));
+      $session->setStatus(ts("Your summary fields will begin being generated on the next scheduled job. It may take up to an hour to complete.", array('domain' => 'net.ourpowerbase.sumfields')));
     }
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
   }

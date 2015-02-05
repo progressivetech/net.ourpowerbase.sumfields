@@ -26,7 +26,7 @@ function sumfields_civicrm_xmlMenu(&$files) {
 function sumfields_civicrm_navigationMenu(&$params) {
   $path = "Administer/Customize Data and Screens";
   $item = array(
-    'label' => ts('Summary Fields'),
+    'label' => ts('Summary Fields', array('net.ourpowerbase.sumfields')),
     'name' => 'Summary Fields',
     'url' => 'civicrm/admin/setting/sumfields',
     'permission' => 'administer CiviCRM',
@@ -59,10 +59,10 @@ function sumfields_civicrm_enable() {
   sumfields_initialize_user_settings();
   $session = CRM_Core_Session::singleton();
   if(!sumfields_create_custom_fields_and_table()) {
-    $msg = ts("Failed to create custom fields and table. Maybe they already exist?");
+    $msg = ts("Failed to create custom fields and table. Maybe they already exist?", array('domain' => 'net.ourpowerbase.sumfields'));
     $session->setStatus($msg);
   }
-  $msg = ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.");
+  $msg = ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.", array('domain' => 'net.ourpowerbase.sumfields'));
   $session->setStatus($msg);
 
   return _sumfields_civix_civicrm_enable();
