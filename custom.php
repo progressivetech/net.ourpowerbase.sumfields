@@ -35,7 +35,7 @@ $custom = array(
 	'groups' => array(
 		'summary_fields' => array(
 			'name' => 'Summary_Fields',
-			'title' => ts('Summary Fields'),
+			'title' => ts('Summary Fields', array('domain' => 'net.ourpowerbase.sumfields')),
 			'extends' => 'Contact',
 			'style' => 'Tab',
 			'collapse_display' => '0',
@@ -50,7 +50,7 @@ $custom = array(
   ),
 	'fields' => array(
 		'contribution_total_lifetime' => array(
-			'label' => ts('Total Lifetime Contributions'),
+			'label' => ts('Total Lifetime Contributions', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -67,7 +67,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
 		'contribution_total_this_year' => array(
-			'label' => ts('Total Contributions this Year'),
+			'label' => ts('Total Contributions this Year', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -85,7 +85,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
     'contribution_total_deductible_this_year' => array(
-			'label' => ts('Total Deductible Contributions this Year'),
+			'label' => ts('Total Deductible Contributions this Year', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -105,7 +105,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
 		'contribution_total_last_year' => array(
-			'label' => ts('Total Contributions last Year'),
+			'label' => ts('Total Contributions last Year', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -123,7 +123,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
     'contribution_total_deductible_last_year' => array(
-			'label' => ts('Total Deductible Contributions last Year'),
+			'label' => ts('Total Deductible Contributions last Year', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -143,7 +143,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
     'contribution_total_year_before_last' => array(
-			'label' => ts('Total Contributions Year Before Last'),
+			'label' => ts('Total Contributions Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -161,7 +161,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
     'contribution_total_deductible_year_before_last_year' => array(
-			'label' => ts('Total Deductible Contributions Year Before Last'),
+			'label' => ts('Total Deductible Contributions Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -181,7 +181,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
 		'contribution_amount_last' => array(
-			'label' => ts('Amount of last contribution'),
+			'label' => ts('Amount of last contribution', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -199,7 +199,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
 		'contribution_date_last' => array(
-			'label' => ts('Date of Last Contribution'),
+			'label' => ts('Date of Last Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Date',
 			'html_type' => 'Select Date',
 			'is_required' => '0',
@@ -216,7 +216,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
 		'contribution_date_first' => array(
-			'label' => ts('Date of First Contribution'),
+			'label' => ts('Date of First Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Date',
 			'html_type' => 'Select Date',
 			'is_required' => '0',
@@ -234,7 +234,7 @@ $custom = array(
 
 		),
 		'contribution_largest' => array(
-			'label' => ts('Largest Contribution'),
+			'label' => ts('Largest Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -251,7 +251,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
 		'contribution_total_number' => array(
-			'label' => ts('Count of Contributions'),
+			'label' => ts('Count of Contributions', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Int',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -268,7 +268,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
     'contribution_average_annual_amount' => array(
-			'label' => ts('Average Annual (Calendar Year) Contribution'),
+			'label' => ts('Average Annual (Calendar Year) Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -287,7 +287,7 @@ $custom = array(
       'display' => 'fundraising',
 		),
     'contribution_date_last_membership_payment' => array(
-			'label' => ts('Date of Last Membership Payment'),
+			'label' => ts('Date of Last Membership Payment', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Date',
 			'html_type' => 'Select Date',
 			'is_required' => '0',
@@ -305,7 +305,7 @@ $custom = array(
       'display' => 'membership',
 		),
     'contribution_amount_last_membership_payment' => array(
-			'label' => ts('Amount of Last Membership Payment'),
+			'label' => ts('Amount of Last Membership Payment', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -323,7 +323,7 @@ $custom = array(
       'display' => 'membership',
 		),
     'event_last_attended_name' => array(
-			'label' => ts('Name of the last attended event'),
+			'label' => ts('Name of the last attended event', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'String',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -341,7 +341,7 @@ $custom = array(
       'display' => 'event_standard',
 		),
     'event_last_attended_date' => array(
-			'label' => ts('Date of the last attended event'),
+			'label' => ts('Date of the last attended event', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Date',
 			'html_type' => 'Select Date',
 			'is_required' => '0',
@@ -359,7 +359,7 @@ $custom = array(
 		),
     
     'event_total' => array(
-			'label' => ts('Total Number of events'),
+			'label' => ts('Total Number of events', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Int',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -374,7 +374,7 @@ $custom = array(
       'display' => 'event_standard',
 		),
     'event_attended' => array(
-      'label' => ts('Number of events attended'),
+      'label' => ts('Number of events attended', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'is_required' => '0',
@@ -389,7 +389,7 @@ $custom = array(
       'display' => 'event_standard',
     ),
     'event_attended_percent_total' => array(
-      'label' => ts('Events attended as percent of total'),
+      'label' => ts('Events attended as percent of total', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'is_required' => '0',
@@ -407,7 +407,7 @@ $custom = array(
       'display' => 'event_standard',
     ),
     'event_noshow' => array(
-      'label' => ts('Number of no-show events'),
+      'label' => ts('Number of no-show events', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'is_required' => '0',
@@ -422,7 +422,7 @@ $custom = array(
       'display' => 'event_standard',
     ),
     'event_noshow_percent_total' => array(
-      'label' => ts('No-shows as percent of total events'),
+      'label' => ts('No-shows as percent of total events', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'is_required' => '0',
@@ -438,7 +438,7 @@ $custom = array(
       'display' => 'event_standard',
     ),
     'event_turnout_attempts' => array(
-			'label' => ts('Number of turnout attempts'),
+			'label' => ts('Number of turnout attempts', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Int',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -453,7 +453,7 @@ $custom = array(
       'display' => 'event_turnout',
 		),
     'event_turnout_attended' => array(
-			'label' => ts('Number attended from turnout attempts'),
+			'label' => ts('Number attended from turnout attempts', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Int',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -468,7 +468,7 @@ $custom = array(
       'display' => 'event_turnout',
 		),
     'event_turnout_noshow' => array(
-			'label' => ts('Number noshow from turnout attempts'),
+			'label' => ts('Number noshow from turnout attempts', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Int',
 			'html_type' => 'Text',
 			'is_required' => '0',
@@ -483,7 +483,7 @@ $custom = array(
       'display' => 'event_turnout',
 		),
     'event_attended_percent_turnout' => array(
-      'label' => ts('Attended as percent of turn out attempts'),
+      'label' => ts('Attended as percent of turn out attempts', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'is_required' => '0',
@@ -499,7 +499,7 @@ $custom = array(
       'display' => 'event_turnout',
     ),
     'event_noshow_percent_turnout' => array(
-      'label' => ts('No-shows as percent of turn out attempts'),
+      'label' => ts('No-shows as percent of turn out attempts', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'is_required' => '0',
