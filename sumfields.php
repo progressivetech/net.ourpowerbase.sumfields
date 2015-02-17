@@ -972,7 +972,8 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
  * Test for inconsistent summaries
  *
  * Returns 1 if the test is successful, 2 if inconsistencies are found
- * and 3 if there was an error running the test.
+ * and 3 if there was an error running the test and 4 if the field we 
+ * are testing is not active.
  *
  * FIXME: how can we convince drush to set error codes properly?
  **/
@@ -983,7 +984,7 @@ function sumfields_test_inconsistent_summaries() {
   // We need to ensure this field is enabled on this site.
   $active_fields = sumfields_get_setting('active_fields', array());
   if(!in_array($base_column_name, $active_fields)) {
-    echo "3\n"; 
+    echo "4\n"; 
     return FALSE;
   }
 
