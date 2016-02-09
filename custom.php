@@ -8,7 +8,8 @@ $event_attended_trigger_sql =
   t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
   AND e.event_type_id IN (%event_type_ids))';
 $event_total_trigger_sql =
-  '(SELECT COUNT(id) AS summary_value FROM civicrm_participant WHERE contact_id = NEW.contact_id)';
+ '(SELECT COUNT(t1.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
+ t1.event_id = e.id WHERE contact_id = NEW.contact_id AND e.event_type_id IN (%event_type_ids))';
 $event_noshow_trigger_sql =
   '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
   t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_noshow_status_ids)
