@@ -1053,8 +1053,11 @@ function sumfields_print_inconsistent_summaries() {
  *
  **/
 function sumfields_get_update_trigger($table = 'civicrm_contribution') {
+  $config = CRM_Core_Config::singleton();
+  $dsn = DB::connect($config->dsn);
+  $dbName = $dsn->_db;
   $sql = "SELECT ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE
-    TRIGGER_NAME = '${table}_after_update'";
+    TRIGGER_NAME = '${table}_after_update' AND TRIGGER_SCHEMA = '$dbName'";
 
   $dao = CRM_Core_DAO::executeQuery($sql);
   $dao->fetch();
