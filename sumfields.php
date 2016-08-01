@@ -616,8 +616,13 @@ function sumfields_create_custom_fields_and_table() {
  * for this extension.
  **/
 function sumfields_save_setting($key, $value) {
-  $group = 'Summary Fields';
-  CRM_Core_BAO_Setting::setItem($value, $group, $key);
+  if (version_compare('>=', CRM_Utils_System::version(), '4.7.alpha1')) {
+    civicrm_api3('Setting', 'create', array($key => $value));
+  }
+  else {
+    $group = 'Summary Fields';
+    CRM_Core_BAO_Setting::setItem($value, $group, $key);
+  }
 }
 
 /**
@@ -625,8 +630,13 @@ function sumfields_save_setting($key, $value) {
  * for this extension.
  **/
 function sumfields_get_setting($key, $default = NULL) {
-  $group = 'Summary Fields';
-  $ret = CRM_Core_BAO_Setting::getItem($group, $key);
+  if (version_compare('>=', CRM_Utils_System::version(), '4.7.alpha1')) {
+    $ret = civicrm_api3('Setting', 'getvalue', array('name' => $key));
+  }
+  else {
+    $group = 'Summary Fields';
+    $ret = civicrm_api3('Setting', 'getvalue', array('name' => $key, 'group' => $group));
+  }
   if(empty($ret)) return $default;
   return $ret;
 }
@@ -671,8 +681,13 @@ function sumfields_delete_custom_fields_and_table() {
  * Remove our values from civicrm_setting table
  **/
 function sumfields_delete_user_settings() {
-  $sql = "DELETE FROM civicrm_setting WHERE group_name = 'Summary Fields'";
-  CRM_Core_DAO::executeQuery($sql);
+  $settings = require_once('settings/sumfields.settings.php');
+  $sql = "DELETE FROM civicrm_setting WHERE name = %0";
+  while(list($key) = each($settings)) {
+    // No remove/delete for Setting api entity.
+    $params = array(0 => array($key, 'String'));
+    CRM_Core_DAO::executeQuery($sql, $params);
+  }
 }
 
 /**
