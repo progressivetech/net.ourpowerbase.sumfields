@@ -154,7 +154,7 @@ function sumfields_sql_rewrite($sql) {
   $participant_info_table_name = sumfields_get_participant_info_table();
   if($participant_info_table_name) {
     $sql = str_replace('%civicrm_value_participant_info', $participant_info_table_name, $sql);
-  } 
+  }
   elseif(preg_match('/%civicrm_value_participant_info/', $sql)) {
     // This is an error - we have a variable we can't replace.
     return FALSE;
@@ -299,7 +299,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     // Keep track of which tables we need to build triggers for.
     if(!in_array($table, $tables)) $tables[] = $table;
   }
-  
+
   // Iterate over each table that needs a trigger, build the trigger's
   // sql clause.
   while(list(, $table) = each($tables)) {
@@ -345,7 +345,7 @@ function sumfields_create_temporary_table($trigger_table) {
   $custom_fields = _sumfields_get_custom_field_parameters();
 
   // Load the field and group definitions because we need to know
-  // which fields are triggered on which tables 
+  // which fields are triggered on which tables
   $custom_field_definitions = sumfields_get_custom_field_definitions();
   $definitions = $custom_field_definitions['fields'];
 
@@ -362,7 +362,7 @@ function sumfields_create_temporary_table($trigger_table) {
         $data_type = $field_definition['data_type'];
         if($data_type == 'Money') {
           $data_type = "DECIMAL(10,2)";
-        } 
+        }
         elseif($data_type == 'Date') {
           $data_type = 'datetime';
         }
@@ -375,7 +375,7 @@ function sumfields_create_temporary_table($trigger_table) {
   }
   $sql = "CREATE TABLE `$name` ( ".
     implode($create_fields, ',') . ')';
-  CRM_Core_DAO::executeQuery($sql); 
+  CRM_Core_DAO::executeQuery($sql);
   return $name;
 }
 
@@ -395,7 +395,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $session = CRM_Core_Session::singleton();
   }
   if(empty($table_name)) {
-    $session->setStatus(ts("Your configuration may be corrupted. 
+    $session->setStatus(ts("Your configuration may be corrupted.
       Please disable and renable this extension."));
     return FALSE;
   }
@@ -732,14 +732,14 @@ function sumfields_get_custom_field_definitions() {
       }
     }
     // Some of the custom fields depend on installed components
-    if($k == 'contribution_amount_last_membership_payment' || 
+    if($k == 'contribution_amount_last_membership_payment' ||
       $k == 'contribution_date_last_membership_payment') {
        if(!sumfields_component_enabled('CiviMember')) {
         unset($custom['fields'][$k]);
       }
     }
     if($k == 'event_turnout_attempts') {
-      // event_turnout_attempts is triggered on the civicrm_participant table, 
+      // event_turnout_attempts is triggered on the civicrm_participant table,
       // but it counts records in the civicrm custom table civirm_participant_info_NN.
       // We have to look up the name of that table for this particular instance as a
       // way to see if the table is installed.
@@ -756,7 +756,7 @@ function sumfields_get_custom_field_definitions() {
 
 /**
  * Helper function: get name of civicrm_value_participant_info table
- * for this installation or FALSE if it's not enabled. 
+ * for this installation or FALSE if it's not enabled.
  **/
 function sumfields_get_participant_info_table() {
   $sql = "SELECT table_name FROM civicrm_custom_group WHERE name = 'participant_info';";
@@ -768,8 +768,8 @@ function sumfields_get_participant_info_table() {
 }
 
 /**
- * Helper function: get column name for the given field 
- * for this installation or FALSE if it's not enabled. 
+ * Helper function: get column name for the given field
+ * for this installation or FALSE if it's not enabled.
  **/
 function sumfields_get_column_name($name) {
   $sql = "SELECT column_name FROM civicrm_custom_field WHERE name = %0 ".
@@ -800,11 +800,11 @@ function sumfields_component_enabled($component) {
  * Initialize all user settings.
  *
  * The user has the option to choose which fields they want, which contribution
- * types to include, which event types, etc. 
- * 
+ * types to include, which event types, etc.
+ *
  * When initializing (which happens with the extension is enabled), we
  * don't choose any fields. By not choosing any fields, we don't add any
- * SQL triggers, and the extension is enabled relatively quickly.  
+ * SQL triggers, and the extension is enabled relatively quickly.
  *
  * When the user selects the fields they want, they can choose whether to
  * have the change go through immediately (risks timing out) or via the next
@@ -831,7 +831,7 @@ function sumfields_initialize_user_settings() {
   $values = sumfields_get_all_event_types();
   sumfields_save_setting('event_type_ids', array_keys($values));
 
-  // Which participant status ids are used to calculate attendended events 
+  // Which participant status ids are used to calculate attendended events
   $values = sumfields_get_all_participant_status_types();
   // When initializing, only use the attended.
   $initial_status_types = preg_grep('/Attended/', $values);
@@ -840,7 +840,7 @@ function sumfields_initialize_user_settings() {
   // Which participant status ids are used to calculate no shows
   $values = sumfields_get_all_participant_status_types();
   // When initializing, only use 'No-show' if it exists, otherwise nothing
-  // (note: no-show was added in 4.4) 
+  // (note: no-show was added in 4.4)
   $initial_noshow_status_types = preg_grep('/No-show/', $values);
   sumfields_save_setting('participant_noshow_status_ids', array_keys($initial_noshow_status_types));
 }
@@ -929,10 +929,10 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
     return FALSE;
   }
   if($db_trigger_sql != $config_trigger_sql) {
-    drush_log(dt("Mis-match between db_trigger_sql (@db) and config_trigger_sql (@config). Using config.", 
+    drush_log(dt("Mis-match between db_trigger_sql (@db) and config_trigger_sql (@config). Using config.",
       array('@db' => $db_trigger_sql, '@config' => $config_trigger_sql)));
   }
-  
+
   // Rewrite the sql with the appropriate variables filled in.
   if(FALSE === $trigger_sql = sumfields_sql_rewrite($config_trigger_sql)) {
     $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
@@ -972,7 +972,7 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
  * Test for inconsistent summaries
  *
  * Returns 1 if the test is successful, 2 if inconsistencies are found
- * and 3 if there was an error running the test and 4 if the field we 
+ * and 3 if there was an error running the test and 4 if the field we
  * are testing is not active.
  *
  * FIXME: how can we convince drush to set error codes properly?
@@ -984,11 +984,11 @@ function sumfields_test_inconsistent_summaries() {
   // We need to ensure this field is enabled on this site.
   $active_fields = sumfields_get_setting('active_fields', array());
   if(!in_array($base_column_name, $active_fields)) {
-    echo "4\n"; 
+    echo "4\n";
     return FALSE;
   }
 
-  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) { 
+  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) {
     // If no triger is defined, there's no way this will work. Bail early. Save CPU
     // cycles.
     echo "2\n";
@@ -1031,7 +1031,7 @@ function sumfields_print_inconsistent_summaries() {
     return FALSE;
   }
 
-  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) { 
+  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) {
     // If no triger is defined, there's no way this will work. Bail early. Save CPU
     // cycles.
     drush_log("Contribution table trigger not defined. This won't work.", 'error');
@@ -1080,12 +1080,12 @@ function testo() {
  */
 function sumfields_fix_inconsistent_summaries() {
   // This means there is no update triggered defined.
-  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) { 
+  if(!$db_trigger_sql = sumfields_get_update_trigger('civicrm_contribution')) {
     $msg = dt("Update trigger is not defined. This might explain inconsistent responses. ".
       "Rebuilding triggers, this may take a while.");
     drush_log($msg, 'error');
     CRM_Core_DAO::triggerRebuild();
-    if(!sumfields_get_update_trigger('civicrm_contribution')) { 
+    if(!sumfields_get_update_trigger('civicrm_contribution')) {
       $msg = dt("Still can't find trigger after rebuilding. Bailing...");
       drush_log($msg, 'error');
       return FALSE;
@@ -1094,9 +1094,9 @@ function sumfields_fix_inconsistent_summaries() {
   $ids = sumfields_find_incorrect_total_lifetime_contribution_records();
   if($ids && count($ids) > 0) {
     // Just re-initiate everything - who knows what might have gone wrong.
-    drush_log(dt("Data is wrong. Re-running trigger creation."), 'error'); 
+    drush_log(dt("Data is wrong. Re-running trigger creation."), 'error');
     CRM_Core_DAO::triggerRebuild();
-    drush_log(dt("Repopulating all data."), 'error'); 
+    drush_log(dt("Repopulating all data."), 'error');
     sumfields_generate_data_based_on_current_data($session = NULL);
     return TRUE;
   }
@@ -1107,7 +1107,7 @@ function sumfields_fix_inconsistent_summaries() {
  * and no longer needed fields are removed
  *
  * @old_fields: the currently active fields
- * @new_fields: the desired fields 
+ * @new_fields: the desired fields
  *
  **/
 function sumfields_alter_table() {
@@ -1115,7 +1115,7 @@ function sumfields_alter_table() {
   $new_fields = sumfields_get_setting('new_active_fields', NULL);
 
   if(is_null($new_fields)) {
-    // This is an error - we should never be called without new fields 
+    // This is an error - we should never be called without new fields
     // available;
     return FALSE;
   }
@@ -1179,7 +1179,7 @@ function sumfields_alter_table() {
       // $session->setStatus(sprintf(ts("Added custom field '%s'"), $field));
       $value = array_pop($result['values']);
       $custom_field_parameters[$field] = array(
-        'id' => $value['id'], 
+        'id' => $value['id'],
         'column_name' => $value['column_name']
       );
     }
@@ -1211,7 +1211,7 @@ function sumfields_print_triggers() {
 }
 
 /**
- * Used for generating the schema and data 
+ * Used for generating the schema and data
  *
  * Should be called whenever the extension has the chosen
  * fields saved or via Cron job.
@@ -1220,14 +1220,14 @@ function sumfields_print_triggers() {
  */
 function sumfields_gen_data(&$returnValues) {
   // generate_schema_and_data variable can be set to any of the following:
-  // 
+  //
   // NULL It has never been run, no need to run
   // scheduled:YYYY-MM-DD HH:MM:SS -> it should be run
   // running:YYYY-MM-DD HH:MM:SS -> it is currently running, and started at the given date/time
   // success:YYYY-MM-DD HH:MM:SS -> It completed successfully on the last run at the given date/time
   // failed:YYYY-MM-DD HH:MM:SS -> It failed on the last run at the given date/time
   //
- 
+
   // We will run if we are scheduled to run OR if the fiscal year has turned
   // and we haven't yet run this fiscal year
   $status = $new_status = sumfields_get_setting('generate_schema_and_data', FALSE);
@@ -1239,7 +1239,7 @@ function sumfields_gen_data(&$returnValues) {
   if(preg_match('/^([a-z]+):([0-9 -:]+)$/', $status, $matches)) {
     $status_name = $matches[1];
     $status_date = $matches[2];
-    // Check if the fiscal year has turned over since we last ran. 
+    // Check if the fiscal year has turned over since we last ran.
     // (also, only attempt to do a new fiscal year run if the last run
     // was successful to avoid loops of failed runs).
     if($status_name == 'success') {
