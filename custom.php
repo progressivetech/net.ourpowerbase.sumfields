@@ -85,6 +85,24 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
       'display' => 'fundraising',
 		),
+		'contribution_total_twelve_months' => array(
+			'label' => ts('Total Contributions in the Last 12 Months', array('domain' => 'net.ourpowerbase.sumfields')),
+			'data_type' => 'Money',
+			'html_type' => 'Text',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'is_search_range' => '1',
+			'weight' => '15',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN DATE_SUB(NOW(), INTERVAL 12 MONTH) AND NOW()
+      AND t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
+      'display' => 'fundraising',
+		),
     'contribution_total_deductible_this_year' => array(
 			'label' => ts('Total Deductible Contributions this Year', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Money',

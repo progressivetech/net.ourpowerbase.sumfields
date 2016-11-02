@@ -1112,10 +1112,6 @@ function sumfields_get_update_trigger($table = 'civicrm_contribution') {
   return $dao->ACTION_STATEMENT;
 }
 
-function testo() {
-  drush_log('this is an error', 'error');
-}
-
 /**
  * Fix incorrect contributions summary fields.
  *
