@@ -373,7 +373,7 @@ function sumfields_create_temporary_table($trigger_table) {
       }
     }
   }
-  $sql = "CREATE TABLE `$name` ( ".
+  $sql = "CREATE TEMPORARY TABLE `$name` ( ".
     implode($create_fields, ',') . ')';
   CRM_Core_DAO::executeQuery($sql);
   return $name;
@@ -408,47 +408,15 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
   // clause that is stored here. These are the generically shipped
   // field definitions (via custom.php).
   $custom = sumfields_get_custom_field_definitions();
-
   $active_fields = sumfields_get_setting('active_fields', array());
 
   // Variables used for building the temp tables and temp insert statement.
-  $contribution_sql = NULL;
-  $contribution_sql_parts = array();
-  $contribution_sql_parts[] = 'contact_id';
-  $participant_sql = NULL;
-  $participant_sql_parts = array();
-  $participant_sql_parts[] = 'contact_id';
+  $temp_sql = array();
 
-  // Variables used for building the final insert statement into the actual
-  // summary fields table
-  $final_sql = "INSERT INTO `$table_name` ";
-  $final_sql_parts = array();
-  $final_sql_parts[] = 'NULL';
-  $final_sql_parts[] = 'contact_id';
-
-  if(sumfields_are_any_contribution_fields_active()) {
-    $contribution_temp_table = sumfields_create_temporary_table('civicrm_contribution');
-    $contribution_sql = "INSERT INTO `$contribution_temp_table` SELECT ";
-  }
-
-  if(sumfields_are_any_event_fields_active()) {
-    $participant_temp_table = sumfields_create_temporary_table('civicrm_participant');
-    $participant_sql = "INSERT INTO `$participant_temp_table` SELECT ";
-  }
-
-  if(is_null($contribution_sql) && is_null($participant_sql)) {
-    // Is this an error? Not sure. But it will be an error if we let this
-    // function continue - it will produce a broken sql statement, so we
-    // short circuit here.
-    $session->setStatus(ts("Not regenerating content, no fields defined."));
-    return TRUE;
-  }
-
-  $session->setStatus(ts("Regenerating content in your summary fields table."));
-
-  $tables = array();
-  while(list($base_column_name, $params) = each($custom_fields)) {
-    if(!in_array($base_column_name, $active_fields)) continue;
+  while (list($base_column_name, $params) = each($custom_fields)) {
+    if (!in_array($base_column_name, $active_fields)) {
+      continue;
+    }
     $table = $custom['fields'][$base_column_name]['trigger_table'];
 
     $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
@@ -456,83 +424,54 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     // between the trigger sql statement and the initial sql statement
     // to load the data.
     $trigger = str_replace('NEW.contact_id', 't2.contact_id', $trigger);
-    if(FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
+    if (FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
       $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
       $session->setStatus($msg);
       continue;
     }
-    if($table == 'civicrm_participant') {
-      $participant_sql_parts[] = $trigger;
+    if (!isset($temp_sql[$table])) {
+      $temp_sql[$table] = array(
+        'temp_table' => sumfields_create_temporary_table($table),
+        'triggers' => array(),
+        'map' => array(),
+      );
     }
-    elseif($table == 'civicrm_contribution') {
-      $contribution_sql_parts[] = $trigger;
-    }
-    // For the final query, we just need the field name
-    $final_sql_parts[] = $base_column_name;
+    $temp_sql[$table]['triggers'][$base_column_name] = $trigger;
+    $temp_sql[$table]['map'][$base_column_name] = $params['column_name'];
   }
 
-  if(!is_null($contribution_sql)) {
-    $contribution_sql .= implode(",\n", $contribution_sql_parts);
-    $contribution_sql .= ' FROM `civicrm_contribution` AS t2 ';
-    // Add relationship to contact to avoid sql failures due to incorrect
-    // existing data + foreign key constraints
-    $contribution_sql .= "JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
-    $contribution_sql .= ' WHERE t2.contribution_status_id = 1';
-    $contribution_sql .= ' GROUP BY contact_id';
-    CRM_Core_DAO::executeQuery($contribution_sql);
-    // echo "$contribution_sql\n\n";
+  if(empty($temp_sql)) {
+    // Is this an error? Not sure. But it will be an error if we let this
+    // function continue - it will produce a broken sql statement, so we
+    // short circuit here.
+    $session->setStatus(ts("Not regenerating content, no fields defined."));
+    return TRUE;
   }
-  if(!is_null($participant_sql)) {
-    $participant_sql .= implode(",\n", $participant_sql_parts);
-    $participant_sql .= ' FROM `civicrm_participant` AS t2 ';
-    $participant_sql .= "JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
-    $participant_sql .= ' GROUP BY contact_id';
-    CRM_Core_DAO::executeQuery($participant_sql);
-    // echo "$participant_sql\n\n";
+  // Fixme - shouldn't set status messages from a utility function - let the form do that.
+  $session->setStatus(ts("Regenerating content in your summary fields table."));
+
+  foreach ($temp_sql as $table => $data) {
+    // Calculate data and insert into temp table
+    $query = "INSERT INTO `{$data['temp_table']}` SELECT contact_id, "
+      . implode(",\n", $data['triggers'])
+      . " FROM `$table` AS t2 "
+      . "JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
+    $query .= ' GROUP BY contact_id';
+    CRM_Core_DAO::executeQuery($query);
+
+    // Move temp data into custom field table
+    $query = "INSERT INTO `$table_name` "
+      . "(entity_id, " . implode(',', $data['map']) . ") "
+      . "(SELECT contact_id, " . implode(',', array_keys($data['map'])) . " FROM `{$data['temp_table']}`) "
+      . "ON DUPLICATE KEY UPDATE ";
+    foreach ($data['map'] as $tmp => $val) {
+      $query .= " $val = $tmp,";
+    }
+    $query = rtrim($query, ',');
+    CRM_Core_DAO::executeQuery($query);
   }
-  $final_fields = implode(",\n", $final_sql_parts);
-  if(!is_null($contribution_sql) && !is_null($participant_sql)) {
-    // We have both a contribution and participant table to deal with - this
-    // will require a more complicated UNION query to pull them both together
-    // into the summary fields table.
-    $final_sql .= " SELECT $final_fields FROM `$contribution_temp_table` c LEFT JOIN ".
-      "`$participant_temp_table` t USING(contact_id) UNION SELECT $final_fields FROM ".
-      "`$participant_temp_table` p LEFT JOIN `$contribution_temp_table` c USING(contact_id) ".
-      "WHERE c.contact_id IS NULL";
-  }
-  elseif(!is_null($participant_sql)) {
-    // Only participant fields.
-    $final_sql .= "(SELECT $final_fields FROM `$participant_temp_table`)";
-  }
-  elseif(!is_null($contribution_sql)) {
-    // Only contribution fields.
-    $final_sql .= "(SELECT $final_fields FROM `$contribution_temp_table`)";
-  }
-  // echo "final: $final_sql\n";
-  CRM_Core_DAO::executeQuery($final_sql);
 
   return TRUE;
-}
-
-/**
- * Helper function to see if any of the event fields
- * are active.
- **/
-
-function sumfields_are_any_event_fields_active() {
-  // Fields chosen by the user
-  $active_fields = sumfields_get_setting('active_fields', array());
-  // All custom field definitions.
-  $custom = sumfields_get_custom_field_definitions();
-  // Iterate over our active fields looking for ones using the
-  // civicrm_participant table.
-  while(list(,$base_column_name) = each($active_fields)) {
-    $table = $custom['fields'][$base_column_name]['trigger_table'];
-    if($table == 'civicrm_participant') {
-      return TRUE;
-    }
-  }
-  return FALSE;
 }
 
 /**

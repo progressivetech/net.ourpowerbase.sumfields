@@ -78,8 +78,16 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         $name, $label, array_flip($field_options['fundraising'])
       );
     }
-    
-    if(sumfields_component_enabled('CiviMember') && 
+    if(array_key_exists('soft', $field_options)) {
+      $this->Assign('sumfields_active_soft', TRUE);
+      $name = 'active_soft_fields';
+      $label = ts('Soft Credit Fields', array('domain' => 'net.ourpowerbase.sumfields'));
+      $this->addCheckBox(
+        $name, $label, array_flip($field_options['soft'])
+      );
+    }
+
+    if(sumfields_component_enabled('CiviMember') &&
       array_key_exists('membership', $field_options)) {
 
       $this->Assign('sumfields_active_membership', TRUE);
@@ -137,7 +145,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       $label = ts('Participant Status (attended)', array('domain' => 'net.ourpowerbase.sumfields'));
       $name = 'participant_status_ids';
       $this->addCheckBox(
-        $name, 
+        $name,
         $label,
         array_flip(sumfields_get_all_participant_status_types())
       );
@@ -182,6 +190,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $custom = sumfields_get_custom_field_definitions();
     $active_fields = sumfields_get_setting('active_fields', array());
     $active_fundraising_fields = array();
+    $active_soft_fields = array();
     $active_membership_fields = array();
     $active_event_standard_fields = array();
     $active_event_turnout_fields = array();
@@ -189,6 +198,9 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       if(in_array($field, $active_fields)) {
         if($field_info['display'] == 'fundraising') {
           $active_fundraising_fields[] = $field;
+        }
+        if($field_info['display'] == 'soft') {
+          $active_soft_fields[] = $field;
         }
         elseif($field_info['display'] == 'membership') {
           $active_membership_fields[] = $field;
@@ -200,8 +212,9 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
           $active_event_turnout_fields[] = $field;
         }
       }
-    } 
+    }
     $defaults['active_fundraising_fields'] = $this->array_to_options($active_fundraising_fields);
+    $defaults['active_soft_fields'] = $this->array_to_options($active_soft_fields);
     $defaults['active_membership_fields'] = $this->array_to_options($active_membership_fields);
     $defaults['active_event_standard_fields'] = $this->array_to_options($active_event_standard_fields);
     $defaults['active_event_turnout_fields'] = $this->array_to_options($active_event_turnout_fields);
@@ -224,6 +237,9 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $active_fields = array();
     if(array_key_exists('active_fundraising_fields', $values)) {
       $active_fields = $active_fields + $values['active_fundraising_fields'];
+    }
+    if(array_key_exists('active_soft_fields', $values)) {
+      $active_fields = $active_fields + $values['active_soft_fields'];
     }
     if(array_key_exists('active_membership_fields', $values)) {
       $active_fields = $active_fields + $values['active_membership_fields'];

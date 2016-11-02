@@ -26,6 +26,12 @@
     <td>{$form.active_fundraising_fields.html}</td>
   </tr> 
   {/if}
+  {if $sumfields_active_soft }
+  <tr class="crm-sumfields-form-block-sumfields_active_soft_fields">
+    <td class="label">{$form.active_soft_fields.label}</td>
+    <td>{$form.active_soft_fields.html}</td>
+  </tr>
+  {/if}
   {if $sumfields_active_membership }
   <tr class="crm-sumfields-form-block-sumfields_active_membership_fields">
     <td class="label">{$form.active_membership_fields.label}</td>

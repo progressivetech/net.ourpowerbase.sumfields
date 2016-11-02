@@ -305,6 +305,63 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
       'display' => 'fundraising',
 		),
+		'soft_total_lifetime' => array(
+			'label' => ts('Total Lifetime Soft Credits', array('domain' => 'net.ourpowerbase.sumfields')),
+			'data_type' => 'Money',
+			'html_type' => 'Text',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'is_search_range' => '1',
+			'weight' => '10',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '32',
+			'trigger_sql' => '(SELECT IF(SUM(amount) IS NULL, 0, SUM(amount))
+      FROM civicrm_contribution_soft t1 WHERE t1.contact_id = NEW.contact_id
+      AND t1.contribution_id IN (SELECT id FROM civicrm_contribution WHERE contribution_status_id = 1 AND financial_type_id IN (%financial_type_ids)))',
+			'trigger_table' => 'civicrm_contribution_soft',
+			'display' => 'soft',
+		),
+		'soft_total_this_year' => array(
+			'label' => ts('Total Soft Credits this Year', array('domain' => 'net.ourpowerbase.sumfields')),
+			'data_type' => 'Money',
+			'html_type' => 'Text',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'is_search_range' => '1',
+			'weight' => '15',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '32',
+			'trigger_sql' => '(SELECT COALESCE(SUM(amount),0)
+      FROM civicrm_contribution_soft t1 WHERE t1.contact_id = NEW.contact_id
+      AND t1.contribution_id IN (
+      	SELECT id FROM civicrm_contribution WHERE contribution_status_id = 1 AND financial_type_id IN (%financial_type_ids)
+      	AND CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin" AND "%current_fiscal_year_end"
+      ))',
+			'trigger_table' => 'civicrm_contribution_soft',
+			'display' => 'soft',
+		),
+		'soft_total_twelve_months' => array(
+			'label' => ts('Total Soft Credits in the Last 12 Months', array('domain' => 'net.ourpowerbase.sumfields')),
+			'data_type' => 'Money',
+			'html_type' => 'Text',
+			'is_required' => '0',
+			'is_searchable' => '1',
+			'is_search_range' => '1',
+			'weight' => '15',
+			'is_active' => '1',
+			'is_view' => '1',
+			'text_length' => '32',
+			'trigger_sql' => '(SELECT COALESCE(SUM(amount),0)
+      FROM civicrm_contribution_soft t1 WHERE t1.contact_id = NEW.contact_id
+      AND t1.contribution_id IN (
+      	SELECT id FROM civicrm_contribution WHERE contribution_status_id = 1 AND financial_type_id IN (%financial_type_ids)
+      	AND CAST(receive_date AS DATE) BETWEEN DATE_SUB(NOW(), INTERVAL 12 MONTH) AND NOW()
+      ))',
+			'trigger_table' => 'civicrm_contribution_soft',
+			'display' => 'soft',
+		),
     'contribution_date_last_membership_payment' => array(
 			'label' => ts('Date of Last Membership Payment', array('domain' => 'net.ourpowerbase.sumfields')),
 			'data_type' => 'Date',
