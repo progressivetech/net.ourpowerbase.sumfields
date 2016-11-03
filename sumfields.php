@@ -383,7 +383,11 @@ function sumfields_create_temporary_table($trigger_table) {
  * Generate calculated fields for all contacts.
  * This function is designed to be run once when
  * the extension is installed or initialized.
- **/
+ *
+ * @param CRM_Core_Session $session
+ * @return bool
+ *   TRUE if successful, FALSE otherwise
+ */
 function sumfields_generate_data_based_on_current_data($session = NULL) {
   // Get the actual table name for summary fields.
   $table_name = _sumfields_get_custom_table_name();
@@ -395,8 +399,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $session = CRM_Core_Session::singleton();
   }
   if(empty($table_name)) {
-    $session->setStatus(ts("Your configuration may be corrupted.
-      Please disable and renable this extension."));
+    $session::setStatus(ts("Your configuration may be corrupted. Please disable and renable this extension."), ts('Error'), 'error');
     return FALSE;
   }
   // In theory we shouldn't have to truncate the table, but we
@@ -444,11 +447,9 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     // Is this an error? Not sure. But it will be an error if we let this
     // function continue - it will produce a broken sql statement, so we
     // short circuit here.
-    $session->setStatus(ts("Not regenerating content, no fields defined."));
+    $session::setStatus(ts("Not regenerating content, no fields defined."), ts('Error'), 'error');
     return TRUE;
   }
-  // Fixme - shouldn't set status messages from a utility function - let the form do that.
-  $session->setStatus(ts("Regenerating content in your summary fields table."));
 
   foreach ($temp_sql as $table => $data) {
     // Calculate data and insert into temp table
@@ -1198,6 +1199,9 @@ function sumfields_print_triggers() {
  * fields saved or via Cron job.
  *
  * Called by the API gendata.
+ *
+ * @return boolean
+ *   TRUE if there was an error
  */
 function sumfields_gen_data(&$returnValues) {
   // generate_schema_and_data variable can be set to any of the following:

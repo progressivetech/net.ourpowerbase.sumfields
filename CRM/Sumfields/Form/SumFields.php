@@ -5,7 +5,6 @@ require_once 'CRM/Core/Form.php';
 class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
   function buildQuickForm() {
     $custom = sumfields_get_custom_field_definitions();
-    $options = array();
     $field_options = array();
     while(list($k,$v) = each($custom['fields'])) {
       $display = $v['display'];
@@ -189,38 +188,13 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $defaults = parent::setDefaultValues();
     $custom = sumfields_get_custom_field_definitions();
     $active_fields = sumfields_get_setting('active_fields', array());
-    $active_fundraising_fields = array();
-    $active_soft_fields = array();
-    $active_membership_fields = array();
-    $active_event_standard_fields = array();
-    $active_event_turnout_fields = array();
-    while(list($field,$field_info) = each($custom['fields'])) {
-      if(in_array($field, $active_fields)) {
-        if($field_info['display'] == 'fundraising') {
-          $active_fundraising_fields[] = $field;
-        }
-        if($field_info['display'] == 'soft') {
-          $active_soft_fields[] = $field;
-        }
-        elseif($field_info['display'] == 'membership') {
-          $active_membership_fields[] = $field;
-        }
-        elseif($field_info['display'] == 'event_standard') {
-          $active_event_standard_fields[] = $field;
-        }
-        elseif($field_info['display'] == 'event_turnout') {
-          $active_event_turnout_fields[] = $field;
-        }
+
+    foreach ($custom['fields'] as $name => $info) {
+      if (in_array($name, $active_fields)) {
+        $defaults["active_{$info['display']}_fields"][$name] = 1;
       }
     }
-    $defaults['active_fundraising_fields'] = $this->array_to_options($active_fundraising_fields);
-    $defaults['active_soft_fields'] = $this->array_to_options($active_soft_fields);
-    $defaults['active_membership_fields'] = $this->array_to_options($active_membership_fields);
-    $defaults['active_event_standard_fields'] = $this->array_to_options($active_event_standard_fields);
-    $defaults['active_event_turnout_fields'] = $this->array_to_options($active_event_turnout_fields);
 
-
-    $defaults['active_fields'] = $this->array_to_options(sumfields_get_setting('active_fields', array()));
     $defaults['financial_type_ids'] = $this->array_to_options(sumfields_get_setting('financial_type_ids', array()));
     $defaults['membership_financial_type_ids'] = $this->array_to_options(sumfields_get_setting('membership_financial_type_ids', array()));
     $defaults['event_type_ids'] = $this->array_to_options(sumfields_get_setting('event_type_ids', array()));
@@ -235,20 +209,10 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
     // Combine all fields into on active_fields array for easier processing.
     $active_fields = array();
-    if(array_key_exists('active_fundraising_fields', $values)) {
-      $active_fields = $active_fields + $values['active_fundraising_fields'];
-    }
-    if(array_key_exists('active_soft_fields', $values)) {
-      $active_fields = $active_fields + $values['active_soft_fields'];
-    }
-    if(array_key_exists('active_membership_fields', $values)) {
-      $active_fields = $active_fields + $values['active_membership_fields'];
-    }
-    if(array_key_exists('active_event_standard_fields', $values)) {
-      $active_fields = $active_fields + $values['active_event_standard_fields'];
-    }
-    if(array_key_exists('active_event_turnout_fields', $values)) {
-      $active_fields = $active_fields + $values['active_event_turnout_fields'];
+    foreach ($values as $key => $val) {
+      if (strpos($key, 'active_') === 0 && substr($key, -7) == '_fields') {
+        $active_fields += $val;
+      }
     }
     if(count($active_fields) > 0) {
       $current_active_fields = sumfields_get_setting('active_fields', array());
@@ -279,15 +243,15 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     sumfields_save_setting('generate_schema_and_data', 'scheduled:'. date('Y-m-d H:i:s'));
     if($values['when_to_apply_change'] == 'on_submit') {
       $returnValues = array();
-      if(!sumfields_gen_data($returnValues)) {
-        $msg = ts("There was an error applying your changes.", array('domain' => 'net.ourpowerbase.sumfields'));
+      if (sumfields_gen_data($returnValues)) {
+        $session::setStatus(ts("There was an error applying your changes.", array('domain' => 'net.ourpowerbase.sumfields')), ts('Error'), 'error');
       }
       else {
-        $msg = ts("Changes were applied successfully.", array('domain' => 'net.ourpowerbase.sumfields'));
+        $session::setStatus(ts("Changes were applied successfully.", array('domain' => 'net.ourpowerbase.sumfields')), ts('Saved'), 'success');
       }
     }
     else {
-      $session->setStatus(ts("Your summary fields will begin being generated on the next scheduled job. It may take up to an hour to complete.", array('domain' => 'net.ourpowerbase.sumfields')));
+      $session::setStatus(ts("Your summary fields will begin being generated on the next scheduled job. It may take up to an hour to complete.", array('domain' => 'net.ourpowerbase.sumfields')), ts('Saved'), 'success');
     }
     $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin/setting/sumfields'));
   }
