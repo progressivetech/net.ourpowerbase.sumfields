@@ -302,7 +302,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
 
   // Iterate over each table that needs a trigger, build the trigger's
   // sql clause.
-  while(list(, $table) = each($tables)) {
+  foreach ($tables as $table) {
     $parts = $sql_field_parts[$table];
     $parts[] = 'entity_id = NEW.contact_id';
 
@@ -354,7 +354,7 @@ function sumfields_create_temporary_table($trigger_table) {
   // Initialize with a field to hold the entity_id
   $create_fields[] = "`contact_id` INT";
   // Iterate over the actual instantiated summary fields
-  while(list($field_name, $values) = each($custom_fields)) {
+  foreach ($custom_fields as $field_name => $values) {
     // Avoid error - make sure we have a definition for this field.
     if(array_key_exists($field_name, $definitions)) {
       $field_definition = $definitions[$field_name];
@@ -476,27 +476,6 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
 }
 
 /**
- * Helper function to see if any of the contribution fields
- * are active.
- **/
-
-function sumfields_are_any_contribution_fields_active() {
-  // Fields chosen by the user
-  $active_fields = sumfields_get_setting('active_fields', array());
-  // All custom field definitions.
-  $custom = sumfields_get_custom_field_definitions();
-  // Iterate over our active fields looking for ones using the
-  // civicrm_contribution table.
-  while(list(,$base_column_name) = each($active_fields)) {
-    $table = $custom['fields'][$base_column_name]['trigger_table'];
-    if($table == 'civicrm_contribution') {
-      return TRUE;
-    }
-  }
-  return FALSE;
-}
-
-/**
  * Alter CustomField create parameters.
  *
  * Before creating custom fields, we need to add some parameters.
@@ -528,8 +507,6 @@ function sumfields_alter_custom_field_create_params(&$params) {
  * Create custom fields - should be called on enable.
  **/
 function sumfields_create_custom_fields_and_table() {
-  $session = CRM_Core_Session::singleton();
-
   // Load the field and group definitions.
   $custom = sumfields_get_custom_field_definitions();
 
@@ -556,9 +533,11 @@ function sumfields_create_custom_fields_and_table() {
   // Get an array of fields that the user wants to use.
   $active_fields = sumfields_get_setting('active_fields', array());
   // Now create the fields.
-  while(list($name, $field) = each($custom['fields'])) {
+  foreach ($custom['fields'] as $name => $field) {
     // Skip fields not selected by the user.
-    if(!in_array($name, $active_fields)) continue;
+    if(!in_array($name, $active_fields)) {
+      continue;
+    }
 
     $params = $field;
     $params['version'] = 3;
@@ -568,8 +547,7 @@ function sumfields_create_custom_fields_and_table() {
 
     $result = civicrm_api('CustomField', 'create', $params);
     if($result['is_error'] == 1) {
-      $session->setStatus(sprintf(ts("Error creating custom field '%s'"), $name));
-      $session->setStatus(print_r($result, TRUE));
+      CRM_Core_Session::setStatus(print_r($result, TRUE), ts("Error creating custom field '%1'", array(1 => $name)), 'error');
       continue;
     }
     $value = array_pop($result['values']);
@@ -698,45 +676,47 @@ function _sumfields_get_custom_table_parameters() {
  **/
 function sumfields_get_custom_field_definitions() {
   static $custom = NULL;
-  if(is_null($custom)) {
+  if (is_null($custom)) {
     // The custom.php file defines the $custom array of field
     // definitions. Only require if necessary.
     require 'custom.php';
+    // Invoke hook_civicrm_sumfields_definitions
+    $null = NULL;
+    CRM_Utils_Hook::singleton()->invoke(1, $custom, $null, $null,
+      $null, $null, $null,
+      'civicrm_sumfields_definitions'
+    );
+    foreach ($custom['fields'] as $k => $v) {
+      // Merge in defaults
+      $custom['fields'][$k] += array(
+        'html_type' => 'Text',
+        'is_required' => '0',
+        'is_searchable' => '1',
+        'is_search_range' => '1',
+        'weight' => '0',
+        'is_active' => '1',
+        'is_view' => '1',
+        'text_length' => '32',
+      );
+      // Filter out any fields from tables that are not installed.
+      if (isset($custom['optgroups'][$v['optgroup']]['component'])) {
+        if (!sumfields_component_enabled($custom['optgroups'][$v['optgroup']]['component'])) {
+          unset($custom['fields'][$k]);
+        }
+      }
+      if ($k == 'event_turnout_attempts') {
+        // event_turnout_attempts is triggered on the civicrm_participant table,
+        // but it counts records in the civicrm custom table civirm_participant_info_NN.
+        // We have to look up the name of that table for this particular instance as a
+        // way to see if the table is installed.
+        $actual_table_name = sumfields_get_participant_info_table();
+        if (!$actual_table_name) {
+          // Perhaps not enabled.
+          unset($custom['fields'][$k]);
+        }
+      }
+    }
   }
-  // Not all custom field definitions will be relevant to this
-  // installation, so we have filter out any fields that come
-  // from tables that are not installed.
-  while(list($k, $v) = each($custom['fields'])) {
-    if($v['trigger_table'] == 'civicrm_contribution') {
-      if(!sumfields_component_enabled('CiviContribute')) {
-        unset($custom['fields'][$k]);
-      }
-    }
-    elseif($v['trigger_table'] == 'civicrm_participant') {
-      if(!sumfields_component_enabled('CiviEvent')) {
-        unset($custom['fields'][$k]);
-      }
-    }
-    // Some of the custom fields depend on installed components
-    if($k == 'contribution_amount_last_membership_payment' ||
-      $k == 'contribution_date_last_membership_payment') {
-       if(!sumfields_component_enabled('CiviMember')) {
-        unset($custom['fields'][$k]);
-      }
-    }
-    if($k == 'event_turnout_attempts') {
-      // event_turnout_attempts is triggered on the civicrm_participant table,
-      // but it counts records in the civicrm custom table civirm_participant_info_NN.
-      // We have to look up the name of that table for this particular instance as a
-      // way to see if the table is installed.
-      $actual_table_name = sumfields_get_participant_info_table();
-      if(!$actual_table_name) {
-        // Perhaps not enabled.
-        unset($custom['fields'][$k]);
-      }
-    }
-  }
-  reset($custom);
   return $custom;
 }
 
@@ -856,16 +836,13 @@ function sumfields_get_all_participant_status_types() {
   CRM_Core_PseudoConstant::populate($values, 'CRM_Event_DAO_ParticipantStatusType', $all = TRUE);
   return $values;
 }
+
 /**
  * Get all available active fields
  **/
 function sumfields_get_all_custom_fields() {
   $custom = sumfields_get_custom_field_definitions();
-  $values = array();
-  while(list($k) = each($custom['fields'])) {
-    $values[] = $k;
-  }
-  return $values;
+  return array_keys($custom['fields']);
 }
 
 /**
@@ -1140,8 +1117,7 @@ function sumfields_alter_table() {
   }
   $custom = sumfields_get_custom_field_definitions();
   $group_id = $custom_table_parameters['id'];
-  reset($new_fields);
-  while(list(,$field) = each($new_fields)) {
+  foreach ($new_fields as $field) {
     if(!in_array($field, $old_fields)) {
       $params = $custom['fields'][$field];
       $params['custom_group_id'] = $group_id;
@@ -1182,7 +1158,7 @@ function sumfields_alter_table() {
 function sumfields_print_triggers() {
   // Get list of custom fields and triggers
   $custom = sumfields_get_custom_field_definitions();
-  while(list($k, $v) = each($custom['fields'])) {
+  foreach ($custom['fields'] as $k => $v) {
     $out = sumfields_sql_rewrite($v['trigger_sql']);
     if(FALSE === $out) {
       $out = "Failed sql_write.";

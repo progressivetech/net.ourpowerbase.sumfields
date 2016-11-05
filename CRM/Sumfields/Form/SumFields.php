@@ -5,17 +5,17 @@ require_once 'CRM/Core/Form.php';
 class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
   function buildQuickForm() {
     $custom = sumfields_get_custom_field_definitions();
-    $field_options = $trigger_tables = array();
-    while(list($k,$v) = each($custom['fields'])) {
-      $display = $v['display'];
-      $field_options[$display][$k] = $v['label'];
-      $trigger_tables[$v['trigger_table']] = FALSE;
-    }
-    if(count($field_options) == 0) {
+    if (empty($custom['fields'])) {
       // This means neither CiviEvent or CiviContribute are enabled.
-      $session = CRM_Core_Session::singleton();
-      $session->setStatus(ts("Summary Fields is not particularly useful if CiviContribute and CiviEvent are both disabled. Try enabling at least one.", array('domain' => 'net.ourpowerbase.sumfields')));
+      CRM_Core_Session::setStatus(ts("Summary Fields is not particularly useful if CiviContribute and CiviEvent are both disabled. Try enabling at least one.", array('domain' => 'net.ourpowerbase.sumfields')));
       return;
+    }
+    $trigger_tables = $fieldsets = $field_options = array();
+    foreach ($custom['fields'] as $k => $v) {
+      $optgroup = $v['optgroup'];
+      $fieldsets[$custom['optgroups'][$optgroup]['fieldset']]["active_{$optgroup}_fields"] = CRM_Utils_Array::value('description', $custom['optgroups'][$optgroup]);
+      $field_options[$optgroup][$k] = $v['label'];
+      $trigger_tables[$v['trigger_table']] = FALSE;
     }
     // Evaluate the status of form changes and report to the user
     $apply_settings_status = sumfields_get_setting('generate_schema_and_data', FALSE);
@@ -59,43 +59,26 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $this->assign('trigger_table_status', $trigger_tables);
 
     // Add active fields
+    foreach ($field_options as $optgroup => $options) {
+      $this->addCheckBox(
+        "active_{$optgroup}_fields", $custom['optgroups'][$optgroup]['title'], array_flip($options)
+      );
+    }
+
+    // Add extra settings to fieldsets
     if (sumfields_component_enabled('CiviContribute')) {
-      $label = ts('Contribution Fields', array('domain' => 'net.ourpowerbase.sumfields'));
-      $this->addCheckBox(
-        'active_fundraising_fields', $label, array_flip($field_options['fundraising'])
-      );
-      $label = ts('Soft Credit Fields', array('domain' => 'net.ourpowerbase.sumfields'));
-      $this->addCheckBox(
-        'active_soft_fields', $label, array_flip($field_options['soft'])
-      );
       $label = ts('Financial Types', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->add('select', 'financial_type_ids', $label, sumfields_get_all_financial_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
+      $fieldsets[$custom['optgroups']['fundraising']['fieldset']]['financial_type_ids'] = ts("Financial types to include when calculating contribution related summary fields.", array('domain' => 'net.ourpowerbase.sumfields'));
     }
 
     if (sumfields_component_enabled('CiviMember')) {
-      $name = 'active_membership_fields';
-      $label = ts('Membership Fields', array('domain' => 'net.ourpowerbase.sumfields'));
-      $this->addCheckBox(
-        $name, $label, array_flip($field_options['membership'])
-      );
       $label = ts('Financial Types', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->add('select', 'membership_financial_type_ids', $label, sumfields_get_all_financial_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
+      $fieldsets[$custom['optgroups']['membership']['fieldset']]['membership_financial_type_ids'] = ts("Financial types to include when calculating membership related summary fields.", array('domain' => 'net.ourpowerbase.sumfields'));
     }
 
     if (sumfields_component_enabled('CiviEvent')) {
-      if (array_key_exists('event_standard', $field_options)) {
-        $label = ts('Standard Event Fields', array('domain' => 'net.ourpowerbase.sumfields'));
-        $this->addCheckBox(
-          'active_event_standard_fields', $label, array_flip($field_options['event_standard'])
-        );
-      }
-      if (array_key_exists('event_turnout', $field_options)) {
-        $label = ts('Turnout Event Fields', array('domain' => 'net.ourpowerbase.sumfields'));
-        $this->addCheckBox(
-          'active_event_turnout_fields', $label, array_flip($field_options['event_turnout'])
-        );
-      }
-
       $label = ts('Event Types', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->add('select', 'event_type_ids', $label, sumfields_get_all_event_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
 
@@ -104,17 +87,22 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
       $label = ts('Participant Status (did not attend)', array('domain' => 'net.ourpowerbase.sumfields'));
       $this->add('select', 'participant_noshow_status_ids', $label, sumfields_get_all_participant_status_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
+
+      $fieldsets[$custom['optgroups']['event_standard']['fieldset']] += array(
+        'event_type_ids' => 'Event types to include when calculating participant summary fields',
+        'participant_status_ids' => '',
+        'participant_noshow_status_ids' => '',
+      );
     }
 
-    $name = 'when_to_apply_change';
+    $this->assign('fieldsets', $fieldsets);
+
     $label = ts('When should these changes be applied?', array('domain' => 'net.ourpowerbase.sumfields'));
     $options = array(
       'via_cron' => ts("On the next scheduled job (cron)", array('domain' => 'net.ourpowerbase.sumfields')),
       'on_submit' => ts("When I submit this form", array('domain' => 'net.ourpowerbase.sumfields'))
     );
-    $this->addRadio(
-      $name, $label, $options
-    );
+    $this->addRadio('when_to_apply_change', $label, $options);
 
     $this->addButtons(array(
           array(
@@ -138,7 +126,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
     foreach ($custom['fields'] as $name => $info) {
       if (in_array($name, $active_fields)) {
-        $defaults["active_{$info['display']}_fields"][$name] = 1;
+        $defaults["active_{$info['optgroup']}_fields"][$name] = 1;
       }
     }
 

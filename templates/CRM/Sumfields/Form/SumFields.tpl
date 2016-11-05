@@ -25,78 +25,22 @@
 
 <h3>{ts}Field Settings{/ts}</h3>
 
-{if !empty($form.active_fundraising_fields)}
+{foreach from=$fieldsets key="title" item="fields"}
   <fieldset>
-    <legend>{ts}Fundraising{/ts}</legend>
+    <legend>{$title}</legend>
     <table class="form-layout-compressed">
-      <tr class="crm-sumfields-form-block-sumfields_active_fundraising_fields">
-        <td class="label">{$form.active_fundraising_fields.label}</td>
-        <td>{$form.active_fundraising_fields.html}</td>
-      </tr>
-      <tr class="crm-sumfields-form-block-sumfields_active_soft_fields">
-        <td class="label">{$form.active_soft_fields.label}</td>
-        <td>{$form.active_soft_fields.html}</td>
-      </tr>
-      <tr class="crm-sumfields-form-block-sumfields_financial_type_ids">
-        <td class="label">{$form.financial_type_ids.label}</td>
-        <td>
-          {$form.financial_type_ids.html}
-          <div class="description">{ts}Financial types to include when calculating contribution related summary fields.{/ts}</div>
-        </td>
-      </tr>
+      {foreach from=$fields key="name" item="description"}
+        <tr class="crm-sumfields-form-block-sumfields_{$name}">
+          <td class="label">{$form.$name.label}</td>
+          <td>
+            {$form.$name.html}
+            {if $description}<div class="description">{$description}</div>{/if}
+          </td>
+        </tr>
+      {/foreach}
     </table>
   </fieldset>
-{/if}
-
-{if !empty($form.active_membership_fields)}
-  <fieldset>
-    <legend>{ts}Membership{/ts}</legend>
-    <table class="form-layout-compressed">
-      <tr class="crm-sumfields-form-block-sumfields_active_membership_fields">
-        <td class="label">{$form.active_membership_fields.label}</td>
-        <td>{$form.active_membership_fields.html}</td>
-      </tr>
-      <tr class="crm-sumfields-form-block-sumfields_membership_financial_type_ids">
-        <td class="label">{$form.membership_financial_type_ids.label}</td>
-        <td>
-          {$form.membership_financial_type_ids.html}
-          <div class="description">{ts}Financial types to include when calculating membership related summary fields.{/ts}</div>
-        </td>
-      </tr>
-    </table>
-  </fieldset>
-{/if}
-
-{if !empty($form.active_event_standard_fields)}
-  <fieldset>
-    <legend>{ts}Events{/ts}</legend>
-    <table class="form-layout-compressed">
-      <tr class="crm-sumfields-form-block-sumfields_active_event_standard_fields">
-        <td class="label">{$form.active_event_standard_fields.label}</td>
-        <td>{$form.active_event_standard_fields.html}</td>
-      </tr>
-      <tr class="crm-sumfields-form-block-sumfields_active_event_turnout_fields">
-        <td class="label">{$form.active_event_turnout_fields.label}</td>
-        <td>{$form.active_event_turnout_fields.html}</td>
-      </tr>
-      <tr class="crm-sumfields-form-block-sumfields_event_type_ids">
-        <td class="label">{$form.event_type_ids.label}</td>
-        <td>
-          {$form.event_type_ids.html}
-          <div class="description">{ts}Event types to include when calculating participant summary fields.{/ts}</div>
-        </td>
-      </tr>
-      <tr class="crm-sumfields-form-block-sumfields_participant_status_ids">
-        <td class="label">{$form.participant_status_ids.label}</td>
-        <td>{$form.participant_status_ids.html}</td>
-      </tr>
-      <tr class="crm-sumfields-form-block-sumfields_participant_noshow_status_ids">
-        <td class="label">{$form.participant_noshow_status_ids.label}</td>
-        <td>{$form.participant_noshow_status_ids.html}</td>
-      </tr>
-    </table>
-  </fieldset>
-{/if}
+{/foreach}
 
  <div id="when_to_apply_change">
    <div class="description">{ts}Applying these settings via this form may cause your web server to time out. Applying changes on next scheduled job is recommended.{/ts}</div>
