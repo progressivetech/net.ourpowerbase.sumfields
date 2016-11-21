@@ -302,7 +302,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
 
   // Iterate over each table that needs a trigger, build the trigger's
   // sql clause.
-  while(list(, $table) = each($tables)) {
+  foreach ($tables as $table) {
     $parts = $sql_field_parts[$table];
     $parts[] = 'entity_id = NEW.contact_id';
 
@@ -354,7 +354,7 @@ function sumfields_create_temporary_table($trigger_table) {
   // Initialize with a field to hold the entity_id
   $create_fields[] = "`contact_id` INT";
   // Iterate over the actual instantiated summary fields
-  while(list($field_name, $values) = each($custom_fields)) {
+  foreach ($custom_fields as $field_name => $values) {
     // Avoid error - make sure we have a definition for this field.
     if(array_key_exists($field_name, $definitions)) {
       $field_definition = $definitions[$field_name];
@@ -373,7 +373,7 @@ function sumfields_create_temporary_table($trigger_table) {
       }
     }
   }
-  $sql = "CREATE TABLE `$name` ( ".
+  $sql = "CREATE TEMPORARY TABLE `$name` ( ".
     implode($create_fields, ',') . ')';
   CRM_Core_DAO::executeQuery($sql);
   return $name;
@@ -383,7 +383,11 @@ function sumfields_create_temporary_table($trigger_table) {
  * Generate calculated fields for all contacts.
  * This function is designed to be run once when
  * the extension is installed or initialized.
- **/
+ *
+ * @param CRM_Core_Session $session
+ * @return bool
+ *   TRUE if successful, FALSE otherwise
+ */
 function sumfields_generate_data_based_on_current_data($session = NULL) {
   // Get the actual table name for summary fields.
   $table_name = _sumfields_get_custom_table_name();
@@ -395,8 +399,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $session = CRM_Core_Session::singleton();
   }
   if(empty($table_name)) {
-    $session->setStatus(ts("Your configuration may be corrupted.
-      Please disable and renable this extension."));
+    $session::setStatus(ts("Your configuration may be corrupted. Please disable and renable this extension."), ts('Error'), 'error');
     return FALSE;
   }
   // In theory we shouldn't have to truncate the table, but we
@@ -408,47 +411,15 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
   // clause that is stored here. These are the generically shipped
   // field definitions (via custom.php).
   $custom = sumfields_get_custom_field_definitions();
-
   $active_fields = sumfields_get_setting('active_fields', array());
 
   // Variables used for building the temp tables and temp insert statement.
-  $contribution_sql = NULL;
-  $contribution_sql_parts = array();
-  $contribution_sql_parts[] = 'contact_id';
-  $participant_sql = NULL;
-  $participant_sql_parts = array();
-  $participant_sql_parts[] = 'contact_id';
+  $temp_sql = array();
 
-  // Variables used for building the final insert statement into the actual
-  // summary fields table
-  $final_sql = "INSERT INTO `$table_name` ";
-  $final_sql_parts = array();
-  $final_sql_parts[] = 'NULL';
-  $final_sql_parts[] = 'contact_id';
-
-  if(sumfields_are_any_contribution_fields_active()) {
-    $contribution_temp_table = sumfields_create_temporary_table('civicrm_contribution');
-    $contribution_sql = "INSERT INTO `$contribution_temp_table` SELECT ";
-  }
-
-  if(sumfields_are_any_event_fields_active()) {
-    $participant_temp_table = sumfields_create_temporary_table('civicrm_participant');
-    $participant_sql = "INSERT INTO `$participant_temp_table` SELECT ";
-  }
-
-  if(is_null($contribution_sql) && is_null($participant_sql)) {
-    // Is this an error? Not sure. But it will be an error if we let this
-    // function continue - it will produce a broken sql statement, so we
-    // short circuit here.
-    $session->setStatus(ts("Not regenerating content, no fields defined."));
-    return TRUE;
-  }
-
-  $session->setStatus(ts("Regenerating content in your summary fields table."));
-
-  $tables = array();
-  while(list($base_column_name, $params) = each($custom_fields)) {
-    if(!in_array($base_column_name, $active_fields)) continue;
+  while (list($base_column_name, $params) = each($custom_fields)) {
+    if (!in_array($base_column_name, $active_fields)) {
+      continue;
+    }
     $table = $custom['fields'][$base_column_name]['trigger_table'];
 
     $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
@@ -456,104 +427,52 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     // between the trigger sql statement and the initial sql statement
     // to load the data.
     $trigger = str_replace('NEW.contact_id', 't2.contact_id', $trigger);
-    if(FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
+    if (FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
       $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
       $session->setStatus($msg);
       continue;
     }
-    if($table == 'civicrm_participant') {
-      $participant_sql_parts[] = $trigger;
+    if (!isset($temp_sql[$table])) {
+      $temp_sql[$table] = array(
+        'temp_table' => sumfields_create_temporary_table($table),
+        'triggers' => array(),
+        'map' => array(),
+      );
     }
-    elseif($table == 'civicrm_contribution') {
-      $contribution_sql_parts[] = $trigger;
-    }
-    // For the final query, we just need the field name
-    $final_sql_parts[] = $base_column_name;
+    $temp_sql[$table]['triggers'][$base_column_name] = $trigger;
+    $temp_sql[$table]['map'][$base_column_name] = $params['column_name'];
   }
 
-  if(!is_null($contribution_sql)) {
-    $contribution_sql .= implode(",\n", $contribution_sql_parts);
-    $contribution_sql .= ' FROM `civicrm_contribution` AS t2 ';
-    // Add relationship to contact to avoid sql failures due to incorrect
-    // existing data + foreign key constraints
-    $contribution_sql .= "JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
-    $contribution_sql .= ' WHERE t2.contribution_status_id = 1';
-    $contribution_sql .= ' GROUP BY contact_id';
-    CRM_Core_DAO::executeQuery($contribution_sql);
-    // echo "$contribution_sql\n\n";
+  if(empty($temp_sql)) {
+    // Is this an error? Not sure. But it will be an error if we let this
+    // function continue - it will produce a broken sql statement, so we
+    // short circuit here.
+    $session::setStatus(ts("Not regenerating content, no fields defined."), ts('Error'), 'error');
+    return TRUE;
   }
-  if(!is_null($participant_sql)) {
-    $participant_sql .= implode(",\n", $participant_sql_parts);
-    $participant_sql .= ' FROM `civicrm_participant` AS t2 ';
-    $participant_sql .= "JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
-    $participant_sql .= ' GROUP BY contact_id';
-    CRM_Core_DAO::executeQuery($participant_sql);
-    // echo "$participant_sql\n\n";
+
+  foreach ($temp_sql as $table => $data) {
+    // Calculate data and insert into temp table
+    $query = "INSERT INTO `{$data['temp_table']}` SELECT contact_id, "
+      . implode(",\n", $data['triggers'])
+      . " FROM `$table` AS t2 "
+      . "JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
+    $query .= ' GROUP BY contact_id';
+    CRM_Core_DAO::executeQuery($query);
+
+    // Move temp data into custom field table
+    $query = "INSERT INTO `$table_name` "
+      . "(entity_id, " . implode(',', $data['map']) . ") "
+      . "(SELECT contact_id, " . implode(',', array_keys($data['map'])) . " FROM `{$data['temp_table']}`) "
+      . "ON DUPLICATE KEY UPDATE ";
+    foreach ($data['map'] as $tmp => $val) {
+      $query .= " $val = $tmp,";
+    }
+    $query = rtrim($query, ',');
+    CRM_Core_DAO::executeQuery($query);
   }
-  $final_fields = implode(",\n", $final_sql_parts);
-  if(!is_null($contribution_sql) && !is_null($participant_sql)) {
-    // We have both a contribution and participant table to deal with - this
-    // will require a more complicated UNION query to pull them both together
-    // into the summary fields table.
-    $final_sql .= " SELECT $final_fields FROM `$contribution_temp_table` c LEFT JOIN ".
-      "`$participant_temp_table` t USING(contact_id) UNION SELECT $final_fields FROM ".
-      "`$participant_temp_table` p LEFT JOIN `$contribution_temp_table` c USING(contact_id) ".
-      "WHERE c.contact_id IS NULL";
-  }
-  elseif(!is_null($participant_sql)) {
-    // Only participant fields.
-    $final_sql .= "(SELECT $final_fields FROM `$participant_temp_table`)";
-  }
-  elseif(!is_null($contribution_sql)) {
-    // Only contribution fields.
-    $final_sql .= "(SELECT $final_fields FROM `$contribution_temp_table`)";
-  }
-  // echo "final: $final_sql\n";
-  CRM_Core_DAO::executeQuery($final_sql);
 
   return TRUE;
-}
-
-/**
- * Helper function to see if any of the event fields
- * are active.
- **/
-
-function sumfields_are_any_event_fields_active() {
-  // Fields chosen by the user
-  $active_fields = sumfields_get_setting('active_fields', array());
-  // All custom field definitions.
-  $custom = sumfields_get_custom_field_definitions();
-  // Iterate over our active fields looking for ones using the
-  // civicrm_participant table.
-  while(list(,$base_column_name) = each($active_fields)) {
-    $table = $custom['fields'][$base_column_name]['trigger_table'];
-    if($table == 'civicrm_participant') {
-      return TRUE;
-    }
-  }
-  return FALSE;
-}
-
-/**
- * Helper function to see if any of the contribution fields
- * are active.
- **/
-
-function sumfields_are_any_contribution_fields_active() {
-  // Fields chosen by the user
-  $active_fields = sumfields_get_setting('active_fields', array());
-  // All custom field definitions.
-  $custom = sumfields_get_custom_field_definitions();
-  // Iterate over our active fields looking for ones using the
-  // civicrm_contribution table.
-  while(list(,$base_column_name) = each($active_fields)) {
-    $table = $custom['fields'][$base_column_name]['trigger_table'];
-    if($table == 'civicrm_contribution') {
-      return TRUE;
-    }
-  }
-  return FALSE;
 }
 
 /**
@@ -588,8 +507,6 @@ function sumfields_alter_custom_field_create_params(&$params) {
  * Create custom fields - should be called on enable.
  **/
 function sumfields_create_custom_fields_and_table() {
-  $session = CRM_Core_Session::singleton();
-
   // Load the field and group definitions.
   $custom = sumfields_get_custom_field_definitions();
 
@@ -616,9 +533,11 @@ function sumfields_create_custom_fields_and_table() {
   // Get an array of fields that the user wants to use.
   $active_fields = sumfields_get_setting('active_fields', array());
   // Now create the fields.
-  while(list($name, $field) = each($custom['fields'])) {
+  foreach ($custom['fields'] as $name => $field) {
     // Skip fields not selected by the user.
-    if(!in_array($name, $active_fields)) continue;
+    if(!in_array($name, $active_fields)) {
+      continue;
+    }
 
     $params = $field;
     $params['version'] = 3;
@@ -628,8 +547,7 @@ function sumfields_create_custom_fields_and_table() {
 
     $result = civicrm_api('CustomField', 'create', $params);
     if($result['is_error'] == 1) {
-      $session->setStatus(sprintf(ts("Error creating custom field '%s'"), $name));
-      $session->setStatus(print_r($result, TRUE));
+      CRM_Core_Session::setStatus(print_r($result, TRUE), ts("Error creating custom field '%1'", array(1 => $name)), 'error');
       continue;
     }
     $value = array_pop($result['values']);
@@ -758,45 +676,47 @@ function _sumfields_get_custom_table_parameters() {
  **/
 function sumfields_get_custom_field_definitions() {
   static $custom = NULL;
-  if(is_null($custom)) {
+  if (is_null($custom)) {
     // The custom.php file defines the $custom array of field
     // definitions. Only require if necessary.
     require 'custom.php';
+    // Invoke hook_civicrm_sumfields_definitions
+    $null = NULL;
+    CRM_Utils_Hook::singleton()->invoke(1, $custom, $null, $null,
+      $null, $null, $null,
+      'civicrm_sumfields_definitions'
+    );
+    foreach ($custom['fields'] as $k => $v) {
+      // Merge in defaults
+      $custom['fields'][$k] += array(
+        'html_type' => 'Text',
+        'is_required' => '0',
+        'is_searchable' => '1',
+        'is_search_range' => '1',
+        'weight' => '0',
+        'is_active' => '1',
+        'is_view' => '1',
+        'text_length' => '32',
+      );
+      // Filter out any fields from tables that are not installed.
+      if (isset($custom['optgroups'][$v['optgroup']]['component'])) {
+        if (!sumfields_component_enabled($custom['optgroups'][$v['optgroup']]['component'])) {
+          unset($custom['fields'][$k]);
+        }
+      }
+      if ($k == 'event_turnout_attempts') {
+        // event_turnout_attempts is triggered on the civicrm_participant table,
+        // but it counts records in the civicrm custom table civirm_participant_info_NN.
+        // We have to look up the name of that table for this particular instance as a
+        // way to see if the table is installed.
+        $actual_table_name = sumfields_get_participant_info_table();
+        if (!$actual_table_name) {
+          // Perhaps not enabled.
+          unset($custom['fields'][$k]);
+        }
+      }
+    }
   }
-  // Not all custom field definitions will be relevant to this
-  // installation, so we have filter out any fields that come
-  // from tables that are not installed.
-  while(list($k, $v) = each($custom['fields'])) {
-    if($v['trigger_table'] == 'civicrm_contribution') {
-      if(!sumfields_component_enabled('CiviContribute')) {
-        unset($custom['fields'][$k]);
-      }
-    }
-    elseif($v['trigger_table'] == 'civicrm_participant') {
-      if(!sumfields_component_enabled('CiviEvent')) {
-        unset($custom['fields'][$k]);
-      }
-    }
-    // Some of the custom fields depend on installed components
-    if($k == 'contribution_amount_last_membership_payment' ||
-      $k == 'contribution_date_last_membership_payment') {
-       if(!sumfields_component_enabled('CiviMember')) {
-        unset($custom['fields'][$k]);
-      }
-    }
-    if($k == 'event_turnout_attempts') {
-      // event_turnout_attempts is triggered on the civicrm_participant table,
-      // but it counts records in the civicrm custom table civirm_participant_info_NN.
-      // We have to look up the name of that table for this particular instance as a
-      // way to see if the table is installed.
-      $actual_table_name = sumfields_get_participant_info_table();
-      if(!$actual_table_name) {
-        // Perhaps not enabled.
-        unset($custom['fields'][$k]);
-      }
-    }
-  }
-  reset($custom);
   return $custom;
 }
 
@@ -916,16 +836,13 @@ function sumfields_get_all_participant_status_types() {
   CRM_Core_PseudoConstant::populate($values, 'CRM_Event_DAO_ParticipantStatusType', $all = TRUE);
   return $values;
 }
+
 /**
  * Get all available active fields
  **/
 function sumfields_get_all_custom_fields() {
   $custom = sumfields_get_custom_field_definitions();
-  $values = array();
-  while(list($k) = each($custom['fields'])) {
-    $values[] = $k;
-  }
-  return $values;
+  return array_keys($custom['fields']);
 }
 
 /**
@@ -1200,8 +1117,7 @@ function sumfields_alter_table() {
   }
   $custom = sumfields_get_custom_field_definitions();
   $group_id = $custom_table_parameters['id'];
-  reset($new_fields);
-  while(list(,$field) = each($new_fields)) {
+  foreach ($new_fields as $field) {
     if(!in_array($field, $old_fields)) {
       $params = $custom['fields'][$field];
       $params['custom_group_id'] = $group_id;
@@ -1242,7 +1158,7 @@ function sumfields_alter_table() {
 function sumfields_print_triggers() {
   // Get list of custom fields and triggers
   $custom = sumfields_get_custom_field_definitions();
-  while(list($k, $v) = each($custom['fields'])) {
+  foreach ($custom['fields'] as $k => $v) {
     $out = sumfields_sql_rewrite($v['trigger_sql']);
     if(FALSE === $out) {
       $out = "Failed sql_write.";
@@ -1259,6 +1175,9 @@ function sumfields_print_triggers() {
  * fields saved or via Cron job.
  *
  * Called by the API gendata.
+ *
+ * @return boolean
+ *   TRUE if there was an error
  */
 function sumfields_gen_data(&$returnValues) {
   // generate_schema_and_data variable can be set to any of the following:

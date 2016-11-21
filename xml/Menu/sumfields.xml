@@ -3,7 +3,7 @@
   <item>
     <path>civicrm/admin/setting/sumfields</path>
     <page_callback>CRM_Sumfields_Form_SumFields</page_callback>
-    <title>SumFields</title>
+    <title>Summary Fields Administration</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>
