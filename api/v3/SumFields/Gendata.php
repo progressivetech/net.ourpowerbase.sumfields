@@ -23,8 +23,8 @@ function _civicrm_api3_sum_fields_gendata_spec(&$spec) {
  */
 function civicrm_api3_sum_fields_gendata($params) {
   $returnValues = array();
-  $exception = sumfields_gen_data($returnValues);  
-  if(!$exception) {
+  $ret = sumfields_gen_data($returnValues);  
+  if ($ret) {
     // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
     return civicrm_api3_create_success($returnValues, $params, 'SumFields', 'gendata');
   } else {

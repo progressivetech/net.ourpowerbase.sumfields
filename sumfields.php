@@ -1249,7 +1249,7 @@ function sumfields_gen_data(&$returnValues) {
   }
   $returnValues = array("Original Status: $status, New Status: $new_status");
   sumfields_save_setting('generate_schema_and_data', $new_status);
-  if(!$exception) {
+  if($exception) {
     return FALSE;
   }
   return TRUE;
