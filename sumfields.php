@@ -101,6 +101,25 @@ function sumfields_civicrm_managed(&$entities) {
 }
 
 /**
+ * Implementation of hook_civicrm_pageRun
+ *
+ * Add link to manage summary fields
+ */
+function sumfields_civicrm_pageRun($page) {
+  if (CRM_Core_Permission::check('administer CiviCRM') && $page->getVar('_name') == 'CRM_Contact_Page_View_CustomData') {
+    CRM_Core_Region::instance('custom-data-view-Summary_Fields')->add(array(
+      'markup' => '
+      <a class="no-popup button" href="' . CRM_Utils_System::url('civicrm/admin/setting/sumfields') . '">
+        <span>
+          <i class="crm-i fa-wrench"></i>&nbsp; ' . ts('Configure Summary Fields', array('domain' => 'net.ourpowerbase.sumfields')) . '
+        </span>
+      </a>
+    ',
+    ));
+  }
+}
+
+/**
  * Replace %variable with the actual
  * values that the user has configured to limit to.
  **/
