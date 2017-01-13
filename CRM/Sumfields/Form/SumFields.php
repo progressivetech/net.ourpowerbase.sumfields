@@ -170,7 +170,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     sumfields_save_setting('generate_schema_and_data', 'scheduled:'. date('Y-m-d H:i:s'));
     if ($values['when_to_apply_change'] == 'on_submit') {
       $returnValues = array();
-      if (sumfields_gen_data($returnValues)) {
+      if (!sumfields_gen_data($returnValues)) {
         $session::setStatus(ts("There was an error applying your changes.", array('domain' => 'net.ourpowerbase.sumfields')), ts('Error'), 'error');
       }
       else {
