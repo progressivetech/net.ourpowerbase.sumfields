@@ -23,17 +23,19 @@ function sumfields_civicrm_xmlMenu(&$files) {
  *
  * @param $params array
  */
-function sumfields_civicrm_navigationMenu(&$menu) {
-  _myext_civix_insert_navigation_menu($menu, NULL, array(
+function sumfields_civicrm_navigationMenu(&$params) {
+  $path = "Administer/Customize Data and Screens";
+  $item = array(
     'label' => ts('Summary Fields', array('net.ourpowerbase.sumfields')),
     'name' => 'Summary Fields',
     'url' => 'civicrm/admin/setting/sumfields',
     'permission' => 'administer CiviCRM',
     'operator' => '',
-    'separator' => 0,
-  ));
+    'separator' => '',
+    'active' => 1,
+  );
 
-  _sumfields_civix_navigationMenu($menu);
+  $ret = _sumfields_civix_insert_navigation_menu($params, $path, $item);
 }
 
 /**
