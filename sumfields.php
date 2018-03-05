@@ -290,63 +290,68 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
   $sql_field_parts = array();
 
   $active_fields = sumfields_get_setting('active_fields', array());
+  $process_type = sumfields_get_setting('process_type','default');
 
   $session = CRM_Core_Session::singleton();
 
-  // Iterate over all our fields, and build out a sql parts array
-  while(list($base_column_name, $params) = each($custom_fields)) {
-    if(!in_array($base_column_name, $active_fields)) continue;
-    $table = $custom['fields'][$base_column_name]['trigger_table'];
-    if(!is_null($tableName) && $tableName != $table) {
-      // if triggerInfo is called with particular table name, we should
-      // only respond if we are contributing triggers to that table.
-      continue;
+  if ($process_type == 'default') {
+
+    // Iterate over all our fields, and build out a sql parts array
+    while(list($base_column_name, $params) = each($custom_fields)) {
+      if(!in_array($base_column_name, $active_fields)) continue;
+      $table = $custom['fields'][$base_column_name]['trigger_table'];
+      if(!is_null($tableName) && $tableName != $table) {
+        // if triggerInfo is called with particular table name, we should
+        // only respond if we are contributing triggers to that table.
+        continue;
+      }
+      $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
+      $trigger = sumfields_sql_rewrite($trigger);
+      // If we fail to properly rewrite the sql, don't set the trigger
+      // to avoid sql exceptions.
+      if(FALSE === $trigger) {
+        $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
+        $session->setStatus($msg);
+        continue;
+      }
+      $sql_field_parts[$table][] = '`' . $params['column_name'] . '` = ' .
+        $trigger;
+      // Keep track of which tables we need to build triggers for.
+      if(!in_array($table, $tables)) $tables[] = $table;
     }
-    $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
-    $trigger = sumfields_sql_rewrite($trigger);
-    // If we fail to properly rewrite the sql, don't set the trigger
-    // to avoid sql exceptions.
-    if(FALSE === $trigger) {
-      $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
-      $session->setStatus($msg);
-      continue;
+
+    // Iterate over each table that needs a trigger, build the trigger's
+    // sql clause.
+    foreach ($tables as $table) {
+      $parts = $sql_field_parts[$table];
+      $parts[] = 'entity_id = NEW.contact_id';
+
+      $extra_sql = implode(',', $parts);
+      $sql = $generic_sql . $extra_sql . ' ON DUPLICATE KEY UPDATE ' . $extra_sql . ';';
+
+      // We want to fire this trigger on insert, update and delete.
+      $info[] = array(
+        'table' => $table,
+        'when' => 'AFTER',
+        'event' => 'INSERT',
+        'sql' => $sql,
+       );
+      $info[] = array(
+        'table' => $table,
+        'when' => 'AFTER',
+        'event' => 'UPDATE',
+        'sql' => $sql,
+      );
+      // For delete, we reference OLD.field instead of NEW.field
+      $sql = str_replace('NEW.', 'OLD.', $sql);
+      $info[] = array(
+        'table' => $table,
+        'when' => 'AFTER',
+        'event' => 'DELETE',
+        'sql' => $sql,
+      );
     }
-    $sql_field_parts[$table][] = '`' . $params['column_name'] . '` = ' .
-      $trigger;
-    // Keep track of which tables we need to build triggers for.
-    if(!in_array($table, $tables)) $tables[] = $table;
-  }
 
-  // Iterate over each table that needs a trigger, build the trigger's
-  // sql clause.
-  foreach ($tables as $table) {
-    $parts = $sql_field_parts[$table];
-    $parts[] = 'entity_id = NEW.contact_id';
-
-    $extra_sql = implode(',', $parts);
-    $sql = $generic_sql . $extra_sql . ' ON DUPLICATE KEY UPDATE ' . $extra_sql . ';';
-
-    // We want to fire this trigger on insert, update and delete.
-    $info[] = array(
-      'table' => $table,
-      'when' => 'AFTER',
-      'event' => 'INSERT',
-      'sql' => $sql,
-     );
-    $info[] = array(
-      'table' => $table,
-      'when' => 'AFTER',
-      'event' => 'UPDATE',
-      'sql' => $sql,
-    );
-    // For delete, we reference OLD.field instead of NEW.field
-    $sql = str_replace('NEW.', 'OLD.', $sql);
-    $info[] = array(
-      'table' => $table,
-      'when' => 'AFTER',
-      'event' => 'DELETE',
-      'sql' => $sql,
-    );
   }
 }
 
@@ -1238,6 +1243,8 @@ function sumfields_gen_data(&$returnValues) {
     // Check to see if the new_active_fields setting is set. This means we have to alter the fields
     // from the current setting.
     $new_active_fields = sumfields_get_setting('new_active_fields', NULL);
+    // Get process type
+    $process_type = sumfields_get_setting('process_type','default');
     if(!is_null($new_active_fields)) {
       if(!sumfields_alter_table()) {
         // If we fail to properly alter the table, bail and record that we had an error.
@@ -1255,7 +1262,12 @@ function sumfields_gen_data(&$returnValues) {
       if(sumfields_generate_data_based_on_current_data()) {
         CRM_Core_DAO::triggerRebuild();
         $date = date('Y-m-d H:i:s');
-        $new_status = 'success:' . $date;
+        if ($process_type == 'big_data') {
+          // If we have big data, then after a successful task, re-set the status to scheduled
+          $new_status = 'scheduled:' . $date;
+        } else {
+          $new_status = 'success:' . $date;
+        }
       }
       else {
         $date = date('Y-m-d H:i:s');
