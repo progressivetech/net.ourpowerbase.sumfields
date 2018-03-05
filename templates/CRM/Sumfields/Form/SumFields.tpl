@@ -42,6 +42,12 @@
   </fieldset>
 {/foreach}
 
+  <div id="performance_settings">
+    <div class="description">{ts}If 'Default settings' is selected, data will be more accurate but you might face some performance issues on large installations. <br/> If 'Disable triggers' is selected, Summary Fields will rely on each CiviCRM Cron job to process all calculations needed for all contacts.{/ts}</div>
+   <div class="label">{$form.performance_settings.label}</div>
+   <span>{$form.performance_settings.html}</span>
+ </div>
+
  <div id="when_to_apply_change">
    <div class="description">{ts}Applying these settings via this form may cause your web server to time out. Applying changes on next scheduled job is recommended.{/ts}</div>
    <div class="label">{$form.when_to_apply_change.label}</div>
