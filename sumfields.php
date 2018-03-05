@@ -290,11 +290,11 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
   $sql_field_parts = array();
 
   $active_fields = sumfields_get_setting('active_fields', array());
-  $process_type = sumfields_get_setting('process_type','default');
+  $process_type = sumfields_get_setting('data_update_method','default');
 
   $session = CRM_Core_Session::singleton();
 
-  if ($process_type == 'default') {
+  if ($process_type == 'via_triggers') {
 
     // Iterate over all our fields, and build out a sql parts array
     while(list($base_column_name, $params) = each($custom_fields)) {
@@ -1244,7 +1244,7 @@ function sumfields_gen_data(&$returnValues) {
     // from the current setting.
     $new_active_fields = sumfields_get_setting('new_active_fields', NULL);
     // Get process type
-    $process_type = sumfields_get_setting('process_type','default');
+    $process_type = sumfields_get_setting('data_update_method','via_triggers');
     if(!is_null($new_active_fields)) {
       if(!sumfields_alter_table()) {
         // If we fail to properly alter the table, bail and record that we had an error.
@@ -1262,7 +1262,7 @@ function sumfields_gen_data(&$returnValues) {
       if(sumfields_generate_data_based_on_current_data()) {
         CRM_Core_DAO::triggerRebuild();
         $date = date('Y-m-d H:i:s');
-        if ($process_type == 'big_data') {
+        if ($process_type == 'via_cron') {
           // If we have big data, then after a successful task, re-set the status to scheduled
           $new_status = 'scheduled:' . $date;
         } else {

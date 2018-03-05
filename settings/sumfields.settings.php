@@ -128,9 +128,9 @@ return array(
   'process_type' => array(
     'group_name' => 'Summary Fields',
     'group' => 'summaryfields',
-    'name' => 'process_type',
+    'name' => 'data_update_method',
     'type' => 'String',
-    'default' => 'default',
+    'default' => 'via_triggers',
     'add' => '4.6',
     'is_domain' => 1,
     'is_contact' => 0,
