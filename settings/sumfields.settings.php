@@ -125,4 +125,16 @@ return array(
     'description' => 'List of active fields that will be active when the cron job making the change completes.',
     'help_text' => '',
 	),
+  'process_type' => array(
+    'group_name' => 'Summary Fields',
+    'group' => 'summaryfields',
+    'name' => 'process_type',
+    'type' => 'String',
+    'default' => 'default',
+    'add' => '4.6',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => 'Determines what process to use to calculate summary fields. Trigger-based (default) or only cron job based.',
+    'help_text' => '',
+	),
 );
