@@ -19,7 +19,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     }
     // Evaluate the status of form changes and report to the user
     $apply_settings_status = sumfields_get_setting('generate_schema_and_data', FALSE);
-    $process_type = sumfields_get_setting('data_update_method','default');
+    $data_update_method = sumfields_get_setting('data_update_method','default');
     $status_icon = 'fa-times';
 
     if (empty($apply_settings_status)) {
@@ -30,11 +30,11 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       preg_match('/^(scheduled|running|success|failed):([0-9 :\-]+)$/', $apply_settings_status, $matches);
       $date = $matches[2];
       switch($matches[1]) {
-        case 'scheduled' and $process_type == 'via_triggers':
+        case 'scheduled' and $data_update_method == 'via_triggers':
           $display_status = ts("Setting changes were saved on %1, but not yet applied; they should be applied shortly.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
           $status_icon = 'fa-hourglass-start';
           break;
-        case 'scheduled' and $process_type == 'via_cron':
+        case 'scheduled' and $data_update_method == 'via_cron':
           $display_status = ts("Setting changes were saved on %1, but not yet applied; they should be applied on next cron run.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
           $status_icon = 'fa-hourglass-start';
           break;
@@ -147,7 +147,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $defaults['event_type_ids'] = sumfields_get_setting('event_type_ids', array());
     $defaults['participant_status_ids'] = sumfields_get_setting('participant_status_ids', array());
     $defaults['participant_noshow_status_ids'] = sumfields_get_setting('participant_noshow_status_ids', array());
-    $defaults['when_to_apply_change'] = 'via_cron';
+    $defaults['when_to_apply_change'] = sumfields_get_setting('when_to_apply_change','via_cron');
     $defaults['data_update_method'] = sumfields_get_setting('data_update_method','via_triggers');
     return $defaults;
   }
@@ -183,8 +183,9 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     sumfields_save_setting('generate_schema_and_data', 'scheduled:'. date('Y-m-d H:i:s'));
     // Save our form page settings
     sumfields_save_setting('data_update_method', $values['data_update_method']);
+    sumfields_save_setting('when_to_apply_change', $values['when_to_apply_change']);
 
-    if ($values['when_to_apply_change'] == 'on_submit' && $values['data_update_method'] == 'via_triggers') {
+    if ($values['when_to_apply_change'] == 'on_submit') {
       $returnValues = array();
       if (!sumfields_gen_data($returnValues)) {
         $session::setStatus(ts("There was an error applying your changes.", array('domain' => 'net.ourpowerbase.sumfields')), ts('Error'), 'error');
@@ -192,9 +193,6 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       else {
         $session::setStatus(ts("Changes were applied successfully.", array('domain' => 'net.ourpowerbase.sumfields')), ts('Saved'), 'success');
       }
-    }
-    elseif ($values['when_to_apply_change'] == 'on_submit' && $values['data_update_method'] == 'via_cron') {
-      $session::setStatus(ts("There was an error applying your changes. Check your settings.", array('domain' => 'net.ourpowerbase.sumfields')), ts('Error'), 'error');
     }
     else {
       $session::setStatus(ts("Your summary fields will begin being generated on the next scheduled job. It may take up to an hour to complete.", array('domain' => 'net.ourpowerbase.sumfields')), ts('Saved'), 'success');

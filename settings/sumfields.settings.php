@@ -125,7 +125,7 @@ return array(
     'description' => 'List of active fields that will be active when the cron job making the change completes.',
     'help_text' => '',
 	),
-  'process_type' => array(
+  'data_update_method' => array(
     'group_name' => 'Summary Fields',
     'group' => 'summaryfields',
     'name' => 'data_update_method',
@@ -136,5 +136,17 @@ return array(
     'is_contact' => 0,
     'description' => 'Determines what process to use to calculate summary fields. Trigger-based (default) or only cron job based.',
     'help_text' => '',
-	),    
+	),
+  'when_to_apply_change' => array(
+    'group_name' => 'Summary Fields',
+    'group' => 'summaryfields',
+    'name' => 'when_to_apply_change',
+    'type' => 'String',
+    'default' => 'via_cron',
+    'add' => '4.6',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => 'Determines when the calculation should take place.On next cron or on submit',
+    'help_text' => '',
+	),
 );
