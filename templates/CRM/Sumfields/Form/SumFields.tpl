@@ -42,6 +42,12 @@
   </fieldset>
 {/foreach}
 
+  <div id="performance_settings">
+   <div class="label">{$form.data_update_method.label}</div>
+   <span>{$form.data_update_method.html}</span>
+   <div class="description">{ts}If 'Instantly' is selected, data will be more accurate but you might face some performance issues on large installations. <br/> If 'Whenever the cron job is run' is selected, Summary Fields will rely on each CiviCRM Cron job to process all calculations needed for all contacts.{/ts}</div>   
+ </div>
+ <hr/>
  <div id="when_to_apply_change">
    <div class="description">{ts}Applying these settings via this form may cause your web server to time out. Applying changes on next scheduled job is recommended.{/ts}</div>
    <div class="label">{$form.when_to_apply_change.label}</div>
