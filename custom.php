@@ -63,7 +63,7 @@ $custom = array(
       'optgroup' => 'fundraising',
     ),
     'contribution_total_this_year' => array(
-      'label' => ts('Total Contributions this Year', array('domain' => 'net.ourpowerbase.sumfields')),
+      'label' => ts('Total Contributions this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '15',
@@ -89,7 +89,7 @@ $custom = array(
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_this_year' => array(
-      'label' => ts('Total Deductible Contributions this Year', array('domain' => 'net.ourpowerbase.sumfields')),
+      'label' => ts('Total Deductible Contributions this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '15',
@@ -104,7 +104,7 @@ $custom = array(
       'optgroup' => 'fundraising',
     ),
     'contribution_total_last_year' => array(
-      'label' => ts('Total Contributions last Year', array('domain' => 'net.ourpowerbase.sumfields')),
+      'label' => ts('Total Contributions last Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '20',
@@ -117,7 +117,7 @@ $custom = array(
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_last_year' => array(
-      'label' => ts('Total Deductible Contributions last Year', array('domain' => 'net.ourpowerbase.sumfields')),
+      'label' => ts('Total Deductible Contributions last Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '15',
@@ -132,7 +132,7 @@ $custom = array(
       'optgroup' => 'fundraising',
     ),
     'contribution_total_year_before_last' => array(
-      'label' => ts('Total Contributions Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
+      'label' => ts('Total Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '20',
@@ -145,7 +145,7 @@ $custom = array(
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_year_before_last_year' => array(
-      'label' => ts('Total Deductible Contributions Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
+      'label' => ts('Total Deductible Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '15',
@@ -248,7 +248,7 @@ $custom = array(
       'optgroup' => 'soft',
     ),
     'soft_total_this_year' => array(
-      'label' => ts('Total Soft Credits this Year', array('domain' => 'net.ourpowerbase.sumfields')),
+      'label' => ts('Total Soft Credits this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '15',
