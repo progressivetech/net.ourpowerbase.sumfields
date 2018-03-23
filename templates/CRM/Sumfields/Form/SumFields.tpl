@@ -10,6 +10,15 @@
       {$display_status}
     </td>
   </tr>
+  <tr>
+    <td class="description">
+      {ts}Data update method:{/ts}
+    </td>
+    <td>
+      <span class="crm-i {$status_icon}"></span>
+      {$data_update_method}
+    </td>
+  </tr>  
   {foreach from=$trigger_table_status key="tableName" item="enabled"}
     <tr>
       <td class="description {if $enabled}sumfield-status-enabled{else}sumfield-status-disabled{/if}">

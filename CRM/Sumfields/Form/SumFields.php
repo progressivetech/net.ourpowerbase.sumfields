@@ -35,7 +35,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
           $status_icon = 'fa-hourglass-start';
           break;
         case 'scheduled' and $data_update_method == 'via_cron':
-          $display_status = ts("Setting changes were saved on %1, but not yet applied; they should be applied on next cron run.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
+          $display_status = ts("Setting changes were saved on %1, data calculation will be performed on every cron run.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
           $status_icon = 'fa-hourglass-start';
           break;
         case 'running':
@@ -56,6 +56,11 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
     $this->assign('display_status', $display_status);
     $this->assign('status_icon', $status_icon);
+    if ($data_update_method == 'via_cron') {
+      $this->assign('data_update_method', 'Cron job');
+    } else {
+      $this->assign('data_update_method', 'Triggers (Default)');
+    }
 
     // Evaluate status of the triggers and report to the user.
     foreach ($trigger_tables as $table_name => &$status) {
