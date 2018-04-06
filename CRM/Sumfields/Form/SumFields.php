@@ -28,13 +28,25 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     }
     else {
       preg_match('/^(scheduled|running|success|failed):([0-9 :\-]+)$/', $apply_settings_status, $matches);
+      $status = $matches[1];
       $date = $matches[2];
+      if ($status == 'scheduled') {
+        // Status of scheduled could mean one of two things, depending
+        // on the update method.
+        if ($data_update_method == 'via_triggers') {
+          $status = 'scheduled-triggers';
+        }
+        else {
+          $status = 'scheduled-cron';
+        }
+      }
+
       switch($matches[1]) {
-        case 'scheduled' and $data_update_method == 'via_triggers':
+        case 'scheduled-triggers':
           $display_status = ts("Setting changes were saved on %1, but not yet applied; they should be applied shortly.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
           $status_icon = 'fa-hourglass-start';
           break;
-        case 'scheduled' and $data_update_method == 'via_cron':
+        case 'scheduled-cron':
           $display_status = ts("Setting changes were saved on %1, data calculation will be performed on every cron run.", array(1 => $date, 'domain' => 'net.ourpowerbase.sumfields'));
           $status_icon = 'fa-hourglass-start';
           break;
