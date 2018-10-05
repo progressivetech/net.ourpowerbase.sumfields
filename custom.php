@@ -6,31 +6,33 @@
 $event_attended_trigger_sql =
   '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
   t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
-  AND e.event_type_id IN (%event_type_ids))';
+  AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0)';
 $event_total_trigger_sql =
  '(SELECT COUNT(t1.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
- t1.event_id = e.id WHERE contact_id = NEW.contact_id AND e.event_type_id IN (%event_type_ids))';
+ t1.event_id = e.id WHERE contact_id = NEW.contact_id AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0)';
 $event_noshow_trigger_sql =
   '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
   t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_noshow_status_ids)
-  AND e.event_type_id IN (%event_type_ids))';
+  AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0)';
 $event_turnout_attempts_trigger_sql =
   '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
   ON t1.entity_id = p.id JOIN civicrm_event e ON p.event_id = e.id
   WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
-  OR (%invitation_response IS NOT NULL AND %invitation_response != "")) AND e.event_type_id IN (%event_type_ids))';
+  OR (%invitation_response IS NOT NULL AND %invitation_response != "")) AND e.event_type_id IN (%event_type_ids)
+  AND p.is_test = 0
+)';
 $event_turnout_attended_trigger_sql =
   '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
   ON t1.entity_id = p.id JOIN civicrm_event e ON p.event_id = e.id
   WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
   OR (%invitation_response IS NOT NULL AND %invitation_response != "")) AND p.status_id IN (%participant_status_ids)
-  AND e.event_type_id IN (%event_type_ids))';
+  AND e.event_type_id IN (%event_type_ids) AND p.is_test = 0)';
 $event_turnout_noshow_trigger_sql =
   '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
   ON t1.entity_id = p.id JOIN civicrm_event e ON p.event_id = e.id
   WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "") OR
   (%invitation_response IS NOT NULL AND %invitation_response != "")) AND p.status_id IN (%participant_noshow_status_ids)
-  AND e.event_type_id IN (%event_type_ids))';
+  AND e.event_type_id IN (%event_type_ids) AND p.is_test = 0)';
 
 $custom = array(
   'groups' => array(
@@ -313,7 +315,8 @@ $custom = array(
       'trigger_sql' => sumfields_multilingual_rewrite('(SELECT civicrm_event.title AS summary_value
       FROM civicrm_participant t1 JOIN civicrm_event ON t1.event_id = civicrm_event.id
       WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
-      AND civicrm_event.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)'),
+      AND civicrm_event.event_type_id IN (%event_type_ids) AND t1.is_test = 0 
+      ORDER BY start_date DESC LIMIT 1)'),
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
     ),
@@ -325,7 +328,7 @@ $custom = array(
       'text_length' => '32',
       'trigger_sql' => '(SELECT e.start_date AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
       t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
-      AND e.event_type_id IN (%event_type_ids) ORDER BY start_date DESC LIMIT 1)',
+      AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0 ORDER BY start_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
     ),
