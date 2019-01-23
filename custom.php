@@ -82,7 +82,6 @@ $custom = array(
       'optgroup' => 'fundraising',
     ),
   ),
-
   // Any trigger table that does not have contact_id should be listed here, along with
   // a sql statement that can be used to calculate the contact_id from a field that is
   // in the table. You should also specify the trigger_field - the field in the table
@@ -188,6 +187,7 @@ $custom = array(
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
+
     'contribution_total_year_before_last' => array(
       'label' => ts('Total Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
