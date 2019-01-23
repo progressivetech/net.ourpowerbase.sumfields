@@ -299,7 +299,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     $session = CRM_Core_Session::singleton();
 
     // Iterate over all our fields, and build out a sql parts array
-    while(list($base_column_name, $params) = each($custom_fields)) {
+    foreach($custom_fields as $base_column_name => $params) {
       if(!in_array($base_column_name, $active_fields)) continue;
       $table = $custom['fields'][$base_column_name]['trigger_table'];
       if(!is_null($tableName) && $tableName != $table) {
@@ -326,7 +326,24 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     // sql clause.
     foreach ($tables as $table) {
       $parts = $sql_field_parts[$table];
-      $parts[] = 'entity_id = NEW.contact_id';
+
+      // Most trigger tables have the contact_id field so calculating the
+      // contact_id is as easy as referencing NEW.contact_id. However,
+      // some trigger tables (e.g. civicrm_line_item) don't have contact_id
+      // so triggers based on these tables have to calculate the value of
+      // the contact_id (e.g. (SELECT contact_id FROM civicrm_contribution
+      // WHERE id = NEW.contribution_id)). How it is calculated varies
+      // depending on the table. This code abstracts that process - so you
+      // simply need to add it to custom.php.
+      if (isset($custom['tables'][$table]['calculated_contact_id'])) {
+        $calculated_contact_id = $custom['tables'][$table]['calculated_contact_id'];
+      }
+      else {
+        // Choose the default.
+        $calculated_contact_id = 'NEW.contact_id';
+      }
+
+      $parts[] = "entity_id = $calculated_contact_id";
 
       $extra_sql = implode(',', $parts);
       $sql = $generic_sql . $extra_sql . ' ON DUPLICATE KEY UPDATE ' . $extra_sql . ';';
@@ -445,12 +462,20 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
       continue;
     }
     $table = $custom['fields'][$base_column_name]['trigger_table'];
+    if (isset($custom['tables'][$table]['trigger_field'])) {
+      $trigger_field = $custom['tables'][$table]['trigger_field'];
+    }
+    else {
+      // Use the default.
+      $trigger_field = 'contact_id';
+    }
 
     $trigger = $custom['fields'][$base_column_name]['trigger_sql'];
-    // We replace NEW.contact_id with t2.contact_id to reflect the difference
+    // We replace NEW.contact_id with trigger_table.contact_id (or a custom field
+    // if the trigger table does not have contact_id) to reflect the difference
     // between the trigger sql statement and the initial sql statement
     // to load the data.
-    $trigger = str_replace('NEW.contact_id', 't2.contact_id', $trigger);
+    $trigger = str_replace('NEW.' . $trigger_field, 'trigger_table.' . $trigger_field, $trigger);
     if (FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
       $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
       $session->setStatus($msg);
@@ -465,6 +490,23 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     }
     $temp_sql[$table]['triggers'][$base_column_name] = $trigger;
     $temp_sql[$table]['map'][$base_column_name] = $params['column_name'];
+    // If we have not yet set the initialize_join value for this table
+    // then set it here.
+    if (!isset($temp_sql[$table]['initialize_join'])) {
+      // Check custom.php for a custom value. This is only necessary
+      // if the trigger table does not have a contact_id field.
+      if (isset($custom['tables'][$table]['initialize_join'])) {
+        // Overwrite with custom value. Since we have to group by contact_id,
+        // this option allow us to add a join table with contact_id in it
+        // in case our trigger table does not have a contact_id.
+        $temp_sql[$table]['initialize_join'] = $custom['tables'][$table]['initialize_join'];
+      }
+      else {
+        // $temp_sql[$table]['initialize_join'] = "JOIN civicrm_contact AS c ON trigger_table.contact_id = c.id ";
+        $temp_sql[$table]['initialize_join'] = NULL;
+      }
+    }
+
   }
 
   if(empty($temp_sql)) {
@@ -479,9 +521,10 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     // Calculate data and insert into temp table
     $query = "INSERT INTO `{$data['temp_table']}` SELECT contact_id, "
       . implode(",\n", $data['triggers'])
-      . " FROM `$table` AS t2 "
-      . "JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
-    $query .= ' GROUP BY contact_id';
+      . " FROM `$table` AS trigger_table "
+      . $data['initialize_join'] 
+      . ' GROUP BY contact_id';
+
     CRM_Core_DAO::executeQuery($query);
 
     // Move temp data into custom field table
