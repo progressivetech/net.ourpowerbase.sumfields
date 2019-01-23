@@ -477,11 +477,11 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
 
   foreach ($temp_sql as $table => $data) {
     // Calculate data and insert into temp table
-    $query = "INSERT INTO `{$data['temp_table']}` SELECT contact_id, "
+    $query = "INSERT INTO `{$data['temp_table']}` SELECT IFNULL(contact_id,c.id) as contact_id, "
       . implode(",\n", $data['triggers'])
       . " FROM `$table` AS t2 "
-      . "JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
-    $query .= ' GROUP BY contact_id';
+      . "RIGHT OUTER JOIN civicrm_contact AS c ON t2.contact_id = c.id ";
+    $query .= ' GROUP BY IFNULL(contact_id,c.id)';
     CRM_Core_DAO::executeQuery($query);
 
     // Move temp data into custom field table
