@@ -292,6 +292,8 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     // We create a trigger sql statement for each table that should
     // have a trigger
     $tables = array();
+    $pre_sql = NULL;
+    $post_sql = NULL;
     $generic_sql = "INSERT INTO `$table_name` SET ";
     $sql_field_parts = array();
 
@@ -337,6 +339,8 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
       // simply need to add it to custom.php.
       if (isset($custom['tables'][$table]['calculated_contact_id'])) {
         $calculated_contact_id = $custom['tables'][$table]['calculated_contact_id'];
+        $pre_sql = " IF $calculated_contact_id IS NOT NULL\nTHEN\n";
+        $post_sql = " END IF;";
       }
       else {
         // Choose the default.
@@ -346,7 +350,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
       $parts[] = "entity_id = $calculated_contact_id";
 
       $extra_sql = implode(',', $parts);
-      $sql = $generic_sql . $extra_sql . ' ON DUPLICATE KEY UPDATE ' . $extra_sql . ';';
+      $sql = $pre_sql . $generic_sql . $extra_sql . ' ON DUPLICATE KEY UPDATE ' . $extra_sql . ';' . $post_sql;
 
       // We want to fire this trigger on insert, update and delete.
       $info[] = array(
