@@ -29,7 +29,8 @@
  **/
 
 
-/** Define a few trigger sql queries first - because they need to be
+/** 
+ * Define a few trigger sql queries first - because they need to be
  * referenced first for a total number and a second time for the
  * percent.
  **/
@@ -102,9 +103,12 @@ $custom = array(
       'weight' => '10',
       'text_length' => '32',
       'trigger_sql' => '(SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount))
-      FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id
-      AND t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      FROM civicrm_contribution t1 JOIN 
+      civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
+      t1.contribution_status_id = 1 AND
+      t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_this_year' => array(
@@ -114,10 +118,12 @@ $custom = array(
       'weight' => '15',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
-      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin"
-      AND "%current_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
-      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      FROM civicrm_contribution t1 
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin"
+      AND "%current_fiscal_year_end" AND t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
+      t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_twelve_months' => array(
@@ -127,10 +133,12 @@ $custom = array(
       'weight' => '15',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
-      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN DATE_SUB(NOW(), INTERVAL 12 MONTH) AND NOW()
-      AND t1.contact_id = NEW.contact_id AND
-      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      FROM civicrm_contribution t1 
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE CAST(receive_date AS DATE) BETWEEN DATE_SUB(NOW(), INTERVAL 12 MONTH) AND NOW()
+      AND t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
+      t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_this_year' => array(
@@ -156,10 +164,12 @@ $custom = array(
       'weight' => '20',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
-      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin"
-      AND "%last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
-      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      FROM civicrm_contribution t1 
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin"
+      AND "%last_fiscal_year_end" AND t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
+      t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_last_year' => array(
@@ -178,7 +188,6 @@ $custom = array(
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
-
     'contribution_total_year_before_last' => array(
       'label' => ts('Total Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
@@ -186,10 +195,12 @@ $custom = array(
       'weight' => '20',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
-      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin"
-      AND "%year_before_last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
-      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      FROM civicrm_contribution t1 
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin"
+      AND "%year_before_last_fiscal_year_end" AND t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
+      t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_year_before_last_year' => array(
@@ -216,10 +227,12 @@ $custom = array(
       'weight' => '25',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(total_amount,0)
-      FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id
-      AND t1.contribution_status_id = 1  AND t1.financial_type_id IN
+      FROM civicrm_contribution t1 
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id)
+      AND t1.contribution_status_id = 1  AND t2.financial_type_id IN
       (%financial_type_ids) ORDER BY t1.receive_date DESC LIMIT 1)',
-      'trigger_table' => 'civicrm_contribution',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_date_last' => array(
@@ -229,9 +242,10 @@ $custom = array(
       'weight' => '30',
       'text_length' => '32',
       'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1
-      WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
-      t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
+      t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_date_first' => array(
@@ -241,11 +255,11 @@ $custom = array(
       'weight' => '35',
       'text_length' => '32',
       'trigger_sql' => '(SELECT MIN(receive_date) FROM civicrm_contribution t1
-      WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
-      t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
+      t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-
     ),
     'contribution_largest' => array(
       'label' => ts('Largest Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
@@ -254,9 +268,11 @@ $custom = array(
       'weight' => '40',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(MAX(total_amount), 0)
-      FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id AND
-      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      FROM civicrm_contribution t1 
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
+      t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_number' => array(
@@ -265,10 +281,11 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '45',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT COALESCE(COUNT(id), 0) FROM civicrm_contribution t1
-      WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
-      t1.financial_type_id IN (%financial_type_ids))',
-      'trigger_table' => 'civicrm_contribution',
+      'trigger_sql' => '(SELECT COALESCE(COUNT(t1.id), 0) FROM civicrm_contribution t1
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
+      t2.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'contribution_average_annual_amount' => array(
@@ -278,11 +295,14 @@ $custom = array(
       'weight' => '50',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0) / (SELECT NULLIF(COUNT(DISTINCT SUBSTR(receive_date, 1, 4)), 0)
-      FROM civicrm_contribution t0 WHERE t0.contact_id = NEW.contact_id AND t0.financial_type_id
-      IN (%financial_type_ids) AND t0.contribution_status_id = 1) FROM civicrm_contribution t1
-      WHERE t1.contact_id = NEW.contact_id AND t1.financial_type_id IN (%financial_type_ids)
-      AND t1.contribution_status_id = 1)',
-      'trigger_table' => 'civicrm_contribution',
+      FROM civicrm_contribution t0 
+      JOIN civicrm_line_item t1 ON t0.id = t1.contribution_id
+      WHERE t0.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.financial_type_id
+      IN (%financial_type_ids) AND t0.contribution_status_id = 1) FROM civicrm_contribution t2
+      JOIN civicrm_line_item t3 ON t2.id = t3.contribution_id
+      WHERE t2.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t3.financial_type_id IN (%financial_type_ids)
+      AND t2.contribution_status_id = 1)',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
     'soft_total_lifetime' => array(
@@ -333,11 +353,12 @@ $custom = array(
       'html_type' => 'Select Date',
       'weight' => '55',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1 WHERE
-      t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
-      t1.financial_type_id IN (%membership_financial_type_ids) ORDER BY
+      'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1 
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
+      t2.financial_type_id IN (%membership_financial_type_ids) ORDER BY
       receive_date DESC LIMIT 1)',
-      'trigger_table' => 'civicrm_contribution',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'membership',
     ),
     'contribution_amount_last_membership_payment' => array(
@@ -346,11 +367,12 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '60',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1 WHERE
-      t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
-      t1.financial_type_id IN (%membership_financial_type_ids) ORDER BY
+      'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1 
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
+      t2.financial_type_id IN (%membership_financial_type_ids) ORDER BY
       receive_date DESC LIMIT 1)',
-      'trigger_table' => 'civicrm_contribution',
+      'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'membership',
     ),
     'event_last_attended_name' => array(
