@@ -1,8 +1,38 @@
 <?php
 
-// Define a few trigger sql queries first - because they need to be
-// referenced first for a total number and a second time for the
-// percent.
+/**
+ * @file custom.php
+ *
+ * This file defines the summary fields that will be made available
+ * on your site. If you want to add your own summary fields, see the
+ * README.md file for information on how you can use a hook to add your
+ * own definitions in your own extension.
+ *
+ * Defining a summary field requires a specially crafted sql query that
+ * can be used both in the definition of a SQL trigger and also can be
+ * used to create a query that initializes the summary fields for your
+ * existing records. 
+ *
+ * In addition, the name and trigger table have to be defined, as well as
+ * details on how the field should be displayed.
+ *
+ * Since all summary fields are totaled for a given contact, this extension
+ * expects the table that triggers a summary field to be calculated to have
+ * contact_id as one of the fields.
+ *
+ * However, if that is not the case (for example, civicrm_line_item does
+ * not have contact_id, but it does have contribution_id which then
+ * leads to civicrm_contribution which does have contact_id), you can
+ * tell sumfields how to calculate the contact_id using the 'tables'
+ * array of data. 
+ *
+ **/
+
+
+/** Define a few trigger sql queries first - because they need to be
+ * referenced first for a total number and a second time for the
+ * percent.
+ **/
 $event_attended_trigger_sql =
   '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
   t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
@@ -51,6 +81,12 @@ $custom = array(
       'optgroup' => 'fundraising',
     ),
   ),
+
+  // Any trigger table that does not have contact_id should be listed here, along with
+  // a sql statement that can be used to calculate the contact_id from a field that is
+  // in the table. You should also specify the trigger_field - the field in the table
+  // that will help you determine the contact_id, and also a JOIN statement to use
+  // when initializing the data.
   'tables' => array(
     'civicrm_line_item' => array(
       'calculated_contact_id' => '(SELECT contact_id FROM civicrm_contribution WHERE id = NEW.contribution_id)',
