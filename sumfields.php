@@ -292,8 +292,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     // We create a trigger sql statement for each table that should
     // have a trigger
     $tables = array();
-    $pre_sql = NULL;
-    $post_sql = NULL;
+    
     $generic_sql = "INSERT INTO `$table_name` SET ";
     $sql_field_parts = array();
 
@@ -327,6 +326,11 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     // Iterate over each table that needs a trigger, build the trigger's
     // sql clause.
     foreach ($tables as $table) {
+      // Most tables don't need to be enclosed in an if/then statement,
+      // so pre_sql and post_sql are null.
+      $pre_sql = NULL;
+      $post_sql = NULL;
+
       $parts = $sql_field_parts[$table];
 
       // Most trigger tables have the contact_id field so calculating the
@@ -339,6 +343,9 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
       // simply need to add it to custom.php.
       if (isset($custom['tables'][$table]['calculated_contact_id'])) {
         $calculated_contact_id = $custom['tables'][$table]['calculated_contact_id'];
+
+        // Wrap this trigger around an if/then to ensure we only execute if we
+        // can calculate the contact_id.
         $pre_sql = " IF $calculated_contact_id IS NOT NULL\nTHEN\n";
         $post_sql = " END IF;";
       }
