@@ -22,7 +22,7 @@ class CRM_Sumfields_Upgrader extends CRM_Sumfields_Upgrader_Base {
     return TRUE;
   }
 
-  public function rebuildTriggers() { 
+  public function triggerRebuild() { 
     CRM_Core_DAO::triggerRebuild();
     return TRUE;
   }
