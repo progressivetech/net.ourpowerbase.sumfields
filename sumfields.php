@@ -643,13 +643,7 @@ function sumfields_create_custom_fields_and_table() {
  * for this extension.
  **/
 function sumfields_save_setting($key, $value) {
-  if (version_compare('>=', CRM_Utils_System::version(), '4.7.alpha1')) {
-    civicrm_api3('Setting', 'create', array($key => $value));
-  }
-  else {
-    $group = 'Summary Fields';
-    CRM_Core_BAO_Setting::setItem($value, $group, $key);
-  }
+ civicrm_api3('Setting', 'create', array($key => $value));
 }
 
 /**
