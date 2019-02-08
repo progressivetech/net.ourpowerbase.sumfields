@@ -26,7 +26,7 @@ function sumfields_civicrm_xmlMenu(&$files) {
 function sumfields_civicrm_navigationMenu(&$menu) {
   $path = "Administer/Customize Data and Screens";
   _sumfields_civix_insert_navigation_menu($menu, $path, array(
-    'label' => ts('Summary Fields', array('net.ourpowerbase.sumfields')),
+    'label' => E::ts('Summary Fields'),
     'name' => 'Summary Fields',
     'url' => 'civicrm/admin/setting/sumfields',
     'permission' => 'administer CiviCRM',
@@ -57,10 +57,10 @@ function sumfields_civicrm_enable() {
   sumfields_initialize_user_settings();
   $session = CRM_Core_Session::singleton();
   if(!sumfields_create_custom_fields_and_table()) {
-    $msg = ts("Failed to create custom fields and table. Maybe they already exist?", array('domain' => 'net.ourpowerbase.sumfields'));
+    $msg = E::ts("Failed to create custom fields and table. Maybe they already exist?");
     $session->setStatus($msg);
   }
-  $msg = ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.", array('domain' => 'net.ourpowerbase.sumfields'));
+  $msg = E::ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.");
   $session->setStatus($msg);
 
   return _sumfields_civix_civicrm_enable();
@@ -109,7 +109,7 @@ function sumfields_civicrm_pageRun($page) {
       'markup' => '
       <a class="no-popup button" href="' . CRM_Utils_System::url('civicrm/admin/setting/sumfields') . '">
         <span>
-          <i class="crm-i fa-wrench"></i>&nbsp; ' . ts('Configure Summary Fields', array('domain' => 'net.ourpowerbase.sumfields')) . '
+          <i class="crm-i fa-wrench"></i>&nbsp; ' . E::ts('Configure Summary Fields') . '
         </span>
       </a>
     ',
@@ -313,7 +313,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
       // If we fail to properly rewrite the sql, don't set the trigger
       // to avoid sql exceptions.
       if(FALSE === $trigger) {
-        $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
+        $msg = sprintf(E::ts("Failed to rewrite sql for %s field."), $base_column_name);
         $session->setStatus($msg);
         continue;
       }
@@ -451,7 +451,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $session = CRM_Core_Session::singleton();
   }
   if(empty($table_name)) {
-    $session::setStatus(ts("Your configuration may be corrupted. Please disable and renable this extension."), ts('Error'), 'error');
+    $session::setStatus(E::ts("Your configuration may be corrupted. Please disable and renable this extension."), E::ts('Error'), 'error');
     return FALSE;
   }
   // In theory we shouldn't have to truncate the table, but we
@@ -488,7 +488,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     // to load the data.
     $trigger = str_replace('NEW.' . $trigger_field, 'trigger_table.' . $trigger_field, $trigger);
     if (FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
-      $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
+      $msg = sprintf(E::ts("Failed to rewrite sql for %s field."), $base_column_name);
       $session->setStatus($msg);
       continue;
     }
@@ -524,7 +524,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     // Is this an error? Not sure. But it will be an error if we let this
     // function continue - it will produce a broken sql statement, so we
     // short circuit here.
-    $session::setStatus(ts("Not regenerating content, no fields defined."), ts('Error'), 'error');
+    $session::setStatus(E::ts("Not regenerating content, no fields defined."), E::ts('Error'), 'error');
     return TRUE;
   }
 
@@ -625,7 +625,7 @@ function sumfields_create_custom_fields_and_table() {
 
     $result = civicrm_api('CustomField', 'create', $params);
     if($result['is_error'] == 1) {
-      CRM_Core_Session::setStatus(print_r($result, TRUE), ts("Error creating custom field '%1'", array(1 => $name)), 'error');
+      CRM_Core_Session::setStatus(print_r($result, TRUE), E::ts("Error creating custom field '%1'", array(1 => $name)), 'error');
       continue;
     }
     $value = array_pop($result['values']);
@@ -690,7 +690,7 @@ function sumfields_delete_custom_fields_and_table() {
     $result = civicrm_api('CustomField', 'delete', $params);
     if($result['is_error'] == 1) {
       $column_name = $field['column_name'];
-      $session->setStatus(sprintf(ts("Error deleting '%s'"), $column_name));
+      $session->setStatus(E::ts("Error deleting '%1'", array(1 => $column_name)));
       $session->setStatus(print_r($result,TRUE));
     }
   }
@@ -700,7 +700,7 @@ function sumfields_delete_custom_fields_and_table() {
   $result = civicrm_api('CustomGroup', 'delete', $params);
   if($result['is_error'] == 1) {
     $table_name = $custom_table_parameters['table_name'];
-    $session->setStatus(sprintf(ts("Error deleting '%s'"), $table_name));
+    $session->setStatus(E::ts("Error deleting '%1'", array(1 => $table_name)));
   }
 }
 
@@ -976,7 +976,7 @@ function sumfields_find_incorrect_total_lifetime_contribution_records() {
 
   // Rewrite the sql with the appropriate variables filled in.
   if(FALSE === $trigger_sql = sumfields_sql_rewrite($config_trigger_sql)) {
-    $msg = sprintf(ts("Failed to rewrite sql for %s field."), $base_column_name);
+    $msg = E::ts("Failed to rewrite sql for %1 field.", array(1 => $base_column_name));
     drush_log($msg, 'error');
     return FALSE;
   }
@@ -1176,13 +1176,13 @@ function sumfields_alter_table() {
         }
       }
       catch (CiviCRM_API3_Exception $e) {
-        $session->setStatus(sprintf(ts("Error deleting custom field '%s': %s"), $field, $e->getMessage()));
+        $session->setStatus(E::ts("Error deleting custom field '%1': %2"), array(1 => $field, 2 => $e->getMessage()));
         // This will result in a error, but let's continue anyway to see if we can get the rest of the fields
         // in working order.
         $ret = FALSE;
         continue;
       }
-      // $session->setStatus(sprintf(ts("Deleted custom field '%s'"), $field));
+      // $session->setStatus(E::ts("Deleted custom field '%1'"), array(1 => $field));
       unset($custom_field_parameters[$field]);
     }
   }
@@ -1190,7 +1190,7 @@ function sumfields_alter_table() {
   // Add new fields
   $custom_table_parameters = sumfields_get_setting('custom_table_parameters', NULL);
   if(is_null($custom_table_parameters)) {
-    $session->setStatus(ts("Failed to get the custom group parameters. Can't add new fields."));
+    $session->setStatus(E::ts("Failed to get the custom group parameters. Can't add new fields."));
     return FALSE;
   }
   $custom = sumfields_get_custom_field_definitions();
@@ -1208,11 +1208,11 @@ function sumfields_alter_table() {
         }
       }
       catch (CiviCRM_API3_Exception $e) {
-        $session->setStatus(sprintf(ts("Error adding custom field '%s': %s"), $field, $e->getMessage()));
+        $session->setStatus(E::ts("Error adding custom field '%1': %2"), array(1 => $field, 2 => $e->getMessage()));
         $ret = FALSE;
         continue;
       }
-      // $session->setStatus(sprintf(ts("Added custom field '%s'"), $field));
+      // $session->setStatus(E::ts("Added custom field '%1'"), array(1 => $field));
       $value = array_pop($result['values']);
       $custom_field_parameters[$field] = array(
         'id' => $value['id'],
