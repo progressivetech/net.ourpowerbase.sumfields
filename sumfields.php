@@ -1,6 +1,7 @@
 <?php
 
 require_once 'sumfields.civix.php';
+use CRM_Myextension_ExtensionUtil as E;
 
 /**
  * Implementation of hook_civicrm_config
