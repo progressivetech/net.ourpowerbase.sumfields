@@ -716,7 +716,7 @@ function sumfields_delete_custom_fields_and_table() {
  * Remove our values from civicrm_setting table
  **/
 function sumfields_delete_user_settings() {
-  $settings = require_once('settings/sumfields.settings.php');
+  $settings = require_once('settings/sumfields.setting.php');
   $sql = "DELETE FROM civicrm_setting WHERE name = %0";
   while(list($key) = each($settings)) {
     // No remove/delete for Setting api entity.
