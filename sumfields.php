@@ -4,6 +4,13 @@ require_once 'sumfields.civix.php';
 use CRM_Sumfields_ExtensionUtil as E;
 
 /**
+ * Implementation of hook_civicrm_alterSettingsFolders
+ */
+function sumfields_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
+  _sumfields_civix_civicrm_alterSettingsFolders($metaDataFolders);
+}
+
+/**
  * Implementation of hook_civicrm_config
  */
 function sumfields_civicrm_config(&$config) {
@@ -52,10 +59,16 @@ function sumfields_civicrm_uninstall() {
 }
 
 /**
+ * Impelmentation of hook_civicrm_postInstall
+ */
+function sumfields_civicrm_postInstall() {
+  sumfields_initialize_user_settings();
+}
+
+/**
  * Implementation of hook_civicrm_enable
  */
 function sumfields_civicrm_enable() {
-  sumfields_initialize_user_settings();
   $session = CRM_Core_Session::singleton();
   if(!sumfields_create_custom_fields_and_table()) {
     $msg = E::ts("Failed to create custom fields and table. Maybe they already exist?");
