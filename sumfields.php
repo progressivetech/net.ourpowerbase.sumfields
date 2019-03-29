@@ -63,6 +63,7 @@ function sumfields_civicrm_uninstall() {
  */
 function sumfields_civicrm_postInstall() {
   sumfields_initialize_user_settings();
+  return _sumfields_civix_civicrm_postInstall();
 }
 
 /**
