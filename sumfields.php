@@ -63,13 +63,6 @@ function sumfields_civicrm_uninstall() {
  */
 function sumfields_civicrm_postInstall() {
   sumfields_initialize_user_settings();
-  return _sumfields_civix_civicrm_postInstall();
-}
-
-/**
- * Implementation of hook_civicrm_enable
- */
-function sumfields_civicrm_enable() {
   $session = CRM_Core_Session::singleton();
   if(!sumfields_create_custom_fields_and_table()) {
     $msg = E::ts("Failed to create custom fields and table. Maybe they already exist?");
@@ -78,7 +71,14 @@ function sumfields_civicrm_enable() {
   $msg = E::ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.");
   $session->setStatus($msg);
 
-  return _sumfields_civix_civicrm_enable();
+  return _sumfields_civix_civicrm_postInstall();
+}
+
+/**
+ * Implementation of hook_civicrm_enable
+ */
+function sumfields_civicrm_enable() {
+  _sumfields_civix_civicrm_enable();
 }
 
 /**
