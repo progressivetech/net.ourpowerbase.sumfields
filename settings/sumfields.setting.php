@@ -43,7 +43,7 @@ return array(
 	),
   'event_type_ids' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'event_type_ids',
     'type' => 'Array',
     'default' => array(),
@@ -55,7 +55,7 @@ return array(
 	),
   'financial_type_ids' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'financial_type_ids',
     'type' => 'Array',
     'default' => array(),
@@ -67,7 +67,7 @@ return array(
 	),
   'membership_financial_type_ids' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'membership_financial_type_ids',
     'type' => 'Array',
     'default' => array(),
@@ -79,7 +79,7 @@ return array(
 	),
   'participant_noshow_status_ids' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'participant_noshow_status_ids',
     'type' => 'Array',
     'default' => array(),
@@ -91,7 +91,7 @@ return array(
 	),
   'participant_status_ids' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'participant_status_ids',
     'type' => 'Array',
     'default' => array(),
@@ -103,7 +103,7 @@ return array(
 	),
   'generate_schema_and_data' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'generate_schema_and_data',
     'type' => 'String',
     'default' => FALSE,
@@ -115,7 +115,7 @@ return array(
 	),
   'new_active_fields' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'new_active_fields',
     'type' => 'Array',
     'default' => array(),
@@ -127,7 +127,7 @@ return array(
 	),
   'data_update_method' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'data_update_method',
     'type' => 'String',
     'default' => 'via_triggers',
@@ -139,7 +139,7 @@ return array(
 	),
   'when_to_apply_change' => array(
     'group_name' => 'Summary Fields',
-    'group' => 'sumfields',
+    'group' => 'summaryfields',
     'name' => 'when_to_apply_change',
     'type' => 'String',
     'default' => 'via_cron',
