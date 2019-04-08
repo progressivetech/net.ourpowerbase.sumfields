@@ -45,25 +45,6 @@ $event_noshow_trigger_sql =
   '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
   t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_noshow_status_ids)
   AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0)';
-$event_turnout_attempts_trigger_sql =
-  '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
-  ON t1.entity_id = p.id JOIN civicrm_event e ON p.event_id = e.id
-  WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
-  OR (%invitation_response IS NOT NULL AND %invitation_response != "")) AND e.event_type_id IN (%event_type_ids)
-  AND p.is_test = 0
-)';
-$event_turnout_attended_trigger_sql =
-  '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
-  ON t1.entity_id = p.id JOIN civicrm_event e ON p.event_id = e.id
-  WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "")
-  OR (%invitation_response IS NOT NULL AND %invitation_response != "")) AND p.status_id IN (%participant_status_ids)
-  AND e.event_type_id IN (%event_type_ids) AND p.is_test = 0)';
-$event_turnout_noshow_trigger_sql =
-  '(SELECT COUNT(t1.id) AS summary_value FROM %civicrm_value_participant_info t1 JOIN civicrm_participant p
-  ON t1.entity_id = p.id JOIN civicrm_event e ON p.event_id = e.id
-  WHERE contact_id = NEW.contact_id AND ((%reminder_response IS NOT NULL AND %reminder_response != "") OR
-  (%invitation_response IS NOT NULL AND %invitation_response != "")) AND p.status_id IN (%participant_noshow_status_ids)
-  AND e.event_type_id IN (%event_type_ids) AND p.is_test = 0)';
 
 $custom = array(
   'groups' => array(
@@ -456,58 +437,6 @@ $custom = array(
          ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql . ', 0), 2) * 100 AS summary_value)',
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
-    ),
-    'event_turnout_attempts' => array(
-      'label' => ts('Number of turnout attempts', array('domain' => 'net.ourpowerbase.sumfields')),
-      'data_type' => 'Int',
-      'html_type' => 'Text',
-      'weight' => '100',
-      'text_length' => '8',
-      'trigger_sql' => $event_turnout_attempts_trigger_sql,
-      'trigger_table' => 'civicrm_participant',
-      'optgroup' => 'event_turnout',
-    ),
-    'event_turnout_attended' => array(
-      'label' => ts('Number attended from turnout attempts', array('domain' => 'net.ourpowerbase.sumfields')),
-      'data_type' => 'Int',
-      'html_type' => 'Text',
-      'weight' => '105',
-      'text_length' => '8',
-      'trigger_sql' => $event_turnout_attended_trigger_sql,
-      'trigger_table' => 'civicrm_participant',
-      'optgroup' => 'event_turnout',
-    ),
-    'event_turnout_noshow' => array(
-      'label' => ts('Number noshow from turnout attempts', array('domain' => 'net.ourpowerbase.sumfields')),
-      'data_type' => 'Int',
-      'html_type' => 'Text',
-      'weight' => '110',
-      'text_length' => '8',
-      'trigger_sql' => $event_turnout_noshow_trigger_sql,
-      'trigger_table' => 'civicrm_participant',
-      'optgroup' => 'event_turnout',
-    ),
-    'event_attended_percent_turnout' => array(
-      'label' => ts('Attended as percent of turn out attempts', array('domain' => 'net.ourpowerbase.sumfields')),
-      'data_type' => 'Int',
-      'html_type' => 'Text',
-      'weight' => '115',
-      'text_length' => '8',
-      'trigger_sql' => '(SELECT FORMAT(IFNULL(' . $event_turnout_attended_trigger_sql .
-         ', 0)' . ' / ' .  'IFNULL(' . $event_turnout_attempts_trigger_sql . ', 0), 2) * 100 AS summary_value)',
-      'trigger_table' => 'civicrm_participant',
-      'optgroup' => 'event_turnout',
-    ),
-    'event_noshow_percent_turnout' => array(
-      'label' => ts('No-shows as percent of turn out attempts', array('domain' => 'net.ourpowerbase.sumfields')),
-      'data_type' => 'Int',
-      'html_type' => 'Text',
-      'weight' => '120',
-      'text_length' => '8',
-      'trigger_sql' => '(SELECT FORMAT(IFNULL(' . $event_turnout_noshow_trigger_sql .
-         ', 0)' . ' / ' .  'IFNULL(' . $event_turnout_attempts_trigger_sql . ', 0), 2) * 100 AS summary_value)',
-      'trigger_table' => 'civicrm_participant',
-      'optgroup' => 'event_turnout',
     ),
   ),
   'optgroups' => array(

@@ -183,14 +183,6 @@ function sumfields_sql_rewrite($sql) {
   $values = array_values($fiscal_dates);
   $sql = str_replace($keys, $values, $sql);
 
-  $participant_info_table_name = sumfields_get_participant_info_table();
-  if($participant_info_table_name) {
-    $sql = str_replace('%civicrm_value_participant_info', $participant_info_table_name, $sql);
-  }
-  elseif(preg_match('/%civicrm_value_participant_info/', $sql)) {
-    // This is an error - we have a variable we can't replace.
-    return FALSE;
-  }
   $reminder_response_field = sumfields_get_column_name('reminder_response');
   if($reminder_response_field) {
     $sql = str_replace('%reminder_response', $reminder_response_field, $sql);
@@ -791,33 +783,9 @@ function sumfields_get_custom_field_definitions() {
           unset($custom['fields'][$k]);
         }
       }
-      if ($k == 'event_turnout_attempts') {
-        // event_turnout_attempts is triggered on the civicrm_participant table,
-        // but it counts records in the civicrm custom table civirm_participant_info_NN.
-        // We have to look up the name of that table for this particular instance as a
-        // way to see if the table is installed.
-        $actual_table_name = sumfields_get_participant_info_table();
-        if (!$actual_table_name) {
-          // Perhaps not enabled.
-          unset($custom['fields'][$k]);
-        }
-      }
     }
   }
   return $custom;
-}
-
-/**
- * Helper function: get name of civicrm_value_participant_info table
- * for this installation or FALSE if it's not enabled.
- **/
-function sumfields_get_participant_info_table() {
-  $sql = "SELECT table_name FROM civicrm_custom_group WHERE name = 'participant_info';";
-  $dao = CRM_Core_DAO::executeQuery($sql);
-  if($dao->N == 0) return FALSE;
-
-  $dao->fetch();
-  return $dao->table_name;
 }
 
 /**
