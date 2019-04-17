@@ -55,6 +55,8 @@ function sumfields_civicrm_install() {
  * Implementation of hook_civicrm_uninstall
  */
 function sumfields_civicrm_uninstall() {
+  sumfields_deinitialize_custom_data();
+  sumfields_delete_user_settings();
   return _sumfields_civix_civicrm_uninstall();
 }
 
@@ -78,6 +80,7 @@ function sumfields_civicrm_postInstall() {
  * Implementation of hook_civicrm_enable
  */
 function sumfields_civicrm_enable() {
+  sumfields_reenable_custom_group();
   _sumfields_civix_civicrm_enable();
 }
 
@@ -85,8 +88,7 @@ function sumfields_civicrm_enable() {
  * Implementation of hook_civicrm_disable
  */
 function sumfields_civicrm_disable() {
-  sumfields_deinitialize_custom_data();
-  sumfields_delete_user_settings();
+  sumfields_disable_custom_group();
   return _sumfields_civix_civicrm_disable();
 }
 
@@ -687,6 +689,36 @@ function sumfields_get_setting($key, $default = NULL) {
   if(empty($ret)) return $default;
   return $ret;
 }
+/**
+ * Renable the custom field group
+ *
+ */
+function sumfields_reenable_custom_group() {
+  // If we are enabled after having been disabled, see if we have an
+  // existing custom group that should be re-enabled.
+  $custom_table_parameters = _sumfields_get_custom_table_parameters();
+  $id = $custom_table_parameters['id'];
+  if ($id) {
+    $params = array('id' => $id);
+    $result = civicrm_api3('CustomGroup', 'getsingle', $params);
+    $result['is_active'] = 1;
+    civicrm_api3('CustomGroup', 'create', $result);
+  }
+}
+/**
+ * Disable the custom field group
+ *
+ */
+function sumfields_disable_custom_group() {
+  $custom_table_parameters = _sumfields_get_custom_table_parameters();
+  $id = $custom_table_parameters['id'];
+  if ($id) {
+    $params = array('id' => $id);
+    $result = civicrm_api3('CustomGroup', 'getsingle', $params);
+    $result['is_active'] = 0;
+    civicrm_api3('CustomGroup', 'create', $result);
+  }
+}
 
 /**
  * Delete custom fields. All data should be
@@ -716,11 +748,13 @@ function sumfields_delete_custom_fields_and_table() {
   }
   $custom_table_parameters = _sumfields_get_custom_table_parameters();
   $id = $custom_table_parameters['id'];
-  $params = array('version' => 3, 'id' => $id);
-  $result = civicrm_api('CustomGroup', 'delete', $params);
-  if($result['is_error'] == 1) {
-    $table_name = $custom_table_parameters['table_name'];
-    $session->setStatus(E::ts("Error deleting '%1'", array(1 => $table_name)));
+  if ($id) {
+    $params = array('version' => 3, 'id' => $id);
+    $result = civicrm_api('CustomGroup', 'delete', $params);
+    if($result['is_error'] == 1) {
+      $table_name = $custom_table_parameters ['table_name'];
+      $session->setStatus(E::ts("Error deleting '%1'", array(1 => $table_name)));
+    }
   }
 }
 
@@ -765,7 +799,8 @@ function _sumfields_get_custom_field_parameters() {
  *
  **/
 function _sumfields_get_custom_table_parameters() {
-  return sumfields_get_setting('custom_table_parameters', array());
+  $default = array('table_name' => NULL, 'id' => NULL);
+  return sumfields_get_setting('custom_table_parameters', $default);
 }
 
 /**
