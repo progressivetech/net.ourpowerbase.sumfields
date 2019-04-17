@@ -133,6 +133,38 @@ function sumfields_civicrm_pageRun($page) {
 }
 
 /**
+ * Force all values to be integers.
+ *
+ * This function is called in array_walk when rewriting sql statements
+ * to ensure that all values put into "IN (1,2,3)" style clauses are
+ * in fact integers.
+ */
+function sumfields_force_integer(&$value, $key) {
+  if (!is_numeric($value)) {
+    $session = CRM_Core_Session::singleton();
+    $session->setStatus(E::ts("Failed to properly validate one of your options. Be sure to use integer values for all options."));
+  }
+
+  // is_numeric is not perfect, it will allow 4.2 and 0x539, etc.
+  // To be safe, we really want an integer.
+  $value = intval($value);
+}
+
+/**
+ * Force all values to be dates in YYYY-MM-DD format..
+ *
+ * This function is called in array_walk when rewriting sql statements
+ * to ensure that all date values are really date values..
+ */
+function sumfields_force_date(&$value, $key) {
+  if (!preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $value)) {
+    $session = CRM_Core_Session::singleton();
+    $session->setStatus(E::ts("Failed to properly validate the date @date.", array('@date' => $value)));
+    $value = '9999-99-99';
+  }
+}
+
+/**
  * Replace %variable with the actual
  * values that the user has configured to limit to.
  **/
@@ -146,6 +178,7 @@ function sumfields_sql_rewrite($sql) {
   if(count($ids) == 0) {
     $ids = array_keys(sumfields_get_all_financial_types());
   }
+  array_walk($ids, 'sumfields_force_integer');
   $str_ids = implode(',', $ids);
   $sql = str_replace('%financial_type_ids', $str_ids, $sql);
 
@@ -154,6 +187,7 @@ function sumfields_sql_rewrite($sql) {
     // Surely this is wrong... but better to avoid a sql error
     $ids = array_keys(sumfields_get_all_financial_types());
   }
+  array_walk($ids, 'sumfields_force_integer');
   $str_ids = implode(',', $ids);
   $sql = str_replace('%membership_financial_type_ids', $str_ids, $sql);
 
@@ -161,6 +195,7 @@ function sumfields_sql_rewrite($sql) {
   if(count($ids) == 0) {
     $ids = array_keys(sumfields_get_all_participant_status_types());
   }
+  array_walk($ids, 'sumfields_force_integer');
   $str_ids = implode(',', $ids);
   $sql = str_replace('%participant_status_ids', $str_ids, $sql);
 
@@ -168,6 +203,7 @@ function sumfields_sql_rewrite($sql) {
   if(count($ids) == 0) {
     $ids = array_keys(sumfields_get_all_participant_status_types());
   }
+  array_walk($ids, 'sumfields_force_integer');
   $str_ids = implode(',', $ids);
   $sql = str_replace('%participant_noshow_status_ids', $str_ids, $sql);
 
@@ -175,38 +211,16 @@ function sumfields_sql_rewrite($sql) {
   if(count($ids) == 0) {
     $ids = array_keys(sumfields_get_all_event_types());
   }
+  array_walk($ids, 'sumfields_force_integer');
   $str_ids = implode(',', $ids);
   $sql = str_replace('%event_type_ids', $str_ids, $sql);
 
   $fiscal_dates = sumfields_get_fiscal_dates();
   $keys = array_keys($fiscal_dates);
   $values = array_values($fiscal_dates);
+  array_walk($values, 'sumfields_force_date');
   $sql = str_replace($keys, $values, $sql);
-
-  $reminder_response_field = sumfields_get_column_name('reminder_response');
-  if($reminder_response_field) {
-    $sql = str_replace('%reminder_response', $reminder_response_field, $sql);
-  }
-  elseif(preg_match('/%reminder_response/', $sql)) {
-    // This is an error - we have a variable we can't replace.
-    return FALSE;
-  }
-  $invitation_response_field = sumfields_get_column_name('invitation_response');
-  if($invitation_response_field) {
-    $sql = str_replace('%invitation_response', $invitation_response_field, $sql);
-  }
-  elseif(preg_match('/%invitation_response/', $sql)) {
-    // This is an error - we have a variable we can't replace.
-    return FALSE;
-  }
-  $event_attended_total_lifetime_field = sumfields_get_column_name('event_attended_total_lifetime');
-  if($event_attended_total_lifetime_field) {
-    $sql = str_replace('%event_attended_total_lifetime', $event_attended_total_lifetime_field, $sql);
-  }
-  elseif(preg_match('/%event_attended_total_lifetime/', $sql)) {
-    // This is an error - we have a variable we can't replace.
-    return FALSE;
-  }
+  
   return $sql;
 }
 
