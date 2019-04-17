@@ -513,6 +513,11 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
       $session->setStatus($msg);
       continue;
     }
+    // Avoid failures if sql_mode is set to ONLY_FULL_GROUP_BY
+    // If we wrap the SELECT field in MAX, then we avoid the error.
+    // Since the SELECT will only return one value anyway, adding
+    // MAX should not change the value.
+    $trigger = 'MAX(' . $trigger . ')';
     if (!isset($temp_sql[$table])) {
       $temp_sql[$table] = array(
         'temp_table' => sumfields_create_temporary_table($table),
