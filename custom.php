@@ -82,7 +82,7 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '10',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount))
+      'trigger_sql' => '(SELECT IF(SUM(line_total) IS NULL, 0, SUM(line_total))
       FROM civicrm_contribution t1 JOIN 
       civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
@@ -97,7 +97,7 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '15',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
       FROM civicrm_contribution t1 
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin"
@@ -112,7 +112,7 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '15',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
       FROM civicrm_contribution t1 
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN DATE_SUB(NOW(), INTERVAL 12 MONTH) AND NOW()
@@ -127,7 +127,8 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '15',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0) - COALESCE(SUM(qty * COALESCE(t3.non_deductible_amount, 0)), 0)
+      // @todo probably should be line total but double check
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0) - COALESCE(SUM(qty * COALESCE(t3.non_deductible_amount, 0)), 0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
       t1.financial_type_id = t2.id AND is_deductible = 1 
       JOIN civicrm_line_item t3 ON t1.id = t3.contribution_id
@@ -143,7 +144,7 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '20',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
       FROM civicrm_contribution t1 
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin"
@@ -175,7 +176,7 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '20',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
       FROM civicrm_contribution t1 
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin"
@@ -275,6 +276,7 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '50',
       'text_length' => '32',
+      // @todo this will be miscalculating
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0) / (SELECT NULLIF(COUNT(DISTINCT SUBSTR(receive_date, 1, 4)), 0)
       FROM civicrm_contribution t0 
       JOIN civicrm_line_item t1 ON t0.id = t1.contribution_id
