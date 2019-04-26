@@ -414,7 +414,6 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
  * data after changing fields, etc.
  */
 function sumfields_create_temporary_table($trigger_table) {
-  $name = CRM_Core_DAO::createTempTableName();
 
   // These are the actual field names as created in this instance
   $custom_fields = _sumfields_get_custom_field_parameters();
@@ -448,10 +447,9 @@ function sumfields_create_temporary_table($trigger_table) {
       }
     }
   }
-  $sql = "CREATE TEMPORARY TABLE `$name` ( ".
-    implode($create_fields, ',') . ')';
-  CRM_Core_DAO::executeQuery($sql);
-  return $name;
+  return CRM_Utils_SQL_TempTable::build()->createWithColumns(
+    implode($create_fields, ',')
+  )->getName();
 }
 
 /**
