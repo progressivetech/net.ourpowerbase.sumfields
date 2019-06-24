@@ -475,6 +475,11 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $session::setStatus(E::ts("Your configuration may be corrupted. Please disable and renable this extension."), E::ts('Error'), 'error');
     return FALSE;
   }
+
+  // If database logging is on, turn it off during summary fields calculation.
+  // disableLoggingForThisConnection() checks the config for logging
+  CRM_Logging_Schema::disableLoggingForThisConnection();
+
   // In theory we shouldn't have to truncate the table, but we
   // are doing it just to be sure it's empty.
   $sql = "TRUNCATE TABLE `$table_name`";
