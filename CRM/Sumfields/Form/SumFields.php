@@ -43,7 +43,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         }
       }
 
-      switch($matches[1]) {
+      switch($status) {
         case 'scheduled-triggers':
           $display_status = E::ts("Setting changes were saved on %1, but not yet applied; they should be applied shortly.", array(1 => $date));
           $status_icon = 'fa-hourglass-start';
