@@ -2,8 +2,6 @@
 
 use CRM_Sumfields_ExtensionUtil as E;
 
-require_once 'CRM/Core/Form.php';
-
 class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
   function buildQuickForm() {
     $custom = sumfields_get_custom_field_definitions();
@@ -82,10 +80,12 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     }
     $this->assign('trigger_table_status', $trigger_tables);
 
-    // Add active fields
+    // Allows to show a simplified list of fields
+    $this->add('checkbox', 'show_simplified', E::ts('Show simplified fields'), FALSE, array('class' => 'crm-select2 huge'));
+    // Add active fields and change the separator
     foreach ($field_options as $optgroup => $options) {
       $this->addCheckBox(
-        "active_{$optgroup}_fields", $custom['optgroups'][$optgroup]['title'], array_flip($options)
+        "active_{$optgroup}_fields", $custom['optgroups'][$optgroup]['title'], array_flip($options),NULL, NULL, NULL, NULL, "<div></div>"
       );
     }
 
@@ -160,7 +160,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         $defaults["active_{$info['optgroup']}_fields"][$name] = 1;
       }
     }
-
+    $defaults['show_simplified'] = sumfields_get_setting('show_simplified', FALSE);
     $defaults['financial_type_ids'] = sumfields_get_setting('financial_type_ids', array());
     $defaults['membership_financial_type_ids'] = sumfields_get_setting('membership_financial_type_ids', array());
     $defaults['event_type_ids'] = sumfields_get_setting('event_type_ids', array());
@@ -203,6 +203,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     // Save our form page settings
     sumfields_save_setting('data_update_method', $values['data_update_method']);
     sumfields_save_setting('when_to_apply_change', $values['when_to_apply_change']);
+    sumfields_save_setting('show_simplified', $values['show_simplified']);
 
     if ($values['when_to_apply_change'] == 'on_submit') {
       $returnValues = array();

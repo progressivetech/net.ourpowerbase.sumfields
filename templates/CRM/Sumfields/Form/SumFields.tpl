@@ -18,7 +18,7 @@
       <span class="crm-i {$status_icon}"></span>
       {$data_update_method}
     </td>
-  </tr>  
+  </tr>
   {foreach from=$trigger_table_status key="tableName" item="enabled"}
     <tr>
       <td class="description {if $enabled}sumfield-status-enabled{else}sumfield-status-disabled{/if}">
@@ -33,7 +33,12 @@
 </table>
 
 <h3>{ts}Field Settings{/ts}</h3>
-
+<div>
+  <span class="label">{$form.show_simplified.label}</span>
+  <span>{$form.show_simplified.html}</span>
+  <div class="description">{ts}Shows a simplified field definition by using the table <strong>civicrm_contribution</strong> instead of <strong>civicrm_line_item</strong>.{/ts}</div>
+  <div class="description">{ts}Please note: If you check/uncheck this checkbox, all previous selected fields will be <strong>unchecked!</strong>.{/ts}</div>
+</div>
 {foreach from=$fieldsets key="title" item="fields"}
   <fieldset>
     <legend>{$title}</legend>
@@ -44,7 +49,7 @@
         {/if}
         <tr class="crm-sumfields-form-block-sumfields_{$name}">
           <td class="label">{$form.$name.label}</td>
-          <td>
+          <td class="value">
             {$form.$name.html}
             {if $description}<div class="description">{$description}</div>{/if}
           </td>
@@ -57,7 +62,7 @@
   <div id="performance_settings">
    <div class="label">{$form.data_update_method.label}</div>
    <span>{$form.data_update_method.html}</span>
-   <div class="description">{ts}If 'Instantly' is selected, data will be more accurate but you might face some performance issues on large installations. <br/> If 'Whenever the cron job is run' is selected, Summary Fields will rely on each CiviCRM Cron job to process all calculations needed for all contacts.{/ts}</div>   
+   <div class="description">{ts}If 'Instantly' is selected, data will be more accurate but you might face some performance issues on large installations. <br/> If 'Whenever the cron job is run' is selected, Summary Fields will rely on each CiviCRM Cron job to process all calculations needed for all contacts.{/ts}</div>
  </div>
  <hr/>
  <div id="when_to_apply_change">

@@ -11,7 +11,7 @@
  * Defining a summary field requires a specially crafted sql query that
  * can be used both in the definition of a SQL trigger and also can be
  * used to create a query that initializes the summary fields for your
- * existing records. 
+ * existing records.
  *
  * In addition, the name and trigger table have to be defined, as well as
  * details on how the field should be displayed.
@@ -24,12 +24,12 @@
  * not have contact_id, but it does have contribution_id which then
  * leads to civicrm_contribution which does have contact_id), you can
  * tell sumfields how to calculate the contact_id using the 'tables'
- * array of data. 
+ * array of data.
  *
  **/
 
 
-/** 
+/**
  * Define a few trigger sql queries first - because they need to be
  * referenced first for a total number and a second time for the
  * percent.
@@ -83,12 +83,24 @@ $custom = array(
       'weight' => '10',
       'text_length' => '32',
       'trigger_sql' => '(SELECT IF(SUM(line_total) IS NULL, 0, SUM(line_total))
-      FROM civicrm_contribution t1 JOIN 
+      FROM civicrm_contribution t1 JOIN
       civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND
       t2.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_total_lifetime_simplified' => array(
+      'label' => ts('Total Lifetime Contributions (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '10',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT IF(SUM(total_amount) IS NULL, 0, SUM(total_amount))
+      FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id
+      AND t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_this_year' => array(
@@ -98,12 +110,25 @@ $custom = array(
       'weight' => '15',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
-      FROM civicrm_contribution t1 
+      FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin"
       AND "%current_fiscal_year_end" AND t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_total_this_year_simplified' => array(
+      'label' => ts('Total Contributions this Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '15',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin"
+      AND "%current_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_twelve_months' => array(
@@ -113,12 +138,25 @@ $custom = array(
       'weight' => '15',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
-      FROM civicrm_contribution t1 
+      FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN DATE_SUB(NOW(), INTERVAL 12 MONTH) AND NOW()
       AND t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_total_twelve_months_simplified' => array(
+      'label' => ts('Total Contributions in the Last 12 Months (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '15',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN DATE_SUB(NOW(), INTERVAL 12 MONTH) AND NOW()
+      AND t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_this_year' => array(
@@ -130,12 +168,27 @@ $custom = array(
       // @todo probably should be line total but double check
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0) - COALESCE(SUM(qty * COALESCE(t3.non_deductible_amount, 0)), 0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
-      t1.financial_type_id = t2.id AND is_deductible = 1 
+      t1.financial_type_id = t2.id AND is_deductible = 1
       JOIN civicrm_line_item t3 ON t1.id = t3.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin" AND
       "%current_fiscal_year_end" AND t1.contact_id IN (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND t3.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_total_deductible_this_year_simplified' => array(
+      'label' => ts('Total Deductible Contributions this Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '15',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
+      t1.financial_type_id = t2.id AND is_deductible = 1
+      WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin" AND
+      "%current_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_last_year' => array(
@@ -145,12 +198,25 @@ $custom = array(
       'weight' => '20',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
-      FROM civicrm_contribution t1 
+      FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin"
       AND "%last_fiscal_year_end" AND t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_total_last_year_simplified' => array(
+      'label' => ts('Total Contributions last Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '20',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin"
+      AND "%last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_last_year' => array(
@@ -161,7 +227,7 @@ $custom = array(
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0) - COALESCE(SUM(qty * COALESCE(t3.non_deductible_amount, 0)), 0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
-      t1.financial_type_id = t2.id AND is_deductible = 1 
+      t1.financial_type_id = t2.id AND is_deductible = 1
       JOIN civicrm_line_item t3 ON t1.id = t3.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin" AND
       "%last_fiscal_year_end" AND t1.contact_id IN (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
@@ -169,7 +235,21 @@ $custom = array(
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
-
+    'contribution_total_deductible_last_year_simplified' => array(
+      'label' => ts('Total Deductible Contributions last Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '15',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
+      t1.financial_type_id = t2.id AND is_deductible = 1
+      WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin" AND
+      "%last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
+      'optgroup' => 'fundraising',
+    ),
     'contribution_total_year_before_last' => array(
       'label' => ts('Total Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
@@ -177,12 +257,25 @@ $custom = array(
       'weight' => '20',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
-      FROM civicrm_contribution t1 
+      FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin"
       AND "%year_before_last_fiscal_year_end" AND t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_total_year_before_last_simplified' => array(
+      'label' => ts('Total Contributions Fiscal Year Before Last (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '20',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin"
+      AND "%year_before_last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_deductible_year_before_last_year' => array(
@@ -193,13 +286,27 @@ $custom = array(
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0) - COALESCE(SUM(qty * COALESCE(t3.non_deductible_amount, 0)), 0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
-      t1.financial_type_id = t2.id AND is_deductible = 1 
+      t1.financial_type_id = t2.id AND is_deductible = 1
       JOIN civicrm_line_item t3 ON t1.id = t3.contribution_id
       WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin" AND
       "%year_before_last_fiscal_year_end" AND t1.contact_id IN (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND t3.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
-
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_total_deductible_year_before_last_year_simplified' => array(
+      'label' => ts('Total Deductible Contributions Fiscal Year Before Last (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '15',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
+      FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
+      t1.financial_type_id = t2.id AND is_deductible = 1
+      WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin" AND
+      "%year_before_last_fiscal_year_end" AND t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_amount_last' => array(
@@ -209,12 +316,25 @@ $custom = array(
       'weight' => '25',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(total_amount,0)
-      FROM civicrm_contribution t1 
+      FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id)
       AND t1.contribution_status_id = 1  AND t2.financial_type_id IN
       (%financial_type_ids) ORDER BY t1.receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_amount_last_simplified' => array(
+      'label' => ts('Amount of last contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '25',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(total_amount,0)
+      FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id
+      AND t1.contribution_status_id = 1  AND t1.financial_type_id IN
+      (%financial_type_ids) ORDER BY t1.receive_date DESC LIMIT 1)',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_date_last' => array(
@@ -230,6 +350,18 @@ $custom = array(
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
+    'contribution_date_last_simplified' => array(
+      'label' => ts('Date of Last Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Date',
+      'html_type' => 'Select Date',
+      'weight' => '30',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1
+      WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
+      t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
+      'optgroup' => 'fundraising',
+    ),
     'contribution_date_first' => array(
       'label' => ts('Date of First Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
@@ -243,6 +375,18 @@ $custom = array(
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
+    'contribution_date_first_simplified' => array(
+      'label' => ts('Date of First Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Date',
+      'html_type' => 'Select Date',
+      'weight' => '35',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT MIN(receive_date) FROM civicrm_contribution t1
+      WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
+      t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
+      'optgroup' => 'fundraising',
+    ),
     'contribution_largest' => array(
       'label' => ts('Largest Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
@@ -250,11 +394,23 @@ $custom = array(
       'weight' => '40',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(MAX(total_amount), 0)
-      FROM civicrm_contribution t1 
+      FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_largest_simplified' => array(
+      'label' => ts('Largest Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '40',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(MAX(total_amount), 0)
+      FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id AND
+      t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'contribution_total_number' => array(
@@ -270,15 +426,26 @@ $custom = array(
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
+    'contribution_total_number_simplified' => array(
+      'label' => ts('Count of Contributions (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Int',
+      'html_type' => 'Text',
+      'weight' => '45',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(COUNT(id), 0) FROM civicrm_contribution t1
+      WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
+      t1.financial_type_id IN (%financial_type_ids))',
+      'trigger_table' => 'civicrm_contribution',
+      'optgroup' => 'fundraising',
+    ),
     'contribution_average_annual_amount' => array(
       'label' => ts('Average Annual (Calendar Year) Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '50',
       'text_length' => '32',
-      // @todo this will be miscalculating
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0) / (SELECT NULLIF(COUNT(DISTINCT SUBSTR(receive_date, 1, 4)), 0)
-      FROM civicrm_contribution t0 
+      FROM civicrm_contribution t0
       JOIN civicrm_line_item t1 ON t0.id = t1.contribution_id
       WHERE t0.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.financial_type_id
       IN (%financial_type_ids) AND t0.contribution_status_id = 1) FROM civicrm_contribution t2
@@ -286,6 +453,20 @@ $custom = array(
       WHERE t2.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t3.financial_type_id IN (%financial_type_ids)
       AND t2.contribution_status_id = 1)',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_average_annual_amount_simplified' => array(
+      'label' => ts('Average Annual (Calendar Year) Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '50',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0) / (SELECT NULLIF(COUNT(DISTINCT SUBSTR(receive_date, 1, 4)), 0)
+      FROM civicrm_contribution t0 WHERE t0.contact_id = NEW.contact_id AND t0.financial_type_id
+      IN (%financial_type_ids) AND t0.contribution_status_id = 1) FROM civicrm_contribution t1
+      WHERE t1.contact_id = NEW.contact_id AND t1.financial_type_id IN (%financial_type_ids)
+      AND t1.contribution_status_id = 1)',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
     'soft_total_lifetime' => array(
@@ -336,7 +517,7 @@ $custom = array(
       'html_type' => 'Select Date',
       'weight' => '55',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1 
+      'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
       t2.financial_type_id IN (%membership_financial_type_ids) ORDER BY
@@ -350,7 +531,7 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '60',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1 
+      'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
       t2.financial_type_id IN (%membership_financial_type_ids) ORDER BY
@@ -368,7 +549,7 @@ $custom = array(
       'trigger_sql' => sumfields_multilingual_rewrite('(SELECT civicrm_event.title AS summary_value
       FROM civicrm_participant t1 JOIN civicrm_event ON t1.event_id = civicrm_event.id
       WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
-      AND civicrm_event.event_type_id IN (%event_type_ids) AND t1.is_test = 0 
+      AND civicrm_event.event_type_id IN (%event_type_ids) AND t1.is_test = 0
       ORDER BY start_date DESC LIMIT 1)'),
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
@@ -385,14 +566,14 @@ $custom = array(
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
     ),
-    
+
     'event_total' => array(
       'label' => ts('Total Number of events', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '75',
       'text_length' => '8',
-      'trigger_sql' => $event_total_trigger_sql, 
+      'trigger_sql' => $event_total_trigger_sql,
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
     ),
@@ -440,7 +621,7 @@ $custom = array(
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
     ),
-  ),
+    ),
   'optgroups' => array(
     'fundraising' => array(
       'title' => ts('Contribution Fields', array('domain' => 'net.ourpowerbase.sumfields')),
