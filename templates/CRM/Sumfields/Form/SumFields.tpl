@@ -36,8 +36,7 @@
 <div>
   <span class="label">{$form.show_simplified.label}</span>
   <span>{$form.show_simplified.html}</span>
-  <div class="description">{ts}Shows a simplified field definition by using the table <strong>civicrm_contribution</strong> instead of <strong>civicrm_line_item</strong>.{/ts}</div>
-  <div class="description">{ts}Please note: If you check/uncheck this checkbox, all previous selected fields will be <strong>unchecked!</strong>.{/ts}</div>
+  <div class="description">{ts}Use simplified contribution fields. By default, contribution fields are calculated using the line items table, which provides the most accurate accounting if you use price sets with different financial types. Simplified contribution fields are calculated using the contribution table, which is more efficient and will work better on large installations but won't accurately count a single contribution split between two line items (e.g. an event registration and donation).{/ts}</div>
 </div>
 {foreach from=$fieldsets key="title" item="fields"}
   <fieldset>
@@ -80,5 +79,33 @@
     border-radius: 4px;
   }
 </style>
-{/literal}
 
+<script type="text/javascript">
+  CRM.$(window).load(function() {
+    if (CRM.$('#show_simplified').prop("checked") === true){
+      switch_simplified();
+    } else {
+      switch_normal();
+    }
+    CRM.$('#show_simplified').change(function(){
+      if(this.checked) {
+        switch_simplified();
+      } else {
+        switch_normal();
+      }
+    });
+  });
+  function switch_simplified() {
+      CRM.$('.CRM_Sumfields_Form_SumFields tr.crm-sumfields-form-block-sumfields_active_fundraising_fields td.value input[id$="simplified"]').show();
+      CRM.$('.CRM_Sumfields_Form_SumFields tr.crm-sumfields-form-block-sumfields_active_fundraising_fields td.value label[for$="simplified"]').show();
+      CRM.$('.CRM_Sumfields_Form_SumFields tr.crm-sumfields-form-block-sumfields_active_fundraising_fields td.value input').not('[id$="simplified"]').hide();
+      CRM.$('.CRM_Sumfields_Form_SumFields tr.crm-sumfields-form-block-sumfields_active_fundraising_fields td.value label').not('[for$="simplified"]').hide();
+  }
+  function switch_normal() {
+      CRM.$('.CRM_Sumfields_Form_SumFields tr.crm-sumfields-form-block-sumfields_active_fundraising_fields td.value input[id$="simplified"]').show();
+      CRM.$('.CRM_Sumfields_Form_SumFields tr.crm-sumfields-form-block-sumfields_active_fundraising_fields td.value label[for$="simplified"]').show();
+      CRM.$('.CRM_Sumfields_Form_SumFields tr.crm-sumfields-form-block-sumfields_active_fundraising_fields td.value input').not('[id$="simplified"]').show();
+      CRM.$('.CRM_Sumfields_Form_SumFields tr.crm-sumfields-form-block-sumfields_active_fundraising_fields td.value label').not('[for$="simplified"]').show();
+  }
+</script>
+{/literal}

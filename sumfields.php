@@ -45,22 +45,6 @@ function sumfields_civicrm_navigationMenu(&$menu) {
 }
 
 /**
- * Implementation of hook_civicrm_buildForm
- */
-function sumfields_civicrm_buildForm($formName, &$form) {
-  if ($formName == 'CRM_Sumfields_Form_SumFields') {
-
-    // Inject our tpl here
-    $templatePath = realpath(dirname(__FILE__) . "/templates");
-    // dynamically insert a template block in the page
-    CRM_Core_Region::instance('page-body')->add(array(
-      'template' => "{$templatePath}/CRM/Sumfields/Form/SumFields.Custom.tpl"
-      )
-    );
-  }
-}
-
-/**
  * Implementation of hook_civicrm_install
  */
 function sumfields_civicrm_install() {

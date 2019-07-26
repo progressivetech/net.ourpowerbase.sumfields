@@ -81,7 +81,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $this->assign('trigger_table_status', $trigger_tables);
 
     // Allows to show a simplified list of fields
-    $this->add('checkbox', 'show_simplified', E::ts('Show simplified fields'), FALSE, array('class' => 'crm-select2 huge'));
+    $this->add('checkbox', 'show_simplified', E::ts('Show simplified fields only'));
     // Add active fields and change the separator
     foreach ($field_options as $optgroup => $options) {
       $this->addCheckBox(
