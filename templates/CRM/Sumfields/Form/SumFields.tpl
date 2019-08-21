@@ -54,18 +54,26 @@
   </fieldset>
 {/foreach}
 
-  <div id="performance_settings">
-   <div class="label">{$form.data_update_method.label}</div>
-   <span>{$form.data_update_method.html}</span>
-   <div class="description">{ts}If 'Instantly' is selected, data will be more accurate but you might face some performance issues on large installations. <br/> If 'Whenever the cron job is run' is selected, Summary Fields will rely on each CiviCRM Cron job to process all calculations needed for all contacts.{/ts}</div>   
- </div>
- <hr/>
- <div id="when_to_apply_change">
-   <div class="description">{ts}Applying these settings via this form may cause your web server to time out. Applying changes on next scheduled job is recommended.{/ts}</div>
-   <div class="label">{$form.when_to_apply_change.label}</div>
-   <span>{$form.when_to_apply_change.html}</span>
- </div>
-
+  <fieldset>
+  <legend>Performance Settings</legend>
+    <table class="form-layout-compressed">
+      <tr id="performance_settings">
+        <td class="label">{$form.data_update_method.label}</td>
+        <td>{$form.data_update_method.html}
+        <div class="description">{ts}If 'Instantly' is selected, data will be more accurate but you might face some performance issues on large installations. <br/> If 'Whenever the cron job is run' is selected, Summary Fields will rely on each CiviCRM Cron job to process all calculations needed for all contacts.{/ts}</div></td>
+      </tr>
+      <tr id="exclude_from_logging">
+        <td class="label">{$form.exclude_from_logging.label}</td>
+        <td>{$form.exclude_from_logging.html}
+        <div class="description">{ts}When advanced logging is turned on, you can exclude Summary Fields from being logged to increase performance and reduce clutter.{/ts}</div></td>
+      </tr>
+      <tr id="when_to_apply_change">
+        <td class="label">{$form.when_to_apply_change.label}</td>
+        <td>{$form.when_to_apply_change.html}
+        <div class="description">{ts}Applying these settings via this form may cause your web server to time out. Applying changes on next scheduled job is recommended.{/ts}</div></td>
+      </tr>
+    </table>
+ </fieldset>
  <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
 
 {literal}

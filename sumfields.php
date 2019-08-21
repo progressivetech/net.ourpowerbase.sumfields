@@ -1410,3 +1410,20 @@ function sumfields_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL,
     }
   }
 }
+
+/**
+ * Implements hook_alterLogTables().
+ *
+ * @param array $logTableSpec
+ */
+function sumfields_civicrm_alterLogTables(&$logTableSpec) {
+  $excludeLogging = sumfields_get_setting('exclude_from_logging', 0);
+  if (!$excludeLogging) {
+    return;
+  }
+  $tableName = _sumfields_get_custom_table_name();
+  if (isset($logTableSpec[$tableName])) {
+    unset($logTableSpec[$tableName]);
+  }
+}
+
