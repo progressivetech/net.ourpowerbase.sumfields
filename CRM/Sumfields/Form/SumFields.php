@@ -148,6 +148,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
           ),
         )
       );
+    $this->addYesNo('exclude_from_logging', 'Exclude Summary Fields from logging?');
   }
 
   function setDefaultValues() {
@@ -168,6 +169,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $defaults['participant_noshow_status_ids'] = sumfields_get_setting('participant_noshow_status_ids', array());
     $defaults['when_to_apply_change'] = sumfields_get_setting('when_to_apply_change','via_cron');
     $defaults['data_update_method'] = sumfields_get_setting('data_update_method','via_triggers');
+    $defaults['exclude_from_logging'] = sumfields_get_setting('exclude_from_logging', 0);
     return $defaults;
   }
 
@@ -203,6 +205,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     // Save our form page settings
     sumfields_save_setting('data_update_method', $values['data_update_method']);
     sumfields_save_setting('when_to_apply_change', $values['when_to_apply_change']);
+    sumfields_save_setting('exclude_from_logging', $values['exclude_from_logging']);
 
     if ($values['when_to_apply_change'] == 'on_submit') {
       $returnValues = array();
