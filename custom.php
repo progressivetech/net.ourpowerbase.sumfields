@@ -524,6 +524,19 @@ $custom = array(
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'membership',
     ),
+    'contribution_date_last_membership_payment_simplified' => array(
+      'label' => ts('Date of Last Membership Payment (simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Date',
+      'html_type' => 'Select Date',
+      'weight' => '55',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1 WHERE
+       t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
+       t1.financial_type_id IN (%membership_financial_type_ids) AND t1.is_test = 0 ORDER BY
+       receive_date DESC LIMIT 1)',
+      'trigger_table' => 'civicrm_contribution',
+      'optgroup' => 'membership',
+    ),
     'contribution_amount_last_membership_payment' => array(
       'label' => ts('Amount of Last Membership Payment', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
@@ -533,9 +546,22 @@ $custom = array(
       'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
-      t2.financial_type_id IN (%membership_financial_type_ids) AND is_test = 0 ORDER BY
+      t2.financial_type_id IN (%membership_financial_type_ids) AND t1.is_test = 0 ORDER BY
       receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'membership',
+    ),
+    'contribution_amount_last_membership_payment_simplified' => array(
+      'label' => ts('Amount of Last Membership Payment (simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '60',
+      'text_length' => '32',
+      'trigger_sql' =>'(SELECT total_amount FROM civicrm_contribution t1 WHERE
+       t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
+       t1.financial_type_id IN (%membership_financial_type_ids) AND t1.is_test = 0 ORDER BY 
+      receive_date DESC LIMIT 1)',
+      'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'membership',
     ),
     'event_last_attended_name' => array(
