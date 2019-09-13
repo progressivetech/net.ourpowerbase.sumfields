@@ -40,7 +40,7 @@ Do you want more summary fields? Check out [Joinery's More Summary
 Fields](https://github.com/twomice/com.joineryhq.jsumfields) for an extension
 providing yet more fields.
 
-Wnat *still more fields*?
+Want *still more fields*?
 
 You can write your own extension. Learn how in the document **DEVELOPERS.md** in
 the this extension.

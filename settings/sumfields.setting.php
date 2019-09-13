@@ -149,4 +149,16 @@ return array(
     'description' => 'Determines when the calculation should take place.On next cron or on submit',
     'help_text' => '',
 	),
+  'exclude_from_logging' => array(
+    'group_name' => 'Summary Fields',
+    'group' => 'summaryfields',
+    'name' => 'exclude_from_logging',
+    'type' => 'Boolean',
+    'default' => '0',
+    'add' => '5.0',
+    'is_domain' => 0,
+    'is_contact' => 0,
+    'description' => 'When advanced logging is turned on, you can exclude Summary Fields from being logged.',
+    'help_text' => '',
+  ),
 );

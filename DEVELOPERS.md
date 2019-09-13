@@ -51,15 +51,37 @@ function mycustom_civicrm_sumfields_definitions(&$custom) {
 
 **When writing your own summary fields, here are some tips:**
 
-With version 4+, you can now run updates based on any table, provided there is a way to link it back to a `contact_id`. 
-If there is a `contact_id` in the table you want to be the trigger, it's easy because you can reference `NEW.contact_id`
-to get the right reference for the summary field row. If there isn't a `contact_id` in your table, then you need to add 
-a record to the `$custom['tables']` array (`civicrm_line_item` is a good example of how to do that).
+The two most important settings are `trigger_table` and `trigger_sql`.
+`trigger_table` is the table that is monitored for changes. When a change in
+the data in that table is made, `trigger_sql` is executed. `trigger_sql` should
+be a SQL statement with a single column SELECT statement. The column should be
+an aggregate column that produces a value that will be inserted into the
+summary fields table.
 
-Pick the table with the data you are calculating. This is the trigger_table. When a change is made to this table,
-the summary field is updated. If this table has the `contact_id` field, then you are all set. Your trigger_sql should
-reference `NEW.contact_id`. If this table does not have a `contact_id` field, then it must contain a field that
-can be used to calculate a contact_id (see the `civicrm_line_item` examples in `custom.php`).
+`trigger_sql` must minimally reference `NEW.contact_id` in its WHERE clause.
+`New.contact_id` will be replaced with the value of the `contact_id` field in
+the `trigger_table` row that is being changed or inserted.
+
+What if the trigger table does not have a `contact_id` field? We can work with
+that too.  If there isn't a `contact_id` in your table, then you need to add a
+value to the `$custom['tables']` array (`civicrm_line_item` is a good example
+of how to do that). This value will indicate how summary fields should
+derive the `contact_id` from the fields available in the `trigger_table`.
+
+In addition, there are several variables you can use in your `trigger_sql` that
+are mapped to user-defined settings. All variables are replaced with comma
+separated list of values chosen by users to restrict how summary fields are
+calculated.
+
+ * `%financial_type_ids`
+ * `%participant_status_ids`
+ * `%event_type_ids`
+ * `%participant_noshow_status_ids`
+ * `%current_fiscal_year_begin`
+ * `%current_fiscal_year_end`
+ * `%year_before_last_fiscal_year_begin`
+ * `%year_before_last_fiscal_year_end`
+ * `%membership_financial_type_ids`
 
 If you change the query in the hook, you can simply go to the Summary Fields admin screen and resave. All data 
 will be updated.
@@ -69,21 +91,3 @@ General information on triggers
 
 * [MySQL docs on triggers](https://dev.mysql.com/doc/refman/5.7/en/triggers.html)
 * [CiviCRM trigger info hook](https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_triggerInfo/)
-
-Triggers apply to update, delete and insert. When writing a trigger the NEW key word indicates the record that is inserted
-or changed and OLD indicates the record that was deleted. A simplified example of a trigger would be if you had a contact 
-table with a total_contributions field and a contributions table with a foreign key contact_id that included all the 
-contributions.
-
-Then, you could create trigger that would execute on INSERT or UPDATE for the contribution table that was:
-
-`UPDATE contact SET contact.total_contributions = (SELECT SUM(amount) FROM contribution WHERE contact_id = NEW.contact_id)`
-
-And a DELETE trigger that was:
-
-`UPDATE contact SET contact.total_contributions = (SELECT SUM(amount) FROM contribution WHERE contact_id = OLD.contact_id)`
-
-With these examples `NEW.contact_id` and `OLD.contact_id` would always be equal to the value of `contribution.contact_id` 
-for the row that was inserted, updated or deleted.
-
-With these triggers the `total_contributions` would always be accurate.
