@@ -161,4 +161,16 @@ return array(
     'description' => 'When advanced logging is turned on, you can exclude Summary Fields from being logged.',
     'help_text' => '',
   ),
+  'show_simplified' => array(
+    'group_name' => 'Summary Fields',
+    'group' => 'summaryfields',
+    'name' => 'show_simplified',
+    'type' => 'Boolean',
+    'default' => '0',
+    'add' => '5.0',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => 'Show simplified contribution fields - ones that do not use the line item table',
+    'help_text' => '',
+  ),
 );

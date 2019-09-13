@@ -81,7 +81,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $this->assign('trigger_table_status', $trigger_tables);
 
     // Allows to show a simplified list of fields
-    $this->add('checkbox', 'show_simplified', E::ts('Show simplified fields only'));
+    $this->add('checkbox', 'show_simplified', E::ts('Show simplified fields'));
     // Add active fields and change the separator
     foreach ($field_options as $optgroup => $options) {
       $this->addCheckBox(
@@ -176,6 +176,11 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
   function postProcess() {
     $values = $this->controller->exportValues($this->_name);
 
+    // show_simplified is a checkbox so won't exist if not checked but we want to avoid missing index errors.
+    if (!array_key_exists('show_simplified', $values)) {
+      $values['show_simplified'] = 0;
+    }
+
     // Combine all fields into on active_fields array for easier processing.
     $active_fields = array();
     foreach ($values as $key => $val) {
@@ -192,7 +197,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         sumfields_save_setting('new_active_fields', $new_active_fields);
       }
     }
-    $settings = array('financial_type_ids', 'membership_financial_type_ids', 'event_type_ids', 'participant_status_ids', 'participant_noshow_status_ids');
+    $settings = array('financial_type_ids', 'membership_financial_type_ids', 'event_type_ids', 'participant_status_ids', 'participant_noshow_status_ids', 'show_simplified');
     foreach ($settings as $setting) {
       if (array_key_exists($setting, $values)) {
         sumfields_save_setting($setting, $values[$setting]);
