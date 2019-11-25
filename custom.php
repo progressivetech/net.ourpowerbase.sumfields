@@ -418,7 +418,7 @@ $custom = array(
       'html_type' => 'Text',
       'weight' => '45',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT COALESCE(COUNT(t1.id), 0) FROM civicrm_contribution t1
+      'trigger_sql' => '(SELECT COALESCE(COUNT(DISTINCT t1.id), 0) FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND t1.contribution_status_id = 1 AND
       t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
