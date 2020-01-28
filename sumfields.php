@@ -325,6 +325,10 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     // Iterate over all our fields, and build out a sql parts array
     foreach($custom_fields as $base_column_name => $params) {
       if(!in_array($base_column_name, $active_fields)) continue;
+      if(!in_array($custom['fields'], $base_column_name)) {
+        Civi::log()->debug("The $base_column_name field has been yanked, re-save custom field definitions. ");
+        continue;
+      }
       $table = $custom['fields'][$base_column_name]['trigger_table'];
       if(!is_null($tableName) && $tableName != $table) {
         // if triggerInfo is called with particular table name, we should
