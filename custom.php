@@ -40,7 +40,12 @@ $event_attended_trigger_sql =
   AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0)';
 $event_total_trigger_sql =
  '(SELECT COUNT(t1.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
- t1.event_id = e.id WHERE contact_id = NEW.contact_id AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0)';
+ t1.event_id = e.id WHERE contact_id = NEW.contact_id AND e.event_type_id IN (%event_type_ids) AND
+ t1.is_test = 0)';
+$event_total_trigger_sql_null =
+ '(SELECT COUNT(t1.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
+ t1.event_id = e.id WHERE e.event_type_id IN (%event_type_ids) AND t1.is_test = 0 GROUP BY contact_id
+ HAVING contact_id = NEW.contact_id)';
 $event_noshow_trigger_sql =
   '(SELECT COUNT(e.id) AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
   t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_noshow_status_ids)
@@ -621,7 +626,7 @@ $custom = array(
       // Divide event_attended_total_lifetime / event_total, substituting 0 if either field is NULL. Then, only
       // take two decimal places and multiply by 100, so .8000 becomes 80.
       'trigger_sql' => '(SELECT FORMAT(IFNULL(' . $event_attended_trigger_sql .
-        ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql . ', 0), 2) * 100 AS summary_value)',
+        ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql_null . ', 1), 2) * 100 AS summary_value)',
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
     ),
@@ -642,7 +647,7 @@ $custom = array(
       'weight' => '95',
       'text_length' => '8',
       'trigger_sql' => '(SELECT FORMAT(IFNULL(' . $event_noshow_trigger_sql .
-         ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql . ', 0), 2) * 100 AS summary_value)',
+         ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql_null . ', 1), 2) * 100 AS summary_value)',
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
     ),
