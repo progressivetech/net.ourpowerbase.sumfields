@@ -325,7 +325,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     // Iterate over all our fields, and build out a sql parts array
     foreach($custom_fields as $base_column_name => $params) {
       if(!in_array($base_column_name, $active_fields)) continue;
-      if(!in_array($base_column_name, $custom['fields'])) {
+      if(!array_key_exists($base_column_name, $custom['fields'])) {
         Civi::log()->debug("The $base_column_name field has been yanked, re-save custom field definitions. ");
         continue;
       }
