@@ -445,7 +445,8 @@ function sumfields_create_temporary_table($trigger_table) {
           $data_type = 'datetime';
         }
         elseif($data_type == 'String') {
-          $data_type = 'varchar(128)';
+          $text_length = CRM_Utils_Array::value('text_length', $field_definition, 128);
+          $data_type = "varchar($text_length)";
         }
         $create_fields[] = "`$field_name` $data_type";
       }
