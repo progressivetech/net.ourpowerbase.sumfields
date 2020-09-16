@@ -687,7 +687,7 @@ function sumfields_save_setting($key, $value) {
  * for this extension.
  **/
 function sumfields_get_setting($key, $default = NULL) {
-  if (version_compare('>=', CRM_Utils_System::version(), '4.7.alpha1')) {
+  if (version_compare(CRM_Utils_System::version(), '4.7.alpha1', '>=')) {
     $ret = civicrm_api3('Setting', 'getvalue', array('name' => $key));
   }
   else {
