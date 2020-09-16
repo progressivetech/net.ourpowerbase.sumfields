@@ -597,7 +597,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
 function sumfields_alter_custom_field_create_params(&$params) {
   // Use default date/time formats for Date fields.
   if($params['data_type'] == 'Date') {
-    if (version_compare('>=', CRM_Utils_System::version(), '4.7.alpha1')) {
+    if (version_compare(CRM_Utils_System::version(), '4.7.alpha1','>=' )) {
       $params['date_format'] = Civi::settings()->get('dateInputFormat');
       $params['time_format'] = Civi::settings()->get('timeInputFormat');
     }
