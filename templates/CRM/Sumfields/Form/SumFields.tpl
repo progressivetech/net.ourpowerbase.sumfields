@@ -44,7 +44,8 @@
     <table class="form-layout-compressed">
       {foreach from=$fields key="name" item="description"}
         {if $name == 'active_fundraising_fields'}
-          <tr><div class="help">{ts}Fiscal Year can be set at <a href="/civicrm/admin/setting/date?action=reset=1">Administer &gt; Localization &gt; Date Formats</a>{/ts}</div></tr>
+          {capture assign=fiscalURL}{crmURL p='civicrm/admin/setting/date' q="reset=1"}{/capture}
+          <tr><div class="help">{ts}Fiscal Year can be set at <a href="{$fiscalURL}">Administer &gt; Localization &gt; Date Formats</a>{/ts}</div></tr>
         {/if}
         <tr class="crm-sumfields-form-block-sumfields_{$name}">
           <td class="label">{$form.$name.label}</td>

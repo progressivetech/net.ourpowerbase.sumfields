@@ -48,7 +48,7 @@ function sumfields_civicrm_navigationMenu(&$menu) {
  * Implementation of hook_civicrm_install
  */
 function sumfields_civicrm_install() {
-  return _sumfields_civix_civicrm_install();
+  _sumfields_civix_civicrm_install();
 }
 
 /**
@@ -57,7 +57,7 @@ function sumfields_civicrm_install() {
 function sumfields_civicrm_uninstall() {
   sumfields_deinitialize_custom_data();
   sumfields_delete_user_settings();
-  return _sumfields_civix_civicrm_uninstall();
+  _sumfields_civix_civicrm_uninstall();
 }
 
 /**
@@ -73,7 +73,7 @@ function sumfields_civicrm_postInstall() {
   $msg = E::ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.");
   $session->setStatus($msg);
 
-  return _sumfields_civix_civicrm_postInstall();
+  _sumfields_civix_civicrm_postInstall();
 }
 
 /**
@@ -89,7 +89,7 @@ function sumfields_civicrm_enable() {
  */
 function sumfields_civicrm_disable() {
   sumfields_disable_custom_group();
-  return _sumfields_civix_civicrm_disable();
+  _sumfields_civix_civicrm_disable();
 }
 
 /**
@@ -112,7 +112,7 @@ function sumfields_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * is installed, disabled, uninstalled.
  */
 function sumfields_civicrm_managed(&$entities) {
-  return _sumfields_civix_civicrm_managed($entities);
+  _sumfields_civix_civicrm_managed($entities);
 }
 
 /**
@@ -222,7 +222,7 @@ function sumfields_sql_rewrite($sql) {
   $values = array_values($fiscal_dates);
   array_walk($values, 'sumfields_force_date');
   $sql = str_replace($keys, $values, $sql);
-  
+
   return $sql;
 }
 
@@ -292,12 +292,12 @@ function sumfields_zero_pad($num) {
  **/
 
 function sumfields_civicrm_triggerInfo(&$info, $tableName) {
-  
+
   // Do a check if we are running through triggers or cronjob. We don't want
   // use system resources
-  $data_update_method = sumfields_get_setting('data_update_method','default');  
-  if ($data_update_method == 'via_triggers') {  
-  
+  $data_update_method = sumfields_get_setting('data_update_method','default');
+  if ($data_update_method == 'via_triggers') {
+
     // Our triggers all use custom fields. CiviCRM, when generating
     // custom fields, sometimes gives them different names (appending
     // the id in most cases) to avoid name collisions.
@@ -315,7 +315,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     // We create a trigger sql statement for each table that should
     // have a trigger
     $tables = array();
-    
+
     $generic_sql = "INSERT INTO `$table_name` SET ";
     $sql_field_parts = array();
 
@@ -569,7 +569,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $query = "INSERT INTO `{$data['temp_table']}` SELECT contact_id, "
       . implode(",\n", $data['triggers'])
       . " FROM `$table` AS trigger_table "
-      . $data['initialize_join'] 
+      . $data['initialize_join']
       . ' GROUP BY contact_id';
 
     CRM_Core_DAO::executeQuery($query);
