@@ -823,7 +823,7 @@ function sumfields_get_custom_field_definitions() {
     require 'custom.php';
     // Invoke hook_civicrm_sumfields_definitions
     $null = NULL;
-    CRM_Utils_Hook::singleton()->invoke(1, $custom, $null, $null,
+    CRM_Utils_Hook::singleton()->invoke(['custom'], $custom, $null, $null,
       $null, $null, $null,
       'civicrm_sumfields_definitions'
     );
