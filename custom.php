@@ -366,6 +366,34 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
+    'contribution_amount_first' => array(
+      'label' => ts('Amount of first contribution', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '25',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(total_amount,0)
+      FROM civicrm_contribution t1
+      JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
+      WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id)
+      AND t1.contribution_status_id = 1 AND t2.financial_type_id IN
+      (%financial_type_ids) AND t1.is_test = 0 ORDER BY t1.receive_date ASC LIMIT 1)',
+      'trigger_table' => 'civicrm_line_item',
+      'optgroup' => 'fundraising',
+    ),
+    'contribution_amount_first_simplified' => array(
+      'label' => ts('Amount of first contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Money',
+      'html_type' => 'Text',
+      'weight' => '25',
+      'text_length' => '32',
+      'trigger_sql' => '(SELECT COALESCE(total_amount,0)
+      FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id
+      AND t1.contribution_status_id = 1  AND t1.financial_type_id IN
+      (%financial_type_ids) AND t1.is_test = 0 ORDER BY t1.receive_date ASC LIMIT 1)',
+      'trigger_table' => 'civicrm_contribution',
+      'optgroup' => 'fundraising',
+    ),
     'contribution_date_first' => array(
       'label' => ts('Date of First Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
