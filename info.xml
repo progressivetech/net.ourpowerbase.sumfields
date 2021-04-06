@@ -9,10 +9,10 @@
     <email>jamie@progressivetech.org</email>
   </maintainer>
   <releaseDate>2019-02-05</releaseDate>
-  <version>4.0.2</version>
+  <version>5.0.0</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.7</ver>
+    <ver>5.33</ver>
   </compatibility>
   <comments>This extension adds custom data fields and triggers to your database. Disabling this extension will cause the custom data fields to be deleted and triggers removed.</comments>
   <civix>
