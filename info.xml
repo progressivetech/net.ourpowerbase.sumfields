@@ -8,8 +8,8 @@
     <author>Jamie McClelland/Progressive Technology Project</author>
     <email>jamie@progressivetech.org</email>
   </maintainer>
-  <releaseDate>2019-02-05</releaseDate>
-  <version>5.0.0</version>
+  <releaseDate>2021-05-10</releaseDate>
+  <version>5.0.1</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.33</ver>
