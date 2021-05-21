@@ -597,6 +597,18 @@ $custom = array(
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'membership',
     ),
+    'membership_join_date' => array(
+      'label' => ts('First membership join date', array('domain' => 'net.ourpowerbase.sumfields')),
+      'data_type' => 'Date',
+      'html_type' => 'Select Date',
+      'weight' => '60',
+      'text_length' => '32',
+      'trigger_sql' =>'(SELECT join_date FROM civicrm_membership t1 WHERE
+       t1.contact_id = NEW.contact_id AND t1.is_test = 0 ORDER BY
+      join_date ASC LIMIT 1)',
+      'trigger_table' => 'civicrm_membership',
+      'optgroup' => 'membership',
+    ),
     'event_last_attended_name' => array(
       'label' => ts('Name of the last attended event', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'String',
