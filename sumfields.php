@@ -386,18 +386,25 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
       $extra_sql = implode(',', $parts);
       $sql = $pre_sql . $generic_sql . $extra_sql . ' ON DUPLICATE KEY UPDATE ' . $extra_sql . ';' . $post_sql;
 
+      $variables = ["
+        DECLARE calculated_contact_id integer;
+        SET calculated_contact_id := (SELECT contact_id FROM civicrm_contribution WHERE id = NEW.contribution_id);
+      "];
+
       // We want to fire this trigger on insert, update and delete.
       $info[] = array(
         'table' => $table,
         'when' => 'AFTER',
         'event' => 'INSERT',
         'sql' => $sql,
+        'variables' => $variables,
        );
       $info[] = array(
         'table' => $table,
         'when' => 'AFTER',
         'event' => 'UPDATE',
         'sql' => $sql,
+        'variables' => $variables,
       );
       // For delete, we reference OLD.field instead of NEW.field
       $sql = str_replace('NEW.', 'OLD.', $sql);
@@ -406,6 +413,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
         'when' => 'AFTER',
         'event' => 'DELETE',
         'sql' => $sql,
+        'variables' => $variables,
       );
     }
 
@@ -1431,4 +1439,3 @@ function sumfields_civicrm_alterLogTables(&$logTableSpec) {
     unset($logTableSpec[$tableName]);
   }
 }
-
