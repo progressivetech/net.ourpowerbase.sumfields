@@ -439,7 +439,7 @@ function sumfields_create_temporary_table($trigger_table) {
       if($field_definition['trigger_table'] == $trigger_table) {
         $data_type = $field_definition['data_type'];
         if($data_type == 'Money') {
-          $data_type = "DECIMAL(10,2)";
+          $data_type = "DECIMAL(20,2)";
         }
         elseif($data_type == 'Date') {
           $data_type = 'datetime';
