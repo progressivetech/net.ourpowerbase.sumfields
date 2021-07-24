@@ -421,6 +421,7 @@ function sumfields_create_temporary_table($trigger_table) {
 
   // These are the actual field names as created in this instance
   $custom_fields = _sumfields_get_custom_field_parameters();
+  $active_fields = sumfields_get_setting('active_fields', array());
 
   // Load the field and group definitions because we need to know
   // which fields are triggered on which tables
@@ -433,6 +434,9 @@ function sumfields_create_temporary_table($trigger_table) {
   $create_fields[] = "`contact_id` INT";
   // Iterate over the actual instantiated summary fields
   foreach ($custom_fields as $field_name => $values) {
+    if (!in_array($field_name, $active_fields)) {
+      continue;
+    }
     // Avoid error - make sure we have a definition for this field.
     if(array_key_exists($field_name, $definitions)) {
       $field_definition = $definitions[$field_name];
@@ -1257,6 +1261,11 @@ function sumfields_alter_table() {
         'id' => $value['id'],
         'column_name' => $value['column_name']
       );
+    }
+  }
+  foreach ($custom_field_parameters as $field => $data) {
+	  if(!in_array($field, $new_fields)) {
+		  unset($custom_field_parameters[$field]);
     }
   }
   sumfields_save_setting('custom_field_parameters', $custom_field_parameters);
