@@ -453,7 +453,7 @@ function sumfields_create_temporary_table($trigger_table) {
     }
   }
   return CRM_Utils_SQL_TempTable::build()->createWithColumns(
-    implode($create_fields, ',')
+    implode(',', $create_fields)
   )->getName();
 }
 
