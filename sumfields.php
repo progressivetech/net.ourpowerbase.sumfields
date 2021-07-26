@@ -499,7 +499,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
   // Variables used for building the temp tables and temp insert statement.
   $temp_sql = array();
 
-  while (list($base_column_name, $params) = each($custom_fields)) {
+  foreach ($custom_fields as $base_column_name => $params) {
     if (!in_array($base_column_name, $active_fields)) {
       continue;
     }
@@ -738,7 +738,7 @@ function sumfields_delete_custom_fields_and_table() {
   $custom_field_parameters = _sumfields_get_custom_field_parameters();
 
   $active_fields = sumfields_get_setting('active_fields', array());
-  while(list($key, $field) = each($custom_field_parameters)) {
+  foreach ($custom_field_parameters as $key => $field) {
     // Skip fields not active (they should not have been created so
     // should not exist.
     if(!in_array($key, $active_fields)) continue;
@@ -772,7 +772,7 @@ function sumfields_delete_custom_fields_and_table() {
 function sumfields_delete_user_settings() {
   $settings = require_once('settings/sumfields.setting.php');
   $sql = "DELETE FROM civicrm_setting WHERE name = %0";
-  while(list($key) = each($settings)) {
+  foreach ($settings as $key => $setting) {
     // No remove/delete for Setting api entity.
     $params = array(0 => array($key, 'String'));
     CRM_Core_DAO::executeQuery($sql, $params);
@@ -1202,8 +1202,7 @@ function sumfields_alter_table() {
   // Set default return - optimistically.
   $ret = TRUE;
   // Delete fields no longer needed
-  reset($old_fields);
-  while(list(,$field) = each($old_fields)) {
+  foreach ($old_fields as $field) {
     if(!in_array($field, $new_fields)) {
       $params['id'] = $custom_field_parameters[$field]['id'];
       // First see if it exists. If it doesn't exist, don't bother (this is to help
@@ -1403,7 +1402,7 @@ function sumfields_civicrm_merge($type, &$data, $mainId = NULL, $otherId = NULL,
   if($type == 'batch') {
     $custom_field_parameters = _sumfields_get_custom_field_parameters();
     $active_fields = sumfields_get_setting('active_fields', array());
-    while(list($key, $field) = each($custom_field_parameters)) {
+    foreach ($custom_field_parameters as $key => $field) {
       // Skip fields not active (they should not have been created so
       // should not exist.
       if(!in_array($key, $active_fields)) continue;
