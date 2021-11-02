@@ -235,7 +235,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
    **/
   function options_to_array($options) {
     $ret = array();
-    while(list($k) = each($options)) {
+    foreach($options as $k => $v) {
       $ret[] = $k;
     }
     return $ret;
