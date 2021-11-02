@@ -140,7 +140,7 @@ $custom = array(
       'label' => ts('Total Contributions in the Last 12 Months', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '20',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
       FROM civicrm_contribution t1
@@ -155,7 +155,7 @@ $custom = array(
       'label' => ts('Total Contributions in the Last 12 Months (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '20',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN DATE_SUB(NOW(), INTERVAL 12 MONTH) AND NOW()
@@ -169,7 +169,7 @@ $custom = array(
       'label' => ts('Total Deductible Contributions this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '25',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0) - COALESCE(SUM(qty * COALESCE(t3.non_deductible_amount, 0)), 0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
@@ -185,7 +185,7 @@ $custom = array(
       'label' => ts('Total Deductible Contributions this Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '25',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
@@ -200,7 +200,7 @@ $custom = array(
       'label' => ts('Total Contributions last Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '20',
+      'weight' => '30',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
       FROM civicrm_contribution t1
@@ -215,7 +215,7 @@ $custom = array(
       'label' => ts('Total Contributions last Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '20',
+      'weight' => '30',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin"
@@ -228,7 +228,7 @@ $custom = array(
       'label' => ts('Total Deductible Contributions last Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '35',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0) - COALESCE(SUM(qty * COALESCE(t3.non_deductible_amount, 0)), 0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
@@ -244,7 +244,7 @@ $custom = array(
       'label' => ts('Total Deductible Contributions last Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '35',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
@@ -259,7 +259,7 @@ $custom = array(
       'label' => ts('Total Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '20',
+      'weight' => '40',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0)
       FROM civicrm_contribution t1
@@ -274,7 +274,7 @@ $custom = array(
       'label' => ts('Total Contributions Fiscal Year Before Last (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '20',
+      'weight' => '40',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin"
@@ -287,7 +287,7 @@ $custom = array(
       'label' => ts('Total Deductible Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '45',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0) - COALESCE(SUM(qty * COALESCE(t3.non_deductible_amount, 0)), 0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
@@ -303,7 +303,7 @@ $custom = array(
       'label' => ts('Total Deductible Contributions Fiscal Year Before Last (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '45',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0)
       FROM civicrm_contribution t1 JOIN civicrm_financial_type t2 ON
@@ -318,7 +318,7 @@ $custom = array(
       'label' => ts('Count of Contributions this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '50',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(COUNT(t1.id),0)
       FROM civicrm_contribution t1
@@ -333,7 +333,7 @@ $custom = array(
       'label' => ts('Count of Contributions this Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '50',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(COUNT(t1.id),0)
       FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%current_fiscal_year_begin"
@@ -347,7 +347,7 @@ $custom = array(
       'label' => ts('Count of Contributions last Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '20',
+      'weight' => '55',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(COUNT(t1.id),0)
       FROM civicrm_contribution t1
@@ -362,7 +362,7 @@ $custom = array(
       'label' => ts('Count of Contributions last Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '20',
+      'weight' => '55',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(COUNT(t1.id),0)
       FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%last_fiscal_year_begin"
@@ -375,7 +375,7 @@ $custom = array(
       'label' => ts('Count of Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '20',
+      'weight' => '60',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(COUNT(t1.id),0)
       FROM civicrm_contribution t1
@@ -390,7 +390,7 @@ $custom = array(
       'label' => ts('Count of Contributions Fiscal Year Before Last (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '20',
+      'weight' => '60',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(COUNT(t1.id),0)
       FROM civicrm_contribution t1 WHERE CAST(receive_date AS DATE) BETWEEN "%year_before_last_fiscal_year_begin"
@@ -403,7 +403,7 @@ $custom = array(
       'label' => ts('Amount of last contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '25',
+      'weight' => '65',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(total_amount,0)
       FROM civicrm_contribution t1
@@ -418,7 +418,7 @@ $custom = array(
       'label' => ts('Amount of last contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '25',
+      'weight' => '65',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(total_amount,0)
       FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id
@@ -431,7 +431,7 @@ $custom = array(
       'label' => ts('Date of Last Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '30',
+      'weight' => '70',
       'text_length' => '32',
       'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
@@ -444,7 +444,7 @@ $custom = array(
       'label' => ts('Date of Last Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '30',
+      'weight' => '70',
       'text_length' => '32',
       'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1
       WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
@@ -456,7 +456,7 @@ $custom = array(
       'label' => ts('Amount of first contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '25',
+      'weight' => '75',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(total_amount,0)
       FROM civicrm_contribution t1
@@ -471,7 +471,7 @@ $custom = array(
       'label' => ts('Amount of first contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '25',
+      'weight' => '75',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(total_amount,0)
       FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id
@@ -484,7 +484,7 @@ $custom = array(
       'label' => ts('Date of First Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '35',
+      'weight' => '80',
       'text_length' => '32',
       'trigger_sql' => '(SELECT MIN(receive_date) FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
@@ -497,7 +497,7 @@ $custom = array(
       'label' => ts('Date of First Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '35',
+      'weight' => '80',
       'text_length' => '32',
       'trigger_sql' => '(SELECT MIN(receive_date) FROM civicrm_contribution t1
       WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
@@ -509,9 +509,9 @@ $custom = array(
       'label' => ts('Date of Largest Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '37',
+      'weight' => '85',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT receive_date
+      'trigger_sql' => '(SELECT receive_date 
       FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
@@ -524,9 +524,9 @@ $custom = array(
       'label' => ts('Date of Largest Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '38',
+      'weight' => '85',
       'text_length' => '32',
-      'trigger_sql' => '(SELECT receive_date
+      'trigger_sql' => '(SELECT receive_date 
       FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id AND
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0
       ORDER BY total_amount, receive_date DESC LIMIT 1)',
@@ -537,7 +537,7 @@ $custom = array(
       'label' => ts('Largest Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '40',
+      'weight' => '90',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(MAX(total_amount), 0)
       FROM civicrm_contribution t1
@@ -551,7 +551,7 @@ $custom = array(
       'label' => ts('Largest Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '40',
+      'weight' => '90',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(MAX(total_amount), 0)
       FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id AND
@@ -563,7 +563,7 @@ $custom = array(
       'label' => ts('Count of Contributions', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '45',
+      'weight' => '95',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(COUNT(DISTINCT t1.id), 0) FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
@@ -576,7 +576,7 @@ $custom = array(
       'label' => ts('Count of Contributions (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '45',
+      'weight' => '95',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(COUNT(id), 0) FROM civicrm_contribution t1
       WHERE t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
@@ -588,7 +588,7 @@ $custom = array(
       'label' => ts('Average Annual (Calendar Year) Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '50',
+      'weight' => '100',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(line_total),0) / (SELECT NULLIF(COUNT(DISTINCT SUBSTR(receive_date, 1, 4)), 0)
       FROM civicrm_contribution t0 
@@ -605,7 +605,7 @@ $custom = array(
       'label' => ts('Average Annual (Calendar Year) Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '50',
+      'weight' => '100',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(total_amount),0) / (SELECT NULLIF(COUNT(DISTINCT SUBSTR(receive_date, 1, 4)), 0)
       FROM civicrm_contribution t0 WHERE t0.contact_id = NEW.contact_id AND t0.financial_type_id
@@ -619,7 +619,7 @@ $custom = array(
       'label' => ts('Total Lifetime Soft Credits', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '10',
+      'weight' => '200',
       'text_length' => '32',
       'trigger_sql' => '(SELECT IF(SUM(amount) IS NULL, 0, SUM(amount))
       FROM civicrm_contribution_soft t1 WHERE t1.contact_id = NEW.contact_id
@@ -631,7 +631,7 @@ $custom = array(
       'label' => ts('Total Soft Credits this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '210',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(amount),0)
       FROM civicrm_contribution_soft t1 WHERE t1.contact_id = NEW.contact_id
@@ -646,7 +646,7 @@ $custom = array(
       'label' => ts('Total Soft Credits in the Last 12 Months', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '15',
+      'weight' => '215',
       'text_length' => '32',
       'trigger_sql' => '(SELECT COALESCE(SUM(amount),0)
       FROM civicrm_contribution_soft t1 WHERE t1.contact_id = NEW.contact_id
@@ -661,7 +661,7 @@ $custom = array(
       'label' => ts('Date of Last Membership Payment', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '55',
+      'weight' => '150',
       'text_length' => '32',
       'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
@@ -675,7 +675,7 @@ $custom = array(
       'label' => ts('Date of Last Membership Payment (simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '55',
+      'weight' => '155',
       'text_length' => '32',
       'trigger_sql' => '(SELECT MAX(receive_date) FROM civicrm_contribution t1 WHERE
        t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
@@ -688,7 +688,7 @@ $custom = array(
       'label' => ts('Amount of Last Membership Payment', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '60',
+      'weight' => '160',
       'text_length' => '32',
       'trigger_sql' => '(SELECT total_amount FROM civicrm_contribution t1
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
@@ -702,7 +702,7 @@ $custom = array(
       'label' => ts('Amount of Last Membership Payment (simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Money',
       'html_type' => 'Text',
-      'weight' => '60',
+      'weight' => '160',
       'text_length' => '32',
       'trigger_sql' =>'(SELECT total_amount FROM civicrm_contribution t1 WHERE
        t1.contact_id = NEW.contact_id AND t1.contribution_status_id = 1 AND
@@ -715,7 +715,7 @@ $custom = array(
       'label' => ts('First membership join date', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '60',
+      'weight' => '170',
       'text_length' => '32',
       'trigger_sql' =>'(SELECT join_date FROM civicrm_membership t1 WHERE
        t1.contact_id = NEW.contact_id AND t1.is_test = 0 ORDER BY
@@ -727,7 +727,7 @@ $custom = array(
       'label' => ts('Latest membership end date', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '60',
+      'weight' => '175',
       'text_length' => '32',
       'trigger_sql' =>'(SELECT end_date FROM civicrm_membership t1 WHERE
        t1.contact_id = NEW.contact_id AND t1.is_test = 0 ORDER BY
@@ -739,7 +739,7 @@ $custom = array(
       'label' => ts('Name of the last attended event', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'String',
       'html_type' => 'Text',
-      'weight' => '65',
+      'weight' => '200',
       'text_length' => '128',
       'is_search_range' => '0',
       'trigger_sql' => sumfields_multilingual_rewrite('(SELECT civicrm_event.title AS summary_value
@@ -754,7 +754,7 @@ $custom = array(
       'label' => ts('Date of the last attended event', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
-      'weight' => '70',
+      'weight' => '205',
       'text_length' => '32',
       'trigger_sql' => '(SELECT e.start_date AS summary_value FROM civicrm_participant t1 JOIN civicrm_event e ON
       t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_status_ids)
@@ -767,7 +767,7 @@ $custom = array(
       'label' => ts('Total Number of events', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '75',
+      'weight' => '210',
       'text_length' => '8',
       'trigger_sql' => $event_total_trigger_sql,
       'trigger_table' => 'civicrm_participant',
@@ -777,7 +777,7 @@ $custom = array(
       'label' => ts('Number of events attended', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '80',
+      'weight' => '215',
       'text_length' => '8',
       'trigger_sql' => $event_attended_trigger_sql,
       'trigger_table' => 'civicrm_participant',
@@ -787,7 +787,7 @@ $custom = array(
       'label' => ts('Events attended as percent of total', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '85',
+      'weight' => '220',
       'text_length' => '8',
       // Divide event_attended_total_lifetime / event_total, substituting 0 if either field is NULL. Then, only
       // take two decimal places and multiply by 100, so .8000 becomes 80.
@@ -800,7 +800,7 @@ $custom = array(
       'label' => ts('Number of no-show events', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '90',
+      'weight' => '225',
       'text_length' => '8',
       'trigger_sql' => $event_noshow_trigger_sql,
       'trigger_table' => 'civicrm_participant',
@@ -810,7 +810,7 @@ $custom = array(
       'label' => ts('No-shows as percent of total events', array('domain' => 'net.ourpowerbase.sumfields')),
       'data_type' => 'Int',
       'html_type' => 'Text',
-      'weight' => '95',
+      'weight' => '230',
       'text_length' => '8',
       'trigger_sql' => '(SELECT FORMAT(IFNULL(' . $event_noshow_trigger_sql .
          ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql_null . ', 1), 2) * 100 AS summary_value)',
