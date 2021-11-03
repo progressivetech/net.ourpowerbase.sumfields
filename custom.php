@@ -516,7 +516,7 @@ $custom = array(
       JOIN civicrm_line_item t2 ON t1.id = t2.contribution_id
       WHERE t1.contact_id = (SELECT contact_id FROM civicrm_contribution cc WHERE cc.id = NEW.contribution_id) AND
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0
-      ORDER BY t1.total_amount, t1.receive_date DESC LIMIT 1)',
+      ORDER BY t1.total_amount DESC, t1.receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
     ),
