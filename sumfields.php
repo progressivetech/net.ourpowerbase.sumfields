@@ -323,7 +323,7 @@ function sumfields_civicrm_triggerInfo(&$info, $tableName) {
     $session = CRM_Core_Session::singleton();
 
     // Iterate over all our fields, and build out a sql parts array
-    foreach($custom_fields as $base_column_name => $params) {
+    foreach ($custom_fields as $base_column_name => $params) {
       if(!in_array($base_column_name, $active_fields)) continue;
       if(!array_key_exists($base_column_name, $custom['fields'])) {
         Civi::log()->debug("The $base_column_name field has been yanked, re-save custom field definitions. ");
@@ -1123,7 +1123,7 @@ function sumfields_print_inconsistent_summaries() {
     drush_log("Failed to test for inconsistent data. Something went wrong.", 'error');
     return FALSE;
   }
-  while(list($id, $data) = each($ids)) {
+  foreach ($ids as $id => $data) {
     drush_log($data, 'ok');
   }
 }
