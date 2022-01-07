@@ -1214,13 +1214,13 @@ function sumfields_alter_table() {
         }
       }
       catch (CiviCRM_API3_Exception $e) {
-        $session->setStatus(E::ts("Error deleting custom field '%1': %2"), array(1 => $field, 2 => $e->getMessage()));
+        $session->setStatus(E::ts("Error deleting custom field '%1': %2", array(1 => $field, 2 => $e->getMessage())));
         // This will result in a error, but let's continue anyway to see if we can get the rest of the fields
         // in working order.
         $ret = FALSE;
         continue;
       }
-      // $session->setStatus(E::ts("Deleted custom field '%1'"), array(1 => $field));
+      // $session->setStatus(E::ts("Deleted custom field '%1'", array(1 => $field)));
       unset($custom_field_parameters[$field]);
     }
   }
@@ -1246,11 +1246,11 @@ function sumfields_alter_table() {
         }
       }
       catch (CiviCRM_API3_Exception $e) {
-        $session->setStatus(E::ts("Error adding custom field '%1': %2"), array(1 => $field, 2 => $e->getMessage()));
+        $session->setStatus(E::ts("Error adding custom field '%1': %2", array(1 => $field, 2 => $e->getMessage())));
         $ret = FALSE;
         continue;
       }
-      // $session->setStatus(E::ts("Added custom field '%1'"), array(1 => $field));
+      // $session->setStatus(E::ts("Added custom field '%1'", array(1 => $field)));
       $value = array_pop($result['values']);
       $custom_field_parameters[$field] = array(
         'id' => $value['id'],
