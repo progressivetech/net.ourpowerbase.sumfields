@@ -16,9 +16,12 @@ class CRM_Sumfields_Upgrader extends CRM_Sumfields_Upgrader_Base {
    * @throws Exception
    **/
   public function upgrade_4000() {
-    $this->ctx->log->info('Planning update 4000'); // PEAR Log interface
-    $this->addTask(E::ts('Regenerate Data'), 'regenerateData');
-    $this->addTask(E::ts('Rebuild Triggers'), 'triggerRebuild');
+    // Only trigger rebuild if we are being upgraded (e.g. we have rebuilt before)
+    if (sumfields_get_setting('generate_schema_and_data', FALSE) != FALSE) {
+      $this->ctx->log->info('Planning update 4000'); // PEAR Log interface
+      $this->addTask(E::ts('Regenerate Data'), 'regenerateData');
+      $this->addTask(E::ts('Rebuild Triggers'), 'triggerRebuild');
+    }
     return TRUE;
   }
 
