@@ -12,14 +12,26 @@
   <version>5.0.2</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.33</ver>
+    <ver>5.38</ver>
   </compatibility>
   <comments>This extension adds custom data fields and triggers to your database. Disabling this extension will cause the custom data fields to be deleted and triggers removed.</comments>
   <civix>
     <namespace>CRM/Sumfields</namespace>
+    <format>23.02.1</format>
   </civix>
   <urls>
     <url description="Main Extension Page">https://github.com/progressivetech/net.ourpowerbase.sumfields</url>
     <url description="Documentation">https://github.com/progressivetech/net.ourpowerbase.sumfields</url>
   </urls>
+  <mixins>
+    <mixin>menu-xml@1.0.0</mixin>
+    <mixin>mgd-php@1.0.0</mixin>
+    <mixin>setting-php@1.0.0</mixin>
+    <mixin>smarty-v2@1.0.0</mixin>
+  </mixins>
+  <classloader>
+    <psr0 prefix="CRM_" path="."/>
+    <psr4 prefix="Civi\" path="Civi"/>
+  </classloader>
+  <upgrader>CRM_Sumfields_Upgrader</upgrader>
 </extension>
