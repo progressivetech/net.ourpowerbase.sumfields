@@ -3,27 +3,13 @@
 require_once 'sumfields.civix.php';
 use CRM_Sumfields_ExtensionUtil as E;
 
-/**
- * Implementation of hook_civicrm_alterSettingsFolders
- */
-function sumfields_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
-  _sumfields_civix_civicrm_alterSettingsFolders($metaDataFolders);
-}
+
 
 /**
  * Implementation of hook_civicrm_config
  */
 function sumfields_civicrm_config(&$config) {
   _sumfields_civix_civicrm_config($config);
-}
-
-/**
- * Implementation of hook_civicrm_xmlMenu
- *
- * @param $files array(string)
- */
-function sumfields_civicrm_xmlMenu(&$files) {
-  _sumfields_civix_civicrm_xmlMenu($files);
 }
 
 /**
@@ -57,7 +43,6 @@ function sumfields_civicrm_install() {
 function sumfields_civicrm_uninstall() {
   sumfields_deinitialize_custom_data();
   sumfields_delete_user_settings();
-  _sumfields_civix_civicrm_uninstall();
 }
 
 /**
@@ -73,7 +58,6 @@ function sumfields_civicrm_postInstall() {
   $msg = E::ts("The extension is enabled. Please go to Adminster -> Customize Data and Screens -> Summary Fields to configure it.");
   $session->setStatus($msg);
 
-  _sumfields_civix_civicrm_postInstall();
 }
 
 /**
@@ -89,30 +73,6 @@ function sumfields_civicrm_enable() {
  */
 function sumfields_civicrm_disable() {
   sumfields_disable_custom_group();
-  _sumfields_civix_civicrm_disable();
-}
-
-/**
- * Implementation of hook_civicrm_upgrade
- *
- * @param $op string, the type of operation being performed; 'check' or 'enqueue'
- * @param $queue CRM_Queue_Queue, (for 'enqueue') the modifiable list of pending up upgrade tasks
- *
- * @return mixed  based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
- *                for 'enqueue', returns void
- */
-function sumfields_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _sumfields_civix_civicrm_upgrade($op, $queue);
-}
-
-/**
- * Implementation of hook_civicrm_managed
- *
- * Generate a list of entities to create/deactivate/delete when this module
- * is installed, disabled, uninstalled.
- */
-function sumfields_civicrm_managed(&$entities) {
-  _sumfields_civix_civicrm_managed($entities);
 }
 
 /**
@@ -1430,4 +1390,3 @@ function sumfields_civicrm_alterLogTables(&$logTableSpec) {
     unset($logTableSpec[$tableName]);
   }
 }
-

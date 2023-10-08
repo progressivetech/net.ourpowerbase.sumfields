@@ -4,7 +4,7 @@ use CRM_Sumfields_ExtensionUtil as E;
 /**
  * Collection of upgrade steps.
  */
-class CRM_Sumfields_Upgrader extends CRM_Sumfields_Upgrader_Base {
+class CRM_Sumfields_Upgrader extends CRM_Extension_Upgrader_Base {
 
   /**
    * Re-build triggers and re-generate data.
