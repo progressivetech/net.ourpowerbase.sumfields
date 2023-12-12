@@ -437,7 +437,9 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $session = CRM_Core_Session::singleton();
   }
   if(empty($table_name)) {
-    $session::setStatus(E::ts("Your configuration may be corrupted. Please disable and renable this extension."), E::ts('Error'), 'error');
+    $msg = E::ts("Your configuration may be corrupted. Please disable and renable this extension.");
+    $session::setStatus($msg, E::ts('Error'), 'error');
+    \Civi::log()->debug($msg);
     return FALSE;
   }
 
@@ -481,6 +483,7 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     if (FALSE === $trigger = sumfields_sql_rewrite($trigger)) {
       $msg = sprintf(E::ts("Failed to rewrite sql for %s field."), $base_column_name);
       $session->setStatus($msg);
+      \Civi::log()->debug($msg);
       continue;
     }
     // Avoid failures if sql_mode is set to ONLY_FULL_GROUP_BY
@@ -1153,6 +1156,7 @@ function sumfields_alter_table() {
   if(is_null($new_fields)) {
     // This is an error - we should never be called without new fields
     // available;
+    \Civi::log()->debug("The new_active_fields settings is NULL, cannot run sumfields_alter_table method.");
     return FALSE;
   }
 
@@ -1174,7 +1178,9 @@ function sumfields_alter_table() {
         }
       }
       catch (CiviCRM_API3_Exception $e) {
-        $session->setStatus(E::ts("Error deleting custom field '%1': %2", array(1 => $field, 2 => $e->getMessage())));
+        $msg = E::ts("Error deleting custom field '%1': %2", array(1 => $field, 2 => $e->getMessage()));
+        $session->setStatus($msg);
+        \Civi::log()->debug($msg);
         // This will result in a error, but let's continue anyway to see if we can get the rest of the fields
         // in working order.
         $ret = FALSE;
@@ -1188,7 +1194,9 @@ function sumfields_alter_table() {
   // Add new fields
   $custom_table_parameters = sumfields_get_setting('custom_table_parameters', NULL);
   if(is_null($custom_table_parameters)) {
-    $session->setStatus(E::ts("Failed to get the custom group parameters. Can't add new fields."));
+    $msg = E::ts("Failed to get the custom group parameters. Can't add new fields.");
+    $session->setStatus($msg);
+    \Civi::log()->debug($msg);
     return FALSE;
   }
   $custom = sumfields_get_custom_field_definitions();
@@ -1206,7 +1214,9 @@ function sumfields_alter_table() {
         }
       }
       catch (CiviCRM_API3_Exception $e) {
-        $session->setStatus(E::ts("Error adding custom field '%1': %2", array(1 => $field, 2 => $e->getMessage())));
+        $msg = E::ts("Error adding custom field '%1': %2", array(1 => $field, 2 => $e->getMessage()));
+        $session->setStatus($msg);
+        \Civi::log()->debug($msg);
         $ret = FALSE;
         continue;
       }
@@ -1305,6 +1315,7 @@ function sumfields_gen_data(&$returnValues) {
         $date = date('Y-m-d H:i:s');
         $new_status = 'failed:' . $date;
         $exception = TRUE;
+        \Civi::log()->debug("The sumfields_alter_table method returned false while running sumfields_gen_data.");
       }
       else {
         // Set new active fields to NULL to indicate that they no longer
@@ -1327,6 +1338,7 @@ function sumfields_gen_data(&$returnValues) {
         $date = date('Y-m-d H:i:s');
         $new_status = 'fail:' . $date;
         $exception = TRUE;
+        \Civi::log()->debug("Failed to run sumfields_generate_data_based_on_current_data when executing sumfields_gen_data.");
       }
     }
   }
