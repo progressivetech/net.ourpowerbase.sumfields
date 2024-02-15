@@ -822,7 +822,7 @@ function sumfields_get_column_name($name) {
     "OR column_name LIKE %1";
   $params = array(
     0 => array($name, 'String'),
-    1 => array("${name}%", 'String')
+    1 => array("{$name}%", 'String')
   );
   $dao = CRM_Core_DAO::executeQuery($sql, $params);
   if($dao->N == 0) return FALSE;
@@ -1100,7 +1100,7 @@ function sumfields_get_update_trigger($table = 'civicrm_contribution') {
   $dsn = DB::connect($config->dsn);
   $dbName = $dsn->_db;
   $sql = "SELECT ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE
-    TRIGGER_NAME = '${table}_after_update' AND TRIGGER_SCHEMA = '$dbName'";
+    TRIGGER_NAME = '{$table}_after_update' AND TRIGGER_SCHEMA = '$dbName'";
 
   $dao = CRM_Core_DAO::executeQuery($sql);
   $dao->fetch();
