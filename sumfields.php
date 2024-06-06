@@ -527,6 +527,8 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     return TRUE;
   }
 
+  $query = 'SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;';
+  CRM_Core_DAO::executeQuery($query);
   foreach ($temp_sql as $table => $data) {
     // Calculate data and insert into temp table
     $query = "INSERT INTO `{$data['temp_table']}` SELECT contact_id, "
@@ -548,6 +550,8 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
     $query = rtrim($query, ',');
     CRM_Core_DAO::executeQuery($query);
   }
+  $query = 'COMMIT;';
+  CRM_Core_DAO::executeQuery($query);
 
   return TRUE;
 }
