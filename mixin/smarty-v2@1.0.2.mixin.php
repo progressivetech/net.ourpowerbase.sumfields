@@ -4,8 +4,12 @@
  * Auto-register "templates/" folder.
  *
  * @mixinName smarty-v2
- * @mixinVersion 1.0.0
+ * @mixinVersion 1.0.2
  * @since 5.59
+ *
+ * @deprecated - it turns out that the mixin is not version specific so the 'smarty'
+ * mixin is preferred over smarty-v2 (they are the same but not having the version
+ * in the name is less misleading.)
  *
  * @param CRM_Extension_MixInfo $mixInfo
  *   On newer deployments, this will be an instance of MixInfo. On older deployments, Civix may polyfill with a work-a-like.
@@ -19,13 +23,20 @@ return function ($mixInfo, $bootCache) {
   }
 
   $register = function() use ($dir) {
-    // This implementation is useful for older versions of CiviCRM. It can be replaced/updated going forward (v1.1+).
     $smarty = CRM_Core_Smarty::singleton();
-    if (!is_array($smarty->template_dir)) {
-      $this->template_dir = [$smarty->template_dir];
+    // Smarty2 compatibility
+    if (isset($smarty->_version) && version_compare($smarty->_version, 3, '<')) {
+      $smarty->addTemplateDir($dir);
+      return;
     }
-    if (!in_array($dir, $smarty->template_dir)) {
-      array_unshift($smarty->template_dir, $dir);
+    // getTemplateDir returns string or array by reference
+    $templateRef = $smarty->getTemplateDir();
+    // Dereference and normalize as array
+    $templateDirs = (array) $templateRef;
+    // Add the dir if not already present
+    if (!in_array($dir, $templateDirs, TRUE)) {
+      array_unshift($templateDirs, $dir);
+      $smarty->setTemplateDir($templateDirs);
     }
   };
 
