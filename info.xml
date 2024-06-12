@@ -9,7 +9,7 @@
     <email>jamie@progressivetech.org</email>
   </maintainer>
   <releaseDate>2021-05-10</releaseDate>
-  <version>5.0.2</version>
+  <version>5.0.3</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.65</ver>
