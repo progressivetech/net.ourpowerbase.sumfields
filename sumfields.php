@@ -1302,7 +1302,18 @@ function sumfields_gen_data(&$returnValues) {
         $status_name = 'scheduled';
       }
     }
+    // Sometimes the cron job gets stuck - because of a timeout, MySQL restart, etc.  Let's assume that it never takes
+    // more than 24 hours to calculate, and if that time has elapsed, we should start over.
+    if ($status_name === 'running') {
+      $now = new DateTime();
+      $lastRun = (new DateTime)::createFromFormat('Y-m-d H:i:s', $status_date);
+      $interval = DateInterval::createFromDateString('3 hours');
+      if ($lastRun->add($interval) < $now) {
+        $status_name = 'scheduled';
+      }
+    }
   }
+
   if ($status_name == 'scheduled') {
 
     $new_status = 'running:' . $date;
