@@ -1303,8 +1303,8 @@ function sumfields_gen_data(&$returnValues) {
       }
     }
     // Sometimes the cron job gets stuck - because of a timeout, MySQL restart, etc.  Let's assume that it never takes
-    // more than 24 hours to calculate, and if that time has elapsed, we should start over.
-    if ($status_name === 'running') {
+    // more than 3 hours to calculate, and if that time has elapsed, we should start over.
+    if (in_array($status_name, ['running', 'failed'])) {
       $now = new DateTime();
       $lastRun = (new DateTime)::createFromFormat('Y-m-d H:i:s', $status_date);
       $interval = DateInterval::createFromDateString('3 hours');
