@@ -1351,7 +1351,7 @@ function sumfields_gen_data(&$returnValues) {
       }
       else {
         $date = date('Y-m-d H:i:s');
-        $new_status = 'fail:' . $date;
+        $new_status = 'failed:' . $date;
         $exception = TRUE;
         \Civi::log()->debug("Failed to run sumfields_generate_data_based_on_current_data when executing sumfields_gen_data.");
       }
