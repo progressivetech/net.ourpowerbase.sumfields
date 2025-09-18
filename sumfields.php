@@ -86,7 +86,7 @@ function sumfields_civicrm_pageRun($page) {
       'markup' => '
       <a class="no-popup button" href="' . CRM_Utils_System::url('civicrm/admin/setting/sumfields') . '">
         <span>
-          <i class="crm-i fa-wrench"></i>&nbsp; ' . E::ts('Configure Summary Fields') . '
+          <i class="crm-i fa-wrench" role="img" aria-hidden="true"></i>&nbsp; ' . E::ts('Configure Summary Fields') . '
         </span>
       </a>
     ',
