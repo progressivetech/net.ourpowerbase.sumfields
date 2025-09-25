@@ -529,7 +529,7 @@ $custom = array(
       'trigger_sql' => '(SELECT receive_date 
       FROM civicrm_contribution t1 WHERE t1.contact_id = NEW.contact_id AND
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0
-      ORDER BY total_amount, receive_date DESC LIMIT 1)',
+      ORDER BY total_amount DESC, receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
     ),
