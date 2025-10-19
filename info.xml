@@ -9,7 +9,7 @@
     <email>jamie@progressivetech.org</email>
   </maintainer>
   <releaseDate>2024-06-12</releaseDate>
-  <version>5.1.0</version>
+  <version>5.1.1</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.65</ver>
@@ -20,8 +20,8 @@
     <format>23.02.1</format>
   </civix>
   <urls>
-    <url description="Main Extension Page">https://github.com/progressivetech/net.ourpowerbase.sumfields</url>
-    <url description="Documentation">https://github.com/progressivetech/net.ourpowerbase.sumfields</url>
+    <url desc="Main Extension Page">https://github.com/progressivetech/net.ourpowerbase.sumfields</url>
+    <url desc="Documentation">https://github.com/progressivetech/net.ourpowerbase.sumfields</url>
   </urls>
   <mixins>
     <mixin>menu-xml@1.0.0</mixin>
