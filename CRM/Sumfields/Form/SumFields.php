@@ -13,7 +13,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     $trigger_tables = $fieldsets = $field_options = array();
     foreach ($custom['fields'] as $k => $v) {
       $optgroup = $v['optgroup'];
-      $fieldsets[$custom['optgroups'][$optgroup]['fieldset']]["active_{$optgroup}_fields"] = CRM_Utils_Array::value('description', $custom['optgroups'][$optgroup]);
+      $fieldsets[$custom['optgroups'][$optgroup]['fieldset']]["active_{$optgroup}_fields"] = $custom['optgroups'][$optgroup]['description'] ?? NULL;
       $field_options[$optgroup][$k] = $v['label'];
       $trigger_tables[$v['trigger_table']] = FALSE;
     }
