@@ -19,7 +19,7 @@ function _civicrm_api3_sum_fields_gendata_spec(&$spec) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_sum_fields_gendata($params) {
   $returnValues = array();
@@ -28,7 +28,7 @@ function civicrm_api3_sum_fields_gendata($params) {
     // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)
     return civicrm_api3_create_success($returnValues, $params, 'SumFields', 'gendata');
   } else {
-    throw new API_Exception(/*errorMessage*/ 'Generating data returned an error.', /*errorCode*/ 1234);
+    throw new CRM_Core_Exception(/*errorMessage*/ 'Generating data returned an error.', /*errorCode*/ 1234);
   }
 }
 

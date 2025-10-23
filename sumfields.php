@@ -1181,7 +1181,7 @@ function sumfields_alter_table() {
           civicrm_api3('CustomField', 'delete', $params);
         }
       }
-      catch (CiviCRM_API3_Exception $e) {
+      catch (CRM_Core_Exception $e) {
         $msg = E::ts("Error deleting custom field '%1': %2", array(1 => $field, 2 => $e->getMessage()));
         $session->setStatus($msg);
         \Civi::log()->debug($msg);
@@ -1217,7 +1217,7 @@ function sumfields_alter_table() {
           $result = civicrm_api3('CustomField', 'create', $params);
         }
       }
-      catch (CiviCRM_API3_Exception $e) {
+      catch (CRM_Core_Exception $e) {
         $msg = E::ts("Error adding custom field '%1': %2", array(1 => $field, 2 => $e->getMessage()));
         $session->setStatus($msg);
         \Civi::log()->debug($msg);
