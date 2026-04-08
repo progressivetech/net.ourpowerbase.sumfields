@@ -447,10 +447,10 @@ function sumfields_generate_data_based_on_current_data($session = NULL) {
   // disableLoggingForThisConnection() checks the config for logging
   CRM_Logging_Schema::disableLoggingForThisConnection();
 
-  // In theory we shouldn't have to truncate the table, but we
+  // In theory we shouldn't have to delete the records, but we
   // are doing it just to be sure it's empty.
-  $sql = "TRUNCATE TABLE `$table_name`";
-  $dao = CRM_Core_DAO::executeQuery($sql);
+  $sql = "DELETE FROM `$table_name`";
+  CRM_Core_DAO::executeQuery($sql);
 
   // Load the field and group definitions because we need the trigger
   // clause that is stored here. These are the generically shipped
@@ -1329,7 +1329,9 @@ function sumfields_gen_data(&$returnValues) {
     }
     if(!$exception) {
       if(sumfields_generate_data_based_on_current_data()) {
-        CRM_Core_DAO::triggerRebuild();
+        if ($new_active_fields) {
+          CRM_Core_DAO::triggerRebuild();
+        }
         $date = date('Y-m-d H:i:s');
         if ($data_update_method == 'via_cron') {
           // If we have big data, then after a successful task, re-set the status to scheduled
