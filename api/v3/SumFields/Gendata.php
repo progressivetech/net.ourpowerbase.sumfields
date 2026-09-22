@@ -22,7 +22,7 @@ function _civicrm_api3_sum_fields_gendata_spec(&$spec) {
  * @throws CRM_Core_Exception
  */
 function civicrm_api3_sum_fields_gendata($params) {
-  $returnValues = array();
+  $returnValues = [];
   $ret = sumfields_gen_data($returnValues);  
   if ($ret) {
     // Spec: civicrm_api3_create_success($values = 1, $params = array(), $entity = NULL, $action = NULL)

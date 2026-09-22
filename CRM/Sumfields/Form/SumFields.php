@@ -10,7 +10,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       CRM_Core_Session::setStatus(E::ts("Summary Fields is not particularly useful if CiviContribute and CiviEvent are both disabled. Try enabling at least one."));
       return;
     }
-    $trigger_tables = $fieldsets = $field_options = array();
+    $trigger_tables = $fieldsets = $field_options = [];
     foreach ($custom['fields'] as $k => $v) {
       $optgroup = $v['optgroup'];
       $fieldsets[$custom['optgroups'][$optgroup]['fieldset']]["active_{$optgroup}_fields"] = $custom['optgroups'][$optgroup]['description'] ?? NULL;
@@ -43,26 +43,26 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
 
       switch($status) {
         case 'scheduled-triggers':
-          $display_status = E::ts("Setting changes were saved on %1, but not yet applied; they should be applied shortly.", array(1 => $date));
+          $display_status = E::ts("Setting changes were saved on %1, but not yet applied; they should be applied shortly.", [1 => $date]);
           $status_icon = 'fa-hourglass-start';
           break;
         case 'scheduled-cron':
-          $display_status = E::ts("Setting changes were saved on %1, data calculation will be performed on every cron run.", array(1 => $date));
+          $display_status = E::ts("Setting changes were saved on %1, data calculation will be performed on every cron run.", [1 => $date]);
           $status_icon = 'fa-hourglass-start';
           break;
         case 'running':
-          $display_status = E::ts("Setting changes are in the process of being applied; the process started on %1.", array(1 => $date));
+          $display_status = E::ts("Setting changes are in the process of being applied; the process started on %1.", [1 => $date]);
           $status_icon = 'fa-hourglass-end';
           break;
         case 'success':
-          $display_status = E::ts("Setting changes were successfully applied on %1.", array(1 => $date));
+          $display_status = E::ts("Setting changes were successfully applied on %1.", [1 => $date]);
           $status_icon = 'fa-check';
           break;
         case 'failed':
-          $display_status = E::ts("Setting changes failed to apply; the failed attempt happend on %1.", array(1 => $date));
+          $display_status = E::ts("Setting changes failed to apply; the failed attempt happend on %1.", [1 => $date]);
           break;
         default:
-          $display_status = E::ts("Unable to determine status (%1).", array(1 => $apply_settings_status));
+          $display_status = E::ts("Unable to determine status (%1).", [1 => $apply_settings_status]);
       }
     }
 
@@ -92,61 +92,61 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     // Add extra settings to fieldsets
     if (sumfields_component_enabled('CiviContribute')) {
       $label = E::ts('Financial Types');
-      $this->add('select', 'financial_type_ids', $label, sumfields_get_all_financial_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
+      $this->add('select', 'financial_type_ids', $label, sumfields_get_all_financial_types(), TRUE, ['multiple' => TRUE, 'class' => 'crm-select2 huge']);
       $fieldsets[$custom['optgroups']['fundraising']['fieldset']]['financial_type_ids'] = E::ts("Financial types to include when calculating contribution related summary fields.");
     }
 
     if (sumfields_component_enabled('CiviMember')) {
       $label = E::ts('Financial Types');
-      $this->add('select', 'membership_financial_type_ids', $label, sumfields_get_all_financial_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
+      $this->add('select', 'membership_financial_type_ids', $label, sumfields_get_all_financial_types(), TRUE, ['multiple' => TRUE, 'class' => 'crm-select2 huge']);
       $fieldsets[$custom['optgroups']['membership']['fieldset']]['membership_financial_type_ids'] = E::ts("Financial types to include when calculating membership related summary fields.");
     }
 
     if (sumfields_component_enabled('CiviEvent')) {
       $label = E::ts('Event Types');
-      $this->add('select', 'event_type_ids', $label, sumfields_get_all_event_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
+      $this->add('select', 'event_type_ids', $label, sumfields_get_all_event_types(), TRUE, ['multiple' => TRUE, 'class' => 'crm-select2 huge']);
 
       $label = E::ts('Participant Status (attended)');
-      $this->add('select', 'participant_status_ids', $label, sumfields_get_all_participant_status_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
+      $this->add('select', 'participant_status_ids', $label, sumfields_get_all_participant_status_types(), TRUE, ['multiple' => TRUE, 'class' => 'crm-select2 huge']);
 
       $label = E::ts('Participant Status (did not attend)');
-      $this->add('select', 'participant_noshow_status_ids', $label, sumfields_get_all_participant_status_types(), TRUE, array('multiple' => TRUE, 'class' => 'crm-select2 huge'));
+      $this->add('select', 'participant_noshow_status_ids', $label, sumfields_get_all_participant_status_types(), TRUE, ['multiple' => TRUE, 'class' => 'crm-select2 huge']);
 
-      $fieldsets[$custom['optgroups']['event_standard']['fieldset']] += array(
+      $fieldsets[$custom['optgroups']['event_standard']['fieldset']] += [
         'event_type_ids' => 'Event types to include when calculating participant summary fields',
         'participant_status_ids' => '',
         'participant_noshow_status_ids' => '',
-      );
+      ];
     }
 
     $this->assign('fieldsets', $fieldsets);
 
     $bd_label = E::ts('How often should summary data be updated?');
-    $bd_options = array(
+    $bd_options = [
       'via_triggers' => E::ts("Instantly"),
       'via_cron' => E::ts("When ever the cron job is run (increases performance on large installation)")
-    );
+    ];
     $this->addRadio('data_update_method', $bd_label, $bd_options);
 
     $label = E::ts('When should these changes be applied?');
-    $options = array(
+    $options = [
       'via_cron' => E::ts("On the next scheduled job (cron)"),
       'on_submit' => E::ts("When I submit this form")
-    );
+    ];
     $this->addRadio('when_to_apply_change', $label, $options);
 
-    $this->addButtons(array(
-          array(
+    $this->addButtons([
+          [
             'type' => 'next',
             'name' => E::ts('Save'),
             'spacing' => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
             'isDefault' => TRUE,
-          ),
-          array(
+          ],
+          [
             'type' => 'cancel',
             'name' => E::ts('Cancel'),
-          ),
-        )
+          ],
+        ]
       );
     $this->addYesNo('exclude_from_logging', 'Exclude Summary Fields from logging?');
   }
@@ -154,7 +154,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
   function setDefaultValues() {
     $defaults = parent::setDefaultValues();
     $custom = sumfields_get_custom_field_definitions();
-    $active_fields = sumfields_get_setting('active_fields', array());
+    $active_fields = sumfields_get_setting('active_fields', []);
 
     foreach ($custom['fields'] as $name => $info) {
       if (in_array($name, $active_fields)) {
@@ -162,11 +162,11 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
       }
     }
     $defaults['show_simplified'] = sumfields_get_setting('show_simplified', FALSE);
-    $defaults['financial_type_ids'] = sumfields_get_setting('financial_type_ids', array());
-    $defaults['membership_financial_type_ids'] = sumfields_get_setting('membership_financial_type_ids', array());
-    $defaults['event_type_ids'] = sumfields_get_setting('event_type_ids', array());
-    $defaults['participant_status_ids'] = sumfields_get_setting('participant_status_ids', array());
-    $defaults['participant_noshow_status_ids'] = sumfields_get_setting('participant_noshow_status_ids', array());
+    $defaults['financial_type_ids'] = sumfields_get_setting('financial_type_ids', []);
+    $defaults['membership_financial_type_ids'] = sumfields_get_setting('membership_financial_type_ids', []);
+    $defaults['event_type_ids'] = sumfields_get_setting('event_type_ids', []);
+    $defaults['participant_status_ids'] = sumfields_get_setting('participant_status_ids', []);
+    $defaults['participant_noshow_status_ids'] = sumfields_get_setting('participant_noshow_status_ids', []);
     $defaults['when_to_apply_change'] = sumfields_get_setting('when_to_apply_change','via_cron');
     $defaults['data_update_method'] = sumfields_get_setting('data_update_method','via_triggers');
     $defaults['exclude_from_logging'] = sumfields_get_setting('exclude_from_logging', 0);
@@ -182,14 +182,14 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     }
 
     // Combine all fields into on active_fields array for easier processing.
-    $active_fields = array();
+    $active_fields = [];
     foreach ($values as $key => $val) {
       if (strpos($key, 'active_') === 0 && substr($key, -7) == '_fields') {
         $active_fields += $val;
       }
     }
     if ($active_fields) {
-      $current_active_fields = sumfields_get_setting('active_fields', array());
+      $current_active_fields = sumfields_get_setting('active_fields', []);
       $new_active_fields = $this->options_to_array($active_fields);
       if ($current_active_fields != $new_active_fields) {
         // Setting 'new_active_fields' will alert the system that we have
@@ -197,7 +197,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
         sumfields_save_setting('new_active_fields', $new_active_fields);
       }
     }
-    $settings = array('financial_type_ids', 'membership_financial_type_ids', 'event_type_ids', 'participant_status_ids', 'participant_noshow_status_ids', 'show_simplified');
+    $settings = ['financial_type_ids', 'membership_financial_type_ids', 'event_type_ids', 'participant_status_ids', 'participant_noshow_status_ids', 'show_simplified'];
     foreach ($settings as $setting) {
       if (array_key_exists($setting, $values)) {
         sumfields_save_setting($setting, $values[$setting]);
@@ -214,7 +214,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
     sumfields_save_setting('exclude_from_logging', $values['exclude_from_logging']);
 
     if ($values['when_to_apply_change'] == 'on_submit') {
-      $returnValues = array();
+      $returnValues = [];
       if (!sumfields_gen_data($returnValues)) {
         $session::setStatus(E::ts("There was an error applying your changes."), E::ts('Error'), 'error');
       }
@@ -234,7 +234,7 @@ class CRM_Sumfields_Form_SumFields extends CRM_Core_Form {
    * We want to save it as array('value1' , 'value2');
    **/
   function options_to_array($options) {
-    $ret = array();
+    $ret = [];
     foreach ($options as $k => $v) {
       $ret[] = $k;
     }
