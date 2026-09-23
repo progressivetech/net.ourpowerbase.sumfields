@@ -51,11 +51,11 @@ $event_noshow_trigger_sql =
   t1.event_id = e.id WHERE t1.contact_id = NEW.contact_id AND t1.status_id IN (%participant_noshow_status_ids)
   AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0)';
 
-$custom = array(
-  'groups' => array(
-    'summary_fields' => array(
+$custom = [
+  'groups' => [
+    'summary_fields' => [
       'name' => 'Summary_Fields',
-      'title' => ts('Summary Fields', array('domain' => 'net.ourpowerbase.sumfields')),
+      'title' => ts('Summary Fields', ['domain' => 'net.ourpowerbase.sumfields']),
       'extends' => 'Contact',
       'style' => 'Tab',
       'collapse_display' => '0',
@@ -66,23 +66,23 @@ $custom = array(
       'is_multiple' => '0',
       'collapse_adv_display' => '0',
       'optgroup' => 'fundraising',
-    ),
-  ),
+    ],
+  ],
   // Any trigger table that does not have contact_id should be listed here, along with
   // a sql statement that can be used to calculate the contact_id from a field that is
   // in the table. You should also specify the trigger_field - the field in the table
   // that will help you determine the contact_id, and also a JOIN statement to use
   // when initializing the data.
-  'tables' => array(
-    'civicrm_line_item' => array(
+  'tables' => [
+    'civicrm_line_item' => [
       'calculated_contact_id' => '(SELECT contact_id FROM civicrm_contribution WHERE id = NEW.contribution_id)',
       'trigger_field' => 'contribution_id',
       'initialize_join' => 'JOIN civicrm_contribution AS c ON trigger_table.contribution_id = c.id',
-    ),
-  ),
-  'fields' => array(
-    'contribution_total_lifetime' => array(
-      'label' => ts('Total Lifetime Contributions', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+  ],
+  'fields' => [
+    'contribution_total_lifetime' => [
+      'label' => ts('Total Lifetime Contributions', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '10',
@@ -95,9 +95,9 @@ $custom = array(
       t2.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_lifetime_simplified' => array(
-      'label' => ts('Total Lifetime Contributions (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_lifetime_simplified' => [
+      'label' => ts('Total Lifetime Contributions (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '10',
@@ -107,9 +107,9 @@ $custom = array(
       AND t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids))',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_this_year' => array(
-      'label' => ts('Total Contributions this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_this_year' => [
+      'label' => ts('Total Contributions this Fiscal Year', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '15',
@@ -122,9 +122,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_this_year_simplified' => array(
-      'label' => ts('Total Contributions this Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_this_year_simplified' => [
+      'label' => ts('Total Contributions this Fiscal Year (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '15',
@@ -135,9 +135,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_twelve_months' => array(
-      'label' => ts('Total Contributions in the Last 12 Months', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_twelve_months' => [
+      'label' => ts('Total Contributions in the Last 12 Months', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '20',
@@ -150,9 +150,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_twelve_months_simplified' => array(
-      'label' => ts('Total Contributions in the Last 12 Months (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_twelve_months_simplified' => [
+      'label' => ts('Total Contributions in the Last 12 Months (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '20',
@@ -163,10 +163,10 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
+    ],
 
-    'contribution_total_deductible_this_year' => array(
-      'label' => ts('Total Deductible Contributions this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
+    'contribution_total_deductible_this_year' => [
+      'label' => ts('Total Deductible Contributions this Fiscal Year', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '25',
@@ -180,9 +180,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t3.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_deductible_this_year_simplified' => array(
-      'label' => ts('Total Deductible Contributions this Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_deductible_this_year_simplified' => [
+      'label' => ts('Total Deductible Contributions this Fiscal Year (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '25',
@@ -195,9 +195,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_last_year' => array(
-      'label' => ts('Total Contributions last Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_last_year' => [
+      'label' => ts('Total Contributions last Fiscal Year', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '30',
@@ -210,9 +210,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_last_year_simplified' => array(
-      'label' => ts('Total Contributions last Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_last_year_simplified' => [
+      'label' => ts('Total Contributions last Fiscal Year (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '30',
@@ -223,9 +223,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_deductible_last_year' => array(
-      'label' => ts('Total Deductible Contributions last Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_deductible_last_year' => [
+      'label' => ts('Total Deductible Contributions last Fiscal Year', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '35',
@@ -239,9 +239,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t3.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_deductible_last_year_simplified' => array(
-      'label' => ts('Total Deductible Contributions last Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_deductible_last_year_simplified' => [
+      'label' => ts('Total Deductible Contributions last Fiscal Year (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '35',
@@ -254,9 +254,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_year_before_last' => array(
-      'label' => ts('Total Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_year_before_last' => [
+      'label' => ts('Total Contributions Fiscal Year Before Last', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '40',
@@ -269,9 +269,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_year_before_last_simplified' => array(
-      'label' => ts('Total Contributions Fiscal Year Before Last (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_year_before_last_simplified' => [
+      'label' => ts('Total Contributions Fiscal Year Before Last (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '40',
@@ -282,9 +282,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_deductible_year_before_last_year' => array(
-      'label' => ts('Total Deductible Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_deductible_year_before_last_year' => [
+      'label' => ts('Total Deductible Contributions Fiscal Year Before Last', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '45',
@@ -298,9 +298,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t3.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_deductible_year_before_last_year_simplified' => array(
-      'label' => ts('Total Deductible Contributions Fiscal Year Before Last (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_deductible_year_before_last_year_simplified' => [
+      'label' => ts('Total Deductible Contributions Fiscal Year Before Last (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '45',
@@ -313,9 +313,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_count_this_year' => array(
-      'label' => ts('Count of Contributions this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_count_this_year' => [
+      'label' => ts('Count of Contributions this Fiscal Year', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '50',
@@ -328,9 +328,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_count_this_year_simplified' => array(
-      'label' => ts('Count of Contributions this Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_count_this_year_simplified' => [
+      'label' => ts('Count of Contributions this Fiscal Year (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '50',
@@ -341,10 +341,10 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
+    ],
 
-    'contribution_count_last_year' => array(
-      'label' => ts('Count of Contributions last Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
+    'contribution_count_last_year' => [
+      'label' => ts('Count of Contributions last Fiscal Year', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '55',
@@ -357,9 +357,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_count_last_year_simplified' => array(
-      'label' => ts('Count of Contributions last Fiscal Year (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_count_last_year_simplified' => [
+      'label' => ts('Count of Contributions last Fiscal Year (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '55',
@@ -370,9 +370,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_count_year_before_last' => array(
-      'label' => ts('Count of Contributions Fiscal Year Before Last', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_count_year_before_last' => [
+      'label' => ts('Count of Contributions Fiscal Year Before Last', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '60',
@@ -385,9 +385,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_count_year_before_last_simplified' => array(
-      'label' => ts('Count of Contributions Fiscal Year Before Last (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_count_year_before_last_simplified' => [
+      'label' => ts('Count of Contributions Fiscal Year Before Last (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '60',
@@ -398,9 +398,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_amount_last' => array(
-      'label' => ts('Amount of last contribution', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_amount_last' => [
+      'label' => ts('Amount of last contribution', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '65',
@@ -413,9 +413,9 @@ $custom = array(
       (%financial_type_ids) AND t1.is_test = 0 ORDER BY t1.receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_amount_last_simplified' => array(
-      'label' => ts('Amount of last contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_amount_last_simplified' => [
+      'label' => ts('Amount of last contribution (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '65',
@@ -426,9 +426,9 @@ $custom = array(
       (%financial_type_ids) AND t1.is_test = 0 ORDER BY t1.receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_date_last' => array(
-      'label' => ts('Date of Last Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_date_last' => [
+      'label' => ts('Date of Last Contribution', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '70',
@@ -439,9 +439,9 @@ $custom = array(
       t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_date_last_simplified' => array(
-      'label' => ts('Date of Last Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_date_last_simplified' => [
+      'label' => ts('Date of Last Contribution (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '70',
@@ -451,9 +451,9 @@ $custom = array(
       t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_amount_first' => array(
-      'label' => ts('Amount of first contribution', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_amount_first' => [
+      'label' => ts('Amount of first contribution', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '75',
@@ -466,9 +466,9 @@ $custom = array(
       (%financial_type_ids) AND t1.is_test = 0 ORDER BY t1.receive_date ASC LIMIT 1)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_amount_first_simplified' => array(
-      'label' => ts('Amount of first contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_amount_first_simplified' => [
+      'label' => ts('Amount of first contribution (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '75',
@@ -479,9 +479,9 @@ $custom = array(
       (%financial_type_ids) AND t1.is_test = 0 ORDER BY t1.receive_date ASC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_date_first' => array(
-      'label' => ts('Date of First Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_date_first' => [
+      'label' => ts('Date of First Contribution', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '80',
@@ -492,9 +492,9 @@ $custom = array(
       t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_date_first_simplified' => array(
-      'label' => ts('Date of First Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_date_first_simplified' => [
+      'label' => ts('Date of First Contribution (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '80',
@@ -504,9 +504,9 @@ $custom = array(
       t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_date_largest' => array(
-      'label' => ts('Date of Largest Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_date_largest' => [
+      'label' => ts('Date of Largest Contribution', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '85',
@@ -519,9 +519,9 @@ $custom = array(
       ORDER BY t1.total_amount DESC, t1.receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_date_largest_simplified' => array(
-      'label' => ts('Date of Largest Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_date_largest_simplified' => [
+      'label' => ts('Date of Largest Contribution (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '85',
@@ -532,9 +532,9 @@ $custom = array(
       ORDER BY total_amount DESC, receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_largest' => array(
-      'label' => ts('Largest Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_largest' => [
+      'label' => ts('Largest Contribution', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '90',
@@ -546,9 +546,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_largest_simplified' => array(
-      'label' => ts('Largest Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_largest_simplified' => [
+      'label' => ts('Largest Contribution (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '90',
@@ -558,9 +558,9 @@ $custom = array(
       t1.contribution_status_id = 1 AND t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_number' => array(
-      'label' => ts('Count of Contributions', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_number' => [
+      'label' => ts('Count of Contributions', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '95',
@@ -571,9 +571,9 @@ $custom = array(
       t2.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_total_number_simplified' => array(
-      'label' => ts('Count of Contributions (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_total_number_simplified' => [
+      'label' => ts('Count of Contributions (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '95',
@@ -583,9 +583,9 @@ $custom = array(
       t1.financial_type_id IN (%financial_type_ids) AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_average_annual_amount' => array(
-      'label' => ts('Average Annual (Calendar Year) Contribution', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_average_annual_amount' => [
+      'label' => ts('Average Annual (Calendar Year) Contribution', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '100',
@@ -600,9 +600,9 @@ $custom = array(
       AND t2.contribution_status_id = 1 AND t2.is_test = 0)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'fundraising',
-    ),
-    'contribution_average_annual_amount_simplified' => array(
-      'label' => ts('Average Annual (Calendar Year) Contribution (Simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_average_annual_amount_simplified' => [
+      'label' => ts('Average Annual (Calendar Year) Contribution (Simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '100',
@@ -614,9 +614,9 @@ $custom = array(
       AND t1.contribution_status_id = 1 AND t1.is_test = 0)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'fundraising',
-    ),
-    'soft_total_lifetime' => array(
-      'label' => ts('Total Lifetime Soft Credits', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'soft_total_lifetime' => [
+      'label' => ts('Total Lifetime Soft Credits', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '200',
@@ -626,9 +626,9 @@ $custom = array(
       AND t1.contribution_id IN (SELECT id FROM civicrm_contribution WHERE contribution_status_id = 1 AND financial_type_id IN (%financial_type_ids) AND is_test = 0))',
       'trigger_table' => 'civicrm_contribution_soft',
       'optgroup' => 'soft',
-    ),
-    'soft_total_this_year' => array(
-      'label' => ts('Total Soft Credits this Fiscal Year', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'soft_total_this_year' => [
+      'label' => ts('Total Soft Credits this Fiscal Year', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '210',
@@ -641,9 +641,9 @@ $custom = array(
       ))',
       'trigger_table' => 'civicrm_contribution_soft',
       'optgroup' => 'soft',
-    ),
-    'soft_total_twelve_months' => array(
-      'label' => ts('Total Soft Credits in the Last 12 Months', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'soft_total_twelve_months' => [
+      'label' => ts('Total Soft Credits in the Last 12 Months', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '215',
@@ -656,9 +656,9 @@ $custom = array(
       ))',
       'trigger_table' => 'civicrm_contribution_soft',
       'optgroup' => 'soft',
-    ),
-    'contribution_date_last_membership_payment' => array(
-      'label' => ts('Date of Last Membership Payment', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_date_last_membership_payment' => [
+      'label' => ts('Date of Last Membership Payment', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '150',
@@ -670,9 +670,9 @@ $custom = array(
       receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'membership',
-    ),
-    'contribution_date_last_membership_payment_simplified' => array(
-      'label' => ts('Date of Last Membership Payment (simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_date_last_membership_payment_simplified' => [
+      'label' => ts('Date of Last Membership Payment (simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '155',
@@ -683,9 +683,9 @@ $custom = array(
        receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'membership',
-    ),
-    'contribution_amount_last_membership_payment' => array(
-      'label' => ts('Amount of Last Membership Payment', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_amount_last_membership_payment' => [
+      'label' => ts('Amount of Last Membership Payment', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '160',
@@ -697,9 +697,9 @@ $custom = array(
       receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_line_item',
       'optgroup' => 'membership',
-    ),
-    'contribution_amount_last_membership_payment_simplified' => array(
-      'label' => ts('Amount of Last Membership Payment (simplified)', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'contribution_amount_last_membership_payment_simplified' => [
+      'label' => ts('Amount of Last Membership Payment (simplified)', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Money',
       'html_type' => 'Text',
       'weight' => '160',
@@ -710,9 +710,9 @@ $custom = array(
       receive_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_contribution',
       'optgroup' => 'membership',
-    ),
-    'membership_join_date' => array(
-      'label' => ts('First membership join date', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'membership_join_date' => [
+      'label' => ts('First membership join date', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '170',
@@ -722,9 +722,9 @@ $custom = array(
       join_date ASC LIMIT 1)',
       'trigger_table' => 'civicrm_membership',
       'optgroup' => 'membership',
-    ),
-    'membership_end_date' => array(
-      'label' => ts('Latest membership end date', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'membership_end_date' => [
+      'label' => ts('Latest membership end date', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '175',
@@ -734,9 +734,9 @@ $custom = array(
       join_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_membership',
       'optgroup' => 'membership',
-    ),
-    'event_last_attended_name' => array(
-      'label' => ts('Name of the last attended event', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'event_last_attended_name' => [
+      'label' => ts('Name of the last attended event', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'String',
       'html_type' => 'Text',
       'weight' => '200',
@@ -749,9 +749,9 @@ $custom = array(
       ORDER BY start_date DESC LIMIT 1)'),
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
-    ),
-    'event_last_attended_date' => array(
-      'label' => ts('Date of the last attended event', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'event_last_attended_date' => [
+      'label' => ts('Date of the last attended event', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Date',
       'html_type' => 'Select Date',
       'weight' => '205',
@@ -761,10 +761,10 @@ $custom = array(
       AND e.event_type_id IN (%event_type_ids) AND t1.is_test = 0 ORDER BY start_date DESC LIMIT 1)',
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
-    ),
+    ],
 
-    'event_total' => array(
-      'label' => ts('Total Number of events', array('domain' => 'net.ourpowerbase.sumfields')),
+    'event_total' => [
+      'label' => ts('Total Number of events', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '210',
@@ -772,9 +772,9 @@ $custom = array(
       'trigger_sql' => $event_total_trigger_sql,
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
-    ),
-    'event_attended' => array(
-      'label' => ts('Number of events attended', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'event_attended' => [
+      'label' => ts('Number of events attended', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '215',
@@ -782,9 +782,9 @@ $custom = array(
       'trigger_sql' => $event_attended_trigger_sql,
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
-    ),
-    'event_attended_percent_total' => array(
-      'label' => ts('Events attended as percent of total', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'event_attended_percent_total' => [
+      'label' => ts('Events attended as percent of total', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '220',
@@ -795,9 +795,9 @@ $custom = array(
         ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql_null . ', 1), 2) * 100 AS summary_value)',
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
-    ),
-    'event_noshow' => array(
-      'label' => ts('Number of no-show events', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'event_noshow' => [
+      'label' => ts('Number of no-show events', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '225',
@@ -805,9 +805,9 @@ $custom = array(
       'trigger_sql' => $event_noshow_trigger_sql,
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
-    ),
-    'event_noshow_percent_total' => array(
-      'label' => ts('No-shows as percent of total events', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+    'event_noshow_percent_total' => [
+      'label' => ts('No-shows as percent of total events', ['domain' => 'net.ourpowerbase.sumfields']),
       'data_type' => 'Int',
       'html_type' => 'Text',
       'weight' => '230',
@@ -816,33 +816,33 @@ $custom = array(
          ', 0)' . ' / ' .  'IFNULL(' . $event_total_trigger_sql_null . ', 1), 2) * 100 AS summary_value)',
       'trigger_table' => 'civicrm_participant',
       'optgroup' => 'event_standard',
-    ),
-  ),
-  'optgroups' => array(
-    'fundraising' => array(
-      'title' => ts('Contribution Fields', array('domain' => 'net.ourpowerbase.sumfields')),
+    ],
+  ],
+  'optgroups' => [
+    'fundraising' => [
+      'title' => ts('Contribution Fields', ['domain' => 'net.ourpowerbase.sumfields']),
       'component' => 'CiviContribute',
-      'fieldset' => ts('Fundraising', array('domain' => 'net.ourpowerbase.sumfields')),
-    ),
-    'soft' => array(
-      'title' => ts('Soft Credit Fields', array('domain' => 'net.ourpowerbase.sumfields')),
+      'fieldset' => ts('Fundraising', ['domain' => 'net.ourpowerbase.sumfields']),
+    ],
+    'soft' => [
+      'title' => ts('Soft Credit Fields', ['domain' => 'net.ourpowerbase.sumfields']),
       'component' => 'CiviContribute',
-      'fieldset' => ts('Fundraising', array('domain' => 'net.ourpowerbase.sumfields')),
-    ),
-    'membership' => array(
-      'title' => ts('Membership Fields', array('domain' => 'net.ourpowerbase.sumfields')),
+      'fieldset' => ts('Fundraising', ['domain' => 'net.ourpowerbase.sumfields']),
+    ],
+    'membership' => [
+      'title' => ts('Membership Fields', ['domain' => 'net.ourpowerbase.sumfields']),
       'component' => 'CiviMember',
-      'fieldset' => ts('Membership', array('domain' => 'net.ourpowerbase.sumfields')),
-    ),
-    'event_standard' => array(
-      'title' => ts('Standard Event Fields', array('domain' => 'net.ourpowerbase.sumfields')),
+      'fieldset' => ts('Membership', ['domain' => 'net.ourpowerbase.sumfields']),
+    ],
+    'event_standard' => [
+      'title' => ts('Standard Event Fields', ['domain' => 'net.ourpowerbase.sumfields']),
       'component' => 'CiviEvent',
-      'fieldset' => ts('Events', array('domain' => 'net.ourpowerbase.sumfields')),
-    ),
-    'event_turnout' => array(
-      'title' => ts('Event Turnout Fields', array('domain' => 'net.ourpowerbase.sumfields')),
+      'fieldset' => ts('Events', ['domain' => 'net.ourpowerbase.sumfields']),
+    ],
+    'event_turnout' => [
+      'title' => ts('Event Turnout Fields', ['domain' => 'net.ourpowerbase.sumfields']),
       'component' => 'CiviEvent',
-      'fieldset' => ts('Events', array('domain' => 'net.ourpowerbase.sumfields')),
-    ),
-  )
-);
+      'fieldset' => ts('Events', ['domain' => 'net.ourpowerbase.sumfields']),
+    ],
+  ]
+];
